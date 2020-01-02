@@ -1,0 +1,7 @@
+ALTER TABLE SUPPLIER ADD SUP_ACCOUNT varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL;
+
+
+
+
+
+

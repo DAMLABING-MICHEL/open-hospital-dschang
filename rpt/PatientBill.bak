@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"  ?>
+<!-- Created with iReport - A designer for JasperReports -->
+<!DOCTYPE jasperReport PUBLIC "//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+<jasperReport
+		 name="PatientBill"
+		 columnCount="1"
+		 printOrder="Vertical"
+		 orientation="Portrait"
+		 pageWidth="595"
+		 pageHeight="842"
+		 columnWidth="535"
+		 columnSpacing="0"
+		 leftMargin="30"
+		 rightMargin="30"
+		 topMargin="20"
+		 bottomMargin="20"
+		 whenNoDataType="NoPages"
+		 isFloatColumnFooter="true"
+		 isTitleNewPage="false"
+		 isSummaryNewPage="false">
+	<property name="ireport.scriptlethandling" value="0" />
+	<property name="ireport.encoding" value="UTF-8" />
+	<import value="java.util.*" />
+	<import value="net.sf.jasperreports.engine.*" />
+	<import value="net.sf.jasperreports.engine.data.*" />
+
+	<parameter name="billID" isForPrompting="true" class="java.lang.String"/>
+	<parameter name="Hospital" isForPrompting="true" class="java.lang.String"/>
+	<parameter name="Address" isForPrompting="true" class="java.lang.String"/>
+	<parameter name="City" isForPrompting="true" class="java.lang.String"/>
+	<parameter name="Email" isForPrompting="true" class="java.lang.String"/>
+	<parameter name="Telephone" isForPrompting="true" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" isForPrompting="true" class="java.lang.String">
+		<defaultValueExpression ><![CDATA["./rpt/"]]></defaultValueExpression>
+	</parameter>
+	<queryString><![CDATA[SELECT P.PAT_FNAME, P.PAT_SNAME, P.PAT_NAME, BLL_ID, BLL_ID_PAT, BLL_PAT_NAME, BLL_UPDATE, BLL_USR_ID_A, BLI_ID_PRICE, BLI_ITEM_DESC, BLI_ITEM_AMOUNT, BLI_QTY, BLP_USR_ID_A, BLL_STATUS,BLL_DATE
+
+FROM BILLS B
+JOIN PATIENT P ON B.BLL_ID_PAT=P.PAT_ID 
+JOIN BILLITEMS I ON B.BLL_ID = I.BLI_ID_BILL
+LEFT JOIN (SELECT BLP_ID_BILL, BLP_USR_ID_A FROM BILLPAYMENTS WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE DESC LIMIT 1) AS P ON B.BLL_ID = P.BLP_ID_BILL
+WHERE BLL_ID = $P{billID}]]></queryString>
+
+	<field name="PAT_FNAME" class="java.lang.String"/>
+	<field name="PAT_SNAME" class="java.lang.String"/>
+	<field name="PAT_NAME" class="java.lang.String"/>
+	<field name="BLL_ID" class="java.lang.Integer"/>
+	<field name="BLL_ID_PAT" class="java.lang.Integer"/>
+	<field name="BLL_PAT_NAME" class="java.lang.String"/>
+	<field name="BLL_UPDATE" class="java.sql.Timestamp"/>
+	<field name="BLL_USR_ID_A" class="java.lang.String"/>
+	<field name="BLI_ID_PRICE" class="java.lang.String"/>
+	<field name="BLI_ITEM_DESC" class="java.lang.String"/>
+	<field name="BLI_ITEM_AMOUNT" class="java.lang.Double"/>
+	<field name="BLI_QTY" class="java.lang.Double"/>
+	<field name="BLP_USR_ID_A" class="java.lang.String"/>
+	<field name="BLL_STATUS" class="java.lang.String"/>
+	<field name="BLL_DATE" class="java.sql.Timestamp"/>
+
+	<variable name="TOTAL_ITEM" class="java.math.BigDecimal" resetType="Report" calculation="Nothing">
+		<variableExpression><![CDATA[new BigDecimal(Double.toString($F{BLI_ITEM_AMOUNT}.doubleValue()))
+	.multiply(new BigDecimal($F{BLI_QTY}.intValue()))]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_BILL" class="java.math.BigDecimal" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$V{TOTAL_ITEM}]]></variableExpression>
+	</variable>
+		<background>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</background>
+		<title>
+			<band height="90"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="0"
+						width="535"
+						height="22"
+						key="textField-18"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{Hospital}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="22"
+						width="535"
+						height="17"
+						key="textField-19"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{Address} + " - " + $P{City}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="39"
+						width="535"
+						height="17"
+						key="textField-20"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{Email}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="56"
+						width="535"
+						height="17"
+						key="textField-21"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{Telephone}]]></textFieldExpression>
+				</textField>
+			</band>
+		</title>
+		<pageHeader>
+			<band height="121"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="0"
+						width="242"
+						height="31"
+						key="textField-12"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement>
+						<font fontName="Arial" size="18"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbill.billn") + $P{billID}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="EEEEE dd MMMMM yyyy" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="54"
+						y="50"
+						width="481"
+						height="18"
+						key="textField-16"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement verticalAlignment="Bottom">
+						<font size="12"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{BLL_USR_ID_A}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="54"
+						y="31"
+						width="481"
+						height="18"
+						key="textField-17"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement verticalAlignment="Bottom">
+						<font size="12"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{BLL_ID_PAT} + " - " + $F{PAT_NAME}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="EEEEE dd MMMMM yyyy" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="54"
+						y="69"
+						width="188"
+						height="18"
+						key="textField-23"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement verticalAlignment="Bottom">
+						<font size="12"/>
+					</textElement>
+				<textFieldExpression   class="java.util.Date"><![CDATA[$F{BLL_DATE}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="242"
+						y="0"
+						width="293"
+						height="31"
+						forecolor="#FF0033"
+						key="textField-24"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="18"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{BLL_STATUS}.equals( "D" ) ? "DELETED" : null]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="31"
+						width="49"
+						height="19"
+						key="textField-25"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Bottom">
+						<font pdfFontName="Helvetica" size="10" isBold="false" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.patient" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="68"
+						width="49"
+						height="19"
+						key="textField-26"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Bottom">
+						<font pdfFontName="Helvetica" size="10" isBold="false" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.date" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="50"
+						width="49"
+						height="19"
+						key="textField-27"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Bottom">
+						<font pdfFontName="Helvetica" size="10" isBold="false" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbill.cashier" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="87"
+						width="535"
+						height="31"
+						key="textField-34"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="18"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbill.detailsinvoice")]]></textFieldExpression>
+				</textField>
+			</band>
+		</pageHeader>
+		<columnHeader>
+			<band height="22"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="0"
+						width="54"
+						height="19"
+						key="textField-28"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.oh009inpatientreport.code" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="54"
+						y="0"
+						width="236"
+						height="19"
+						key="textField-29"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbill.designation" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="294"
+						y="0"
+						width="71"
+						height="21"
+						key="textField-30"/>
+					<box></box>
+					<textElement textAlignment="Center" verticalAlignment="Top">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbill.unitprice" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="368"
+						y="0"
+						width="88"
+						height="21"
+						key="textField-31"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Top">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.amount" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="460"
+						y="0"
+						width="75"
+						height="19"
+						key="textField-32"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Top">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.moh717monthlyworkloadreportforhospitalspage2b.total" )]]></textFieldExpression>
+				</textField>
+			</band>
+		</columnHeader>
+		<detail>
+			<band height="18"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="0"
+						width="49"
+						height="18"
+						key="textField-7"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{BLI_ID_PRICE}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="54"
+						y="0"
+						width="236"
+						height="18"
+						key="textField-8"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{BLI_ITEM_DESC}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="294"
+						y="0"
+						width="71"
+						height="18"
+						key="textField-9"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BLI_ITEM_AMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="368"
+						y="0"
+						width="88"
+						height="18"
+						key="textField-10"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Center">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BLI_QTY}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="460"
+						y="0"
+						width="75"
+						height="18"
+						key="textField-13"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.math.BigDecimal"><![CDATA[$V{TOTAL_ITEM}]]></textFieldExpression>
+				</textField>
+			</band>
+		</detail>
+		<columnFooter>
+			<band height="270"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="460"
+						y="0"
+						width="75"
+						height="25"
+						key="textField-11"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.math.BigDecimal"><![CDATA[$V{TOTAL_BILL}]]></textFieldExpression>
+				</textField>
+				<subreport  isUsingCache="true">
+					<reportElement
+						x="0"
+						y="25"
+						width="535"
+						height="245"
+						key="subreport-1"/>
+					<subreportParameter  name="billID">
+						<subreportParameterExpression><![CDATA[$P{billID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter  name="REPORT_RESOURCE_BUNDLE">
+						<subreportParameterExpression><![CDATA[$P{REPORT_RESOURCE_BUNDLE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression  class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "PatientBillPayments.jasper"]]></subreportExpression>
+				</subreport>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="368"
+						y="0"
+						width="91"
+						height="24"
+						key="textField-33"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreportuserallindate.total" )]]></textFieldExpression>
+				</textField>
+			</band>
+		</columnFooter>
+		<pageFooter>
+			<band height="20"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="78"
+						y="0"
+						width="130"
+						height="18"
+						key="textField-35"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.util.Date"><![CDATA[new Date()]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="2"
+						y="0"
+						width="75"
+						height="18"
+						key="textField-36"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.printat" )]]></textFieldExpression>
+				</textField>
+			</band>
+		</pageFooter>
+		<summary>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</summary>
+</jasperReport>

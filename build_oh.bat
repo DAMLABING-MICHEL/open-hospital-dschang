@@ -1,0 +1,1 @@
+ant distribute > result.txt

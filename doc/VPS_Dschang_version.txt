@@ -1,0 +1,266 @@
+
+Added files :
+
+		org.isf.reduction.gui.ReductionPlanBrowser.java
+		org.isf.reduction.gui.ReductionPlanEdit.java
+		org.isf.reduction.manager.ReductionPlanManager.java
+		org.isf.reduction.model.ExamsReduction.java
+		org.isf.reduction.model.MedicalsReduction.java
+		org.isf.reduction.model.OperationReduction.java
+		org.isf.reduction.model.OtherReduction.java
+		org.isf.reduction.model.ReductionPlan.java
+		org.isf.reduction.service.IoOperations.java
+		org.isf.utils.db.ExtractPatientsPhotos.java
+		org.isf.utils.jobjects.DateAdapter.java
+		org.isf.utils.jobjects.MysqlDateAdapter.java		
+		changelog_1_8_0_VPS_Dschang_version.txt
+		db/step_55_reduction_plan.sql
+									
+				
+
+
+Updated files : 
+
+		org.isf.accounting.gui.BillBrowser.java
+		org.isf.accounting.gui.PatientBillEdit.java
+		org.isf.accounting.model.Bill.java
+		org.isf.accounting.model.BillItems.java
+		org.isf.accounting.model.BillPayments.java
+		org.isf.accounting.service.IoOperations.java
+		org.isf.admission.gui.AdmissionBrowser.java
+		org.isf.admission.gui.AdmittedPatientBrowser.java
+		org.isf.admission.gui.PatientDataBrowser.java
+		org.isf.admission.gui.PatientFolderBrowser.java
+		org.isf.admission.model.Admission.java
+		org.isf.admission.service.IoOperations.java
+		org.isf.admtype.manager.AdmissionTypeBrowserManager.java
+		org.isf.admtype.model.AdmissionType.java
+		org.isf.admtype.service.IoOperation.java
+		org.isf.agetype.model.AgeType.java
+		org.isf.dicom.gui.DicomViewGui.java
+		org.isf.dicom.test.DicomMain.java
+		org.isf.disctype.manager.DischargeTypeBrowserManager.java
+		org.isf.disctype.model.DischargeType.java
+		org.isf.disctype.service.IoOperation.java
+		org.isf.disease.manager.DiseaseBrowserManager.java
+		org.isf.disease.model.Disease.java
+		org.isf.distype.manager.DiseaseTypeBrowserManager.java
+		org.isf.distype.model.DiseaseType.java
+		org.isf.distype.service.IoOperation.java
+		org.isf.dlvrrestype.manager.DeliveryResultTypeBrowserManager.java
+		org.isf.dlvrrestype.model.DeliveryResultType.java
+		org.isf.dlvrrestype.service.IoOperation.java
+		org.isf.dlvrtype.manager.DeliveryTypeBrowserManager.java
+		org.isf.dlvrtype.model.DeliveryType.java
+		org.isf.dlvrtype.service.IoOperation.java
+		org.isf.exa.manager.ExamBrowsingManager.java
+		org.isf.exa.manager.ExamRowBrowsingManager.java
+		org.isf.exa.model.Exam.java
+		org.isf.exa.model.ExamRow.java
+		org.isf.exa.service.IoOperations.java
+		org.isf.examination.gui.PatientExaminationEdit.java
+		org.isf.exatype.manager.ExamTypeBrowserManager.java
+		org.isf.exatype.model.ExamType.java
+		org.isf.exatype.service.IoOperation.java
+		org.isf.generaldata.GeneralData.java
+		org.isf.lab.gui.LabBrowser.java
+		org.isf.lab.gui.LabEdit.java
+		org.isf.lab.gui.LabEditExtended.java
+		org.isf.lab.gui.LabNew.java
+		org.isf.lab.manager.LabManager.java
+		org.isf.lab.model.Laboratory.java
+		org.isf.lab.service.IoOperations.java
+		org.isf.malnutrition.gui.InsertMalnutrition.java
+		org.isf.malnutrition.manager.MalnutritionManager.java
+		org.isf.malnutrition.model.Malnutrition.java
+		org.isf.malnutrition.service.IoOperation.java
+		org.isf.medicals.gui.MedicalBrowser.java
+		org.isf.medicals.manager.MedicalBrowsingManager.java
+		org.isf.medicals.model.Medical.java
+		org.isf.medicals.service.IoOperations.java
+		org.isf.medicalstock.gui.MovStockBrowser.java
+		org.isf.medicalstock.gui.MovStockMultipleCharging.java
+		org.isf.medicalstock.gui.MovStockMultipleDischarging.java
+		org.isf.medicalstock.manager.DateTextField.java
+		org.isf.medicalstock.manager.MovStockInsertingManager.java
+		org.isf.medicalstock.model.Movement.java
+		org.isf.medicalstock.service.IoOperations.java
+		org.isf.medicalstockward.gui.WardPharmacy.java
+		org.isf.medicalstockward.gui.WardPharmacyNew.java
+		org.isf.medicalstockward.gui.WardPharmacyRectify.java
+		org.isf.medicalstockward.manager.MovWardBrowserManager.java
+		org.isf.medicalstockward.model.MovementWard.java
+		org.isf.medicalstockward.service.IoOperations.java
+		org.isf.medstockmovtype.manager.MedicaldsrstockmovTypeBrowserManager.java
+		org.isf.medstockmovtype.model.MovementType.java
+		org.isf.medstockmovtype.service.IoOperation.java
+		org.isf.medtype.manager.MedicalTypeBrowserManager.java
+		org.isf.medtype.model.MedicalType.java
+		org.isf.medtype.service.IoOperation.java
+		org.isf.menu.gui.MainMenu.java
+		org.isf.menu.gui.Menu.java
+		org.isf.menu.gui.UserEdit.java
+		org.isf.menu.model.User.java
+		org.isf.menu.service.IoOperations.java
+		org.isf.opd.gui.OpdBrowser.java
+		org.isf.opd.gui.OpdEdit.java
+		org.isf.opd.gui.OpdEditExtended.java
+		org.isf.opd.manager.OpdBrowserManager.java
+		org.isf.opd.model.Opd.java
+		org.isf.opd.service.IoOperations.java
+		org.isf.operation.manager.OperationBrowserManager.java
+		org.isf.operation.model.Operation.java
+		org.isf.operation.service.IoOperations.java
+		org.isf.opetype.manager.OperationTypeBrowserManager.java
+		org.isf.opetype.model.OperationType.java
+		org.isf.opetype.service.IoOperation.java
+		org.isf.patient.gui.PatientBrowser.java
+		org.isf.patient.gui.PatientInsert.java
+		org.isf.patient.gui.PatientInsertExtended.java
+		org.isf.patient.gui.PatientSummary.java
+		org.isf.patient.gui.SelectPatient.java
+		org.isf.patient.manager.PatientBrowserManager.java
+		org.isf.patient.model.Patient.java
+		org.isf.patient.service.IoOperations.java
+		org.isf.patvac.gui.PatVacBrowser.java
+		org.isf.patvac.manager.PatVacManager.java
+		org.isf.patvac.model.PatientVaccine.java
+		org.isf.patvac.service.IoOperations.java
+		org.isf.pregtreattype.manager.PregnantTreatmentTypeBrowserManager.java
+		org.isf.pregtreattype.model.PregnantTreatmentType.java
+		org.isf.pregtreattype.service.IoOperation.java
+		org.isf.priceslist.manager.PriceListManager.java
+		org.isf.priceslist.model.List.java
+		org.isf.priceslist.model.Price.java
+		org.isf.priceslist.service.IoOperations.java
+		org.isf.pricesothers.manager.PricesOthersManager.java
+		org.isf.pricesothers.model.PricesOthers.java
+		org.isf.pricesothers.service.IoOperations.java
+		org.isf.serviceprinting.manager.PrintReceipt.java
+		org.isf.serviceprinting.print.MedicalStockSelection.java
+		org.isf.sms.service.SmsOperations.java
+		org.isf.stat.manager.DiseasesList.java
+		org.isf.stat.manager.ExamsList1.java
+		org.isf.stat.manager.GenericReportAdmission.java
+		org.isf.stat.manager.GenericReportBill.java
+		org.isf.stat.manager.GenericReportDischarge.java
+		org.isf.stat.manager.GenericReportFromDateToDate.java
+		org.isf.stat.manager.GenericReportMY.java
+		org.isf.stat.manager.GenericReportOpd.java
+		org.isf.stat.manager.GenericReportPatient.java
+		org.isf.stat.manager.GenericReportPharmaceuticalOrder.java
+		org.isf.stat.manager.GenericReportUserInDate.java
+		org.isf.stat.reportlauncher.gui.ReportLauncher.java
+		org.isf.therapy.gui.TherapyEdit.java
+		org.isf.therapy.gui.TherapyEntryForm.java
+		org.isf.therapy.manager.TherapyManager.java
+		org.isf.therapy.model.Therapy.java
+		org.isf.therapy.model.TherapyRow.java
+		org.isf.therapy.service.IoOperations.java
+		org.isf.utils.db.DbQueryLogger.java
+		org.isf.utils.db.HybernateSessions.java
+		org.isf.utils.db.NormalizeString.java
+		org.isf.utils.jobjects.JAgenda.java
+		org.isf.utils.sms.SetupGSM.java
+		org.isf.utils.time.RememberDates.java
+		org.isf.utils.time.TimeComboBox.java
+		org.isf.utils.time.TimeTools.java
+		org.isf.vaccine.gui.VaccineBrowser.java
+		org.isf.vaccine.manager.VaccineBrowserManager.java
+		org.isf.vaccine.model.Vaccine.java
+		org.isf.vaccine.service.IoOperations.java
+		org.isf.vactype.manager.VaccineTypeBrowserManager.java
+		org.isf.vactype.model.VaccineType.java
+		org.isf.vactype.service.IoOperation.java
+		org.isf.video.gui.PatientPhotoPanel.java
+		org.isf.video.manager.VideoDevicesManager.java
+		org.isf.video.manager.VideoManager.java
+		org.isf.video.service.XMLDocumentManager.java
+		org.isf.visits.manager.VisitManager.java
+		org.isf.visits.model.Visit.java
+		org.isf.visits.service.IoOperations.java
+		org.isf.ward.manager.WardBrowserManager.java
+		org.isf.ward.model.Ward.java
+		org.isf.ward.service.IoOperations.java
+		bundle/language_en.properties		
+		bundle/language_fr.properties		
+		doc/UserManual.pdf	
+		mysql/db/create_all.sql	
+		rsc/generalData.properties
+		
+
+
+changelog description :
+	
+	-Updates to manage web services development
+		1-Updating model classes by changing char fields to String, add adding annotation on GegorianCalendar fields
+		2-Updating manager classes to ensure the good working of web services
+		3-Removing all images from the database to a folder	and updating the old images references in all needed panels.
+
+	-Updates on Laboratory module
+		1-Removing the result and material forms in the adding exam process.
+		2-Adding more filters on the Laboratory browser :
+			-filter exam with all results
+			-filter exam with not empty results
+			-filter exam with empty results
+			-filter exam by patient
+			-filter exam by exam type
+		3-Adding Button "Manage Exams" on Patients browser witch opens 
+	          the Exam browser of the selected patient, showing all his exams and allow 
+		  to add new exam or remove existing exam.
+
+	-updates on vaccination module
+		1-Adding patient filter on the Patient Vaccines browser
+		2-Updating the Clinical Sheet form of a patient by adding the patient vaccines panel of the 
+		selected patient.
+
+	-Updates on Accounting module to add a discount system which allows to define many reduction plans
+	and to apply one of them to any patient : 
+		1-In General Data adding a button to open the reduction plan browser, which shows all the 
+		  reduction plans and allows to add a new one, edit or remove an existing.
+		2-In the editing panel of a selected patient from the patients browser, adding a field 
+		  to set the reduction plan to apply to the selected patient on accounting operations.
+		3-Taking in consideration the selected reduction plan on a patient in every accounting operations.
+
+	-In Patient selection dialog, adding a button to add a patient when the user has the privilege.
+	to do it. 
+
+	-Adding the possibility to update the medicine stock when Selling.
+
+	-Forcing login at the launching of the application.
+
+Important Note :
+	After apply this updates on an open hospital installation, before running the application, be sure to first 
+	of all execute that class utility "org.isf.utils.db.ExtractPatientsPhotos".
+	That utility has to: 
+	 *  extract patient images from the database and store them in the file system. 
+	 *  drop the PAT_PHOTO column from patient table.
+	 The path to the images folder can be set in the generalData.properties file throw the key "PHOTOSDIR"	
+	
+===========================================================================================
+1.
+	01/06/2015 <-- doc/changelog_1_8_0_VPS_Dschange_version.txt
+			   --> doc/VPS_Dschange_version.txt
+			   
+			   - mysql/db/create_all.sql
+			   - mysql/db/step_00_create_user.sql
+			   - mysql/db/step_01_create_structure.sql
+			   <-- mysql/db/step_55_reduction_plan.sql
+			   --> mysql/db/VPS_Dschange_step_01_reduction_plan.sql
+			   - rsc/database.properties
+			  
+	First configuration settins for project VPS_Dschang
+===========================================================================================
+02/10/2015
+
+When a doctor put in place a therapy for a patien, the cashier can access 
+the medicals and sell them to the patien, avoidin error.
+To manage this, we perfor those modifications
+
+org.isf.therapy.model.Therapy.java
+	add field qtyBougth
+	
+
+
+
+	

@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"  ?>
+<!-- Created with iReport - A designer for JasperReports -->
+<!DOCTYPE jasperReport PUBLIC "//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+<jasperReport
+		 name="sub_report_example"
+		 columnCount="1"
+		 printOrder="Vertical"
+		 orientation="Portrait"
+		 pageWidth="595"
+		 pageHeight="842"
+		 columnWidth="535"
+		 columnSpacing="0"
+		 leftMargin="30"
+		 rightMargin="30"
+		 topMargin="20"
+		 bottomMargin="20"
+		 whenNoDataType="NoPages"
+		 isTitleNewPage="false"
+		 isSummaryNewPage="false">
+	<property name="ireport.scriptlethandling" value="0" />
+	<property name="ireport.encoding" value="UTF-8" />
+	<import value="java.util.*" />
+	<import value="net.sf.jasperreports.engine.*" />
+	<import value="net.sf.jasperreports.engine.data.*" />
+
+	<parameter name="title" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="fromdate" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="todate" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="Hospital" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="Address" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="City" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="Email" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="Telephone" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="state" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="state2" isForPrompting="false" class="java.lang.String"/>
+	<queryString><![CDATA[SELECT	BLI_ITEM_GROUP, 
+	BLI_ITEM_DESC, 
+	SUM(BLI_QTY) AS QTY, 
+	SUM(BLI_QTY * BLI_ITEM_AMOUNT) AS AMOUNT
+FROM BILLITEMS
+JOIN BILLS ON BLI_ID_BILL = BLL_ID
+WHERE (BLL_STATUS = $P{state} or BLL_STATUS = $P{state2}) 
+AND DATE(BLL_DATE) BETWEEN STR_TO_DATE($P{fromdate},'%d/%m/%Y') AND STR_TO_DATE($P{todate},'%d/%m/%Y')
+GROUP BY BLI_ITEM_DESC
+ORDER BY BLI_ITEM_GROUP, BLI_ITEM_DESC ASC]]></queryString>
+
+	<field name="BLI_ITEM_GROUP" class="java.lang.String"/>
+	<field name="BLI_ITEM_DESC" class="java.lang.String"/>
+	<field name="QTY" class="java.lang.Double"/>
+	<field name="AMOUNT" class="java.lang.Double"/>
+
+	<variable name="GRP_SUBTOTAL_NB" class="java.lang.Double" resetType="Group" resetGroup="ITEM_GROUP" calculation="Sum">
+		<variableExpression><![CDATA[$F{QTY}]]></variableExpression>
+		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GRP_SUBTOTAL_AMOUNT" class="java.lang.Double" resetType="Group" resetGroup="ITEM_GROUP" calculation="Sum">
+		<variableExpression><![CDATA[$F{AMOUNT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GRP_TOTAL_NB" class="java.lang.Double" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{QTY}]]></variableExpression>
+		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GRP_TOTAL_AMOUNT" class="java.lang.Double" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{AMOUNT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
+	</variable>
+
+		<group  name="ITEM_GROUP" >
+			<groupExpression><![CDATA[$F{BLI_ITEM_GROUP}]]></groupExpression>
+			<groupHeader>
+			<band height="42"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Opaque"
+						x="0"
+						y="3"
+						width="535"
+						height="22"
+						forecolor="#FFFFFF"
+						backcolor="#6699FF"
+						key="textField"/>
+					<box></box>
+					<textElement verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="14" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[" "+( ($F{BLI_ITEM_GROUP}==null || $F{BLI_ITEM_GROUP}.equals(""))? $P{REPORT_RESOURCE_BUNDLE}.getString("angal.priceslist.notype"):
+$F{BLI_ITEM_GROUP}.equals("MED")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.common.medicals"):
+$F{BLI_ITEM_GROUP}.equals("EXA")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.menu.btn.exams"):
+$F{BLI_ITEM_GROUP}.equals("OPE")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.opd.operation"):
+$F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.hmis055labmonthlyformatted.other"):" ")]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="3"
+						y="21"
+						width="297"
+						height="20"
+						key="textField-11"/>
+					<box></box>
+					<textElement verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="11" isBold="true" isUnderline="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.patientbill.designation")]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="299"
+						y="21"
+						width="100"
+						height="20"
+						key="textField-12"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="11" isBold="true" isUnderline="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.medicalstock.multiplecharging.quantity")]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="398"
+						y="21"
+						width="135"
+						height="20"
+						key="textField-13"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="11" isBold="true" isUnderline="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.medicalstock.multiplecharging.totalcost")]]></textFieldExpression>
+				</textField>
+			</band>
+			</groupHeader>
+			<groupFooter>
+			<band height="38"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="3"
+						y="2"
+						width="297"
+						height="20"
+						key="textField-1"/>
+					<box></box>
+					<textElement verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.stat.total") +
+" "+( ($F{BLI_ITEM_GROUP}==null || $F{BLI_ITEM_GROUP}.equals(""))? $P{REPORT_RESOURCE_BUNDLE}.getString("angal.priceslist.notype"):
+$F{BLI_ITEM_GROUP}.equals("MED")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.common.medicals"):
+$F{BLI_ITEM_GROUP}.equals("EXA")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.menu.btn.exams"):
+$F{BLI_ITEM_GROUP}.equals("OPE")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.opd.operation"):
+$F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.hmis055labmonthlyformatted.other"):" ")]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="300"
+						y="2"
+						width="100"
+						height="20"
+						key="textField"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_SUBTOTAL_NB}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="400"
+						y="2"
+						width="133"
+						height="20"
+						key="textField"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_SUBTOTAL_AMOUNT}]]></textFieldExpression>
+				</textField>
+			</band>
+			</groupFooter>
+		</group>
+		<background>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</background>
+		<title>
+			<band height="137"  isSplitAllowed="true" >
+				<rectangle>
+					<reportElement
+						x="0"
+						y="0"
+						width="535"
+						height="58"
+						forecolor="#FFFFFF"
+						backcolor="#0000FF"
+						key="rectangle-1"/>
+					<graphicElement stretchType="NoStretch"/>
+				</rectangle>
+				<image  evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="463"
+						y="4"
+						width="70"
+						height="50"
+						key="image-1"/>
+					<box></box>
+					<graphicElement stretchType="NoStretch"/>
+					<imageExpression class="java.lang.String"><![CDATA["./rsc/images/Splash.jpg"]]></imageExpression>
+				</image>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="3"
+						y="0"
+						width="456"
+						height="32"
+						forecolor="#FFFFFF"
+						key="textField-3"/>
+					<box></box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="16" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( $P{title} )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="3"
+						y="31"
+						width="456"
+						height="20"
+						forecolor="#FFFFFF"
+						key="textField-4"/>
+					<box></box>
+					<textElement>
+						<font size="11"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.prescriberexams.from") + " " + $P{fromdate} + 
+"  " + $P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.prescriberexams.to") + " " + $P{todate}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="58"
+						width="535"
+						height="22"
+						key="textField-6"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{Hospital}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="79"
+						width="535"
+						height="17"
+						key="textField-7"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{Address} + " - " + $P{City}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="95"
+						width="535"
+						height="17"
+						key="textField-8"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{Email}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="111"
+						width="535"
+						height="17"
+						key="textField-9"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{Telephone}]]></textFieldExpression>
+				</textField>
+			</band>
+		</title>
+		<pageHeader>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</pageHeader>
+		<columnHeader>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</columnHeader>
+		<detail>
+			<band height="23"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="3"
+						y="2"
+						width="297"
+						height="20"
+						key="textField"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{BLI_ITEM_DESC}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="300"
+						y="2"
+						width="100"
+						height="20"
+						key="textField"/>
+					<box></box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{QTY}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="400"
+						y="2"
+						width="133"
+						height="20"
+						key="textField"/>
+					<box></box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{AMOUNT}]]></textFieldExpression>
+				</textField>
+			</band>
+		</detail>
+		<columnFooter>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</columnFooter>
+		<pageFooter>
+			<band height="35"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="3"
+						y="14"
+						width="300"
+						height="20"
+						key="textField-5"/>
+					<box></box>
+					<textElement verticalAlignment="Bottom">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[" " + new Date()]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="390"
+						y="14"
+						width="120"
+						height="20"
+						key="textField-14"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Bottom">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.diseaseslist.page") +" "+ $V{PAGE_NUMBER}+ " " + $P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.diseaseslist.of")]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Report" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="510"
+						y="14"
+						width="23"
+						height="20"
+						key="textField-15"/>
+					<box></box>
+					<textElement verticalAlignment="Bottom">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				</textField>
+			</band>
+		</pageFooter>
+		<summary>
+			<band height="30"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Opaque"
+						x="300"
+						y="3"
+						width="100"
+						height="23"
+						forecolor="#FFFFFF"
+						backcolor="#0000FF"
+						key="textField"/>
+					<box></box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="10" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_TOTAL_NB}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Opaque"
+						x="400"
+						y="3"
+						width="135"
+						height="23"
+						forecolor="#FFFFFF"
+						backcolor="#0000FF"
+						key="textField-2"/>
+					<box></box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_TOTAL_AMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Opaque"
+						x="0"
+						y="3"
+						width="300"
+						height="23"
+						forecolor="#FFFFFF"
+						backcolor="#0000FF"
+						key="textField-10"/>
+					<box leftPadding="5"></box>
+					<textElement verticalAlignment="Middle">
+						<font size="12"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.stat.total")]]></textFieldExpression>
+				</textField>
+			</band>
+		</summary>
+</jasperReport>

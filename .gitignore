@@ -1,0 +1,12 @@
+\.svn/
+\bin/
+\logs/
+\.project
+
+\.settings/
+
+*.class
+
+logs/
+
+bin/

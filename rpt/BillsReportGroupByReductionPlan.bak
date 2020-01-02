@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"  ?>
+<!-- Created with iReport - A designer for JasperReports -->
+<!DOCTYPE jasperReport PUBLIC "//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+<jasperReport
+		 name="BillsReportGroupByReductionPlan"
+		 columnCount="1"
+		 printOrder="Vertical"
+		 orientation="Portrait"
+		 pageWidth="595"
+		 pageHeight="842"
+		 columnWidth="535"
+		 columnSpacing="0"
+		 leftMargin="30"
+		 rightMargin="30"
+		 topMargin="20"
+		 bottomMargin="20"
+		 whenNoDataType="NoPages"
+		 isTitleNewPage="false"
+		 isSummaryNewPage="false"
+		 whenResourceMissingType="Key">
+	<property name="ireport.scriptlethandling" value="0" />
+	<property name="ireport.encoding" value="UTF-8" />
+	<import value="java.util.*" />
+	<import value="net.sf.jasperreports.engine.*" />
+	<import value="net.sf.jasperreports.engine.data.*" />
+
+	<parameter name="dateFrom" isForPrompting="true" class="java.util.Date">
+		<parameterDescription><![CDATA[Date From]]></parameterDescription>
+	</parameter>
+	<parameter name="dateTo" isForPrompting="true" class="java.util.Date">
+		<parameterDescription><![CDATA[Date to]]></parameterDescription>
+	</parameter>
+	<queryString><![CDATA[SELECT BLL_ID, BLL_DATE, BLL_UPDATE, BLL_LST_NAME, BLL_ID_PAT, BLL_PAT_NAME, 
+BLL_STATUS, BLL_AMOUNT,BLL_BALANCE, BLL_USR_ID_A, BLL_WARD, BLL_RP_ID, 
+BLL_PAT_AFFILIATED_PERSON, IFNULL(rp.RP_DESCRIPTION, 'Aucun plan de reduction') 
+as RP_DESCRIPTION FROM bills  b left join reductionplan rp on b.BLL_RP_ID=rp.RP_ID
+WhERE DATE(BLL_DATE) BETWEEN $P{dateFrom} AND $P{dateTo}
+order by RP_DESCRIPTION]]></queryString>
+
+	<field name="BLL_ID" class="java.lang.Integer"/>
+	<field name="BLL_DATE" class="java.sql.Timestamp"/>
+	<field name="BLL_UPDATE" class="java.sql.Timestamp"/>
+	<field name="BLL_LST_NAME" class="java.lang.String"/>
+	<field name="BLL_ID_PAT" class="java.lang.Integer"/>
+	<field name="BLL_PAT_NAME" class="java.lang.String"/>
+	<field name="BLL_STATUS" class="java.lang.String"/>
+	<field name="BLL_AMOUNT" class="java.lang.Double"/>
+	<field name="BLL_BALANCE" class="java.lang.Double"/>
+	<field name="BLL_USR_ID_A" class="java.lang.String"/>
+	<field name="BLL_WARD" class="java.lang.String"/>
+	<field name="BLL_RP_ID" class="java.lang.Integer"/>
+	<field name="BLL_PAT_AFFILIATED_PERSON" class="java.lang.Integer"/>
+	<field name="RP_DESCRIPTION" class="java.lang.String"/>
+
+
+		<group  name="Reduction plan" >
+			<groupExpression><![CDATA[$F{RP_DESCRIPTION}]]></groupExpression>
+			<groupHeader>
+			<band height="41"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="0"
+						width="406"
+						height="18"
+						key="textField"/>
+					<box></box>
+					<textElement>
+						<font size="10" isBold="false" isUnderline="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{RP_DESCRIPTION}]]></textFieldExpression>
+				</textField>
+			</band>
+			</groupHeader>
+			<groupFooter>
+			<band height="50"  isSplitAllowed="true" >
+			</band>
+			</groupFooter>
+		</group>
+		<background>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</background>
+		<title>
+			<band height="50"  isSplitAllowed="true" >
+			</band>
+		</title>
+		<pageHeader>
+			<band height="50"  isSplitAllowed="true" >
+			</band>
+		</pageHeader>
+		<columnHeader>
+			<band height="30"  isSplitAllowed="true" >
+			</band>
+		</columnHeader>
+		<detail>
+			<band height="22"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="0"
+						y="3"
+						width="44"
+						height="18"
+						key="textField"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Integer"><![CDATA[$F{BLL_ID}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="dd/MM/yy" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="44"
+						y="3"
+						width="74"
+						height="18"
+						key="textField"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.sql.Timestamp"><![CDATA[$F{BLL_DATE}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="118"
+						y="3"
+						width="100"
+						height="18"
+						key="textField"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{BLL_PAT_NAME}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="218"
+						y="3"
+						width="100"
+						height="18"
+						key="textField"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BLL_AMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="dd/MM/yy" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="318"
+						y="3"
+						width="69"
+						height="18"
+						key="textField"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.sql.Timestamp"><![CDATA[$F{BLL_UPDATE}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="387"
+						y="3"
+						width="77"
+						height="16"
+						key="textField-1"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[new java.lang.Double(  ($F{BLL_AMOUNT}.doubleValue()) -($F{BLL_BALANCE}.doubleValue()) )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="464"
+						y="3"
+						width="71"
+						height="18"
+						key="textField"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BLL_BALANCE}]]></textFieldExpression>
+				</textField>
+			</band>
+		</detail>
+		<columnFooter>
+			<band height="30"  isSplitAllowed="true" >
+			</band>
+		</columnFooter>
+		<pageFooter>
+			<band height="50"  isSplitAllowed="true" >
+			</band>
+		</pageFooter>
+		<lastPageFooter>
+			<band height="50"  isSplitAllowed="true" >
+			</band>
+		</lastPageFooter>
+		<summary>
+			<band height="50"  isSplitAllowed="true" >
+			</band>
+		</summary>
+</jasperReport>

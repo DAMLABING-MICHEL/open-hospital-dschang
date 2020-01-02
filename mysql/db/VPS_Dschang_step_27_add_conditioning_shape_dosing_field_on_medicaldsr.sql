@@ -1,0 +1,3 @@
+ALTER TABLE medicaldsr ADD MDSR_CONDITIONING  varchar(50)  NULL;
+ALTER TABLE medicaldsr ADD MDSR_SHAPE  varchar(50)  NULL;
+ALTER TABLE medicaldsr ADD MDSR_DOSING  varchar(50)  NULL;

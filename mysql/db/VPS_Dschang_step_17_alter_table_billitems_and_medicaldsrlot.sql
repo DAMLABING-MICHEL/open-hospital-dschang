@@ -1,0 +1,2 @@
+ALTER TABLE billitems ADD BLI_EXPORT_STATUS varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT "";
+ALTER TABLE medicaldsrlot ADD LT_REDUCTION_RATE float default 0;
