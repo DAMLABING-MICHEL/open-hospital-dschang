@@ -268,7 +268,6 @@ public class DbQueryLogger {
 			pstmt.execute();
 			return pstmt.getGeneratedKeys();
 		} catch (SQLException e) {
-
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
 		} catch (IOException e) {
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwithserverconnection"), e);

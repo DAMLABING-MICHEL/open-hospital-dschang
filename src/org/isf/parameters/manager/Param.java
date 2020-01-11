@@ -17,6 +17,7 @@ public class Param {
 	public Param(){
 		System.out.println("parameters loaded");
 		ParametersManager manager = new ParametersManager();
+		
 		paramDataBase = manager.getParameters();
 		Parameter param = null;
 		try {
