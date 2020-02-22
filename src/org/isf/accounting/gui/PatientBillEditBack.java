@@ -2032,7 +2032,7 @@ public class PatientBillEditBack extends JDialog implements SelectionListener, P
 			return false;
 		}
 
-		String itemGroup=selectedBillItem.getItemGroup();
+		/*String itemGroup=selectedBillItem.getItemGroup();
 		
 		if(itemGroup!=null && itemGroup.equals(ItemGroup.MEDICAL.getCode())){
 			//Check quantity
@@ -2047,7 +2047,7 @@ public class PatientBillEditBack extends JDialog implements SelectionListener, P
 				}
 			}
 			
-		}
+		}*/
 		this.selectedBillItem.setItemAmount(price);
 		this.selectedBillItem.setItemQuantity(qty);
 

@@ -3,7 +3,7 @@ Buildfile: C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\open-hospital
 clean:
 
 build:
-    [javac] Compiling 469 source files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\open-hospital-dschang\bin
+    [javac] Compiling 465 source files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\open-hospital-dschang\bin
     [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.6
     [javac] Note: C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\open-hospital-dschang\src\org\isf\sms\providers\SkebbyGateway.java uses or overrides a deprecated API.
     [javac] Note: Recompile with -Xlint:deprecation for details.
