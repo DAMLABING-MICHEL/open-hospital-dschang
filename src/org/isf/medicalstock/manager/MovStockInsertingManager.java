@@ -1,6 +1,8 @@
 package org.isf.medicalstock.manager;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -13,6 +15,10 @@ import org.isf.parameters.manager.Param;
 import org.isf.medicals.model.Medical;
 import org.isf.utils.db.DbQueryLogger;
 import org.isf.utils.exception.OHException;
+import org.isf.utils.time.TimeTools;
+
+import com.toedter.calendar.JDateChooser;
+
 import org.isf.generaldata.GeneralData;
 import org.isf.generaldata.MessageBundle;
 
@@ -20,7 +26,8 @@ public class MovStockInsertingManager {
 
 	private IoOperations ioOperations;
 	private org.isf.medicals.service.IoOperations ioOperationsMedicals;
-
+	private static final String DATE_FORMAT_HH_MM = "HH:mm:ss";
+	
 	public MovStockInsertingManager() {
 		ioOperations = new IoOperations();
 		ioOperationsMedicals = new org.isf.medicals.service.IoOperations();
@@ -114,10 +121,15 @@ public class MovStockInsertingManager {
 
 				// checks if the lot is already used by other medicals
 				List<Integer> medicalIds = ioOperations.getMedicalsFromLot(movement.getLot().getCode());
-				if (!(medicalIds.size() == 0 || (medicalIds.size() == 1 && medicalIds.get(0).intValue() == movement.getMedical().getCode().intValue()))) {
+				/*if (!(medicalIds.size() == 0 || (medicalIds.size() == 1 && medicalIds.get(0).intValue() == movement.getMedical().getCode().intValue()))) {
 					JOptionPane.showMessageDialog(null, MessageBundle.getMessage("angal.medicalstock.thislotreferstoanothermedical"));
 					return false;
-
+				}*/
+				
+				if (!(medicalIds.size() == 0 || (medicalIds.size() == 1 && medicalIds.get(0).intValue() == movement.getMedical().getCode().intValue()))) {
+					GregorianCalendar thisDate = TimeTools.getServerDateTime();
+					thisDate.setTime((new JDateChooser(new Date())).getDate());
+					movement.getLot().setCode(movement.getLot().getCode() + formatDateTime(thisDate) );
 				}
 			}
 
@@ -284,6 +296,7 @@ public class MovStockInsertingManager {
 			for (i = 0; i < size; i++) {
 				Movement mov = movements.get(i);
 				ok = prepareChargingMovement(dbQuery, mov);
+				System.out.println("prepareChargingMovement: " + ok);
 				if(!ok){
 					break;
 				}
@@ -390,9 +403,15 @@ public class MovStockInsertingManager {
 
 				// checks if the lot is already used by other medicals
 				List<Integer> medicalIds = ioOperations.getMedicalsFromLot(dbQuery, movement.getLot().getCode());
-				if (!(medicalIds.size() == 0 || (medicalIds.size() == 1 && medicalIds.get(0).intValue() == movement.getMedical().getCode().intValue()))) {
+				/*if (!(medicalIds.size() == 0 || (medicalIds.size() == 1 && medicalIds.get(0).intValue() == movement.getMedical().getCode().intValue()))) {
 					JOptionPane.showMessageDialog(null, MessageBundle.getMessage("angal.medicalstock.thislotreferstoanothermedical"));
 					return false;
+				}*/
+				
+				if (!(medicalIds.size() == 0 || (medicalIds.size() == 1 && medicalIds.get(0).intValue() == movement.getMedical().getCode().intValue()))) {
+					GregorianCalendar thisDate = TimeTools.getServerDateTime();
+					thisDate.setTime((new JDateChooser(new Date())).getDate());
+					movement.getLot().setCode(movement.getLot().getCode() + formatDateTime(thisDate) );
 				}
 			}
 
@@ -403,6 +422,13 @@ public class MovStockInsertingManager {
 		}
 	}
 
+	private String formatDateTime(GregorianCalendar time) {
+		if (time == null)
+			return MessageBundle.getMessage("angal.medicalstock.nodate");
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_HH_MM);
+		return sdf.format(time.getTime());
+	}
+	
 	public int newMultipleDischargingMovements(ArrayList<Movement> movements) {
 		DbQueryLogger dbQuery = new DbQueryLogger();
 		int i = 0;

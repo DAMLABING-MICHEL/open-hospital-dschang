@@ -42,12 +42,13 @@ public class DbSingleConn {
 			try {
 				pConn = createConnection();
 			} catch (CommunicationsException ce){
-				String message = "Serveur de données arrété ou problème de reseau"; //MessageBundle.getMessage("angal.utils.dbserverconnectionfailure");
-				logger.error(">> " + message);
+				String message = "Serveur de donnees arrete ou probleme de reseau"; //MessageBundle.getMessage("angal.utils.dbserverconnectionfailure");
+				
 				//JOptionPane.showMessageDialog(null, message);
-				final JPanel panel = new JPanel();
-			    JOptionPane.showMessageDialog(panel, message, "Error", JOptionPane.ERROR_MESSAGE);
-				System.exit(1);
+				final JPanel pane = new JPanel();
+			    JOptionPane.showMessageDialog(pane, "Serveur de donnees arrete ou probleme de reseau", "Error", JOptionPane.ERROR_MESSAGE);
+			    logger.error(">> " + message);
+			    System.exit(1);
 			}
 		}
 		return pConn;
@@ -108,12 +109,13 @@ public class DbSingleConn {
 		sbURL.append(username);
 		sbURL.append("&password=");
 		sbURL.append(password);
+		
 		Connection conn = null;
 		try {
 			conn = DriverManager.getConnection(sbURL.toString());
 		} catch (Exception e) {		
 			final JPanel panel = new JPanel();
-		    JOptionPane.showMessageDialog(panel, "Serveur de données arrété ou problème de reseau", "Error", JOptionPane.ERROR_MESSAGE);
+		    JOptionPane.showMessageDialog(panel, "Serveur de donnees arrete ou probleme de reseau", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		return conn;
 	}
