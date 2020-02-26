@@ -102,7 +102,7 @@ public class ReportLauncher extends ModalJFrame{
 		{"angal.stat.incomesallbypricecodes_1", 		"OH004_IncomesAllByPriceCodes_closed_&_opened", 					"twodates"},
 		{"angal.stat.incomesallbypricecodes_2", 		"OH004_IncomesAllByPriceCodes_3", 									"year"},
 		{"angal.stat.incomesallbypricecodes_3", 		"OH004_IncomesAllByPriceCodes_3_closed_&_opened", 					"year"},
-		{"angal.stat.incomesallbypricecodes_2chirugy", 	"OH004_IncomesAllByPriceCodes_3chirurgy", 						"year"},
+		{"angal.stat.incomesallbypricecodes_2_chirurgy", 	"OH004_IncomesAllByPriceCodes_3_chirurgy", 						"year"},
 		{"angal.stat.outpatientcount", 					"OH005_opd_count_monthly_report", 									"monthyear"},
 		{"angal.stat.outpatientdiagnoses", 				"OH006_opd_dis_monthly_report", 									"monthyear"},
 		{"angal.stat.labmonthlybasic", 					"OH007_lab_monthly_report", 										"monthyear"},
@@ -625,8 +625,8 @@ public class ReportLauncher extends ModalJFrame{
 					
 					new GenericReportFromDateToDate(fromDate, toDate, "OH004_IncomesAllByPriceCodes_3" ,year,"D","angal.stat.incomesallbypricecodes_3_title", toCSV);
 				}
-				if(reportMatrix[rptIndex][FILENAME].equals("OH004_IncomesAllByPriceCodes_3chirurgy")){
-					new GenericReportFromDateToDate(fromDate, toDate, reportMatrix[rptIndex][FILENAME],year,"C","angal.stat.incomesallbypricecodes_2_titlechirurgy", toCSV);
+				if(reportMatrix[rptIndex][FILENAME].equals("OH004_IncomesAllByPriceCodes_3_chirurgy")){
+					new GenericReportFromDateToDate(fromDate, toDate, reportMatrix[rptIndex][FILENAME],year,"C","angal.stat.incomesallbypricecodes_2_title_chirurgy", toCSV);
 				}
 				if(reportMatrix[rptIndex][FILENAME].equals("synthesisActivities")){
 					GregorianCalendar d = new GregorianCalendar();
