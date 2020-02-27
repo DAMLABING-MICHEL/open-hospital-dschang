@@ -33,6 +33,7 @@ import org.isf.menu.manager.UserBrowsingManager;
 import org.isf.menu.model.User;
 import org.isf.operation.manager.OperationRowBrowserManager;
 import org.isf.operation.model.OperationRow;
+import org.isf.opetype.model.OperationType;
 import org.isf.parameters.manager.Param;
 import org.isf.patient.manager.PatientBrowserManager;
 import org.isf.patient.model.Patient;
@@ -1003,5 +1004,14 @@ public class BillBrowserManager {
 		Admission adm = new Admission();
 		adm = man.getCurrentAdmission(patientSelected);
 		return (adm == null ? "R" : "I");
+	}
+
+	public ArrayList<BillItemReportBean> getTotalCountAmountByQuery12(int year,String status, OperationType operationType) throws OHException, ParseException, SQLException{
+		try {
+			return ioOperations.getTotalCountAmountByQuery12(year, status, operationType);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
 	}
 }

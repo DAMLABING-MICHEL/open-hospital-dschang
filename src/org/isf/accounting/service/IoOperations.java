@@ -19,6 +19,7 @@ import org.isf.accounting.model.BillPayments;
 import org.isf.generaldata.MessageBundle;
 import org.isf.menu.gui.MainMenu;
 import org.isf.menu.model.User;
+import org.isf.opetype.model.OperationType;
 import org.isf.patient.model.Patient;
 import org.isf.utils.db.DbQueryLogger;
 import org.isf.utils.exception.OHException;
@@ -987,6 +988,207 @@ public class IoOperations {
 		DbQueryLogger dbQuery = new DbQueryLogger();
 		List<Object> parameters = new ArrayList<Object>(3);
 		
+		String endFebruary;
+		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance(); 
+		endFebruary = cal.isLeapYear(year) ? "29/02/"+year: "28/02/"+year;
+		String[] dates = {"01/01/"+year, "31/01/"+year, "01/02/"+year, endFebruary, "01/03/"+year, "31/03/"+year,
+				          "01/04/"+year, "30/04/"+year, "01/05/"+year, "31/05/"+year, "01/06/"+year, "30/06/"+year
+				         ,"01/07/"+year, "31/07/"+year, "01/08/"+year, "31/08/"+year, "01/09/"+year, "30/09/"+year
+				         ,"01/10/"+year, "31/10/"+year, "01/11/"+year, "30/11/"+year, "01/12/"+year, "31/12/"+year};
+		Date date = null;
+		DateFormat dateFromat = new SimpleDateFormat("dd/MM/yyyy");
+		GregorianCalendar gregoDate = null;
+		HashMap<Integer, GregorianCalendar> datesG = new HashMap<Integer, GregorianCalendar>();
+		for (int i = 0; i < dates.length; i++) {
+			date = new Date();
+			date = dateFromat.parse(dates[i]);
+			gregoDate = new GregorianCalendar();
+			gregoDate.setTime(date);
+			datesG.put(i, gregoDate);
+		}
+		ArrayList<BillItemReportBean> returnList = new ArrayList<BillItemReportBean>();
+		HashMap<String, BillItemReportBean> items = new HashMap<String, BillItemReportBean>();
+		try {
+			for(int i=0;i<13;i++){
+				if(i==12){
+					parameters.add(new Timestamp(datesG.get(0).getTime().getTime()));
+					parameters.add(new Timestamp(datesG.get(23).getTime().getTime()));
+				}else{
+					parameters.add(new Timestamp(datesG.get(i*2).getTime().getTime()));
+					parameters.add(new Timestamp(datesG.get(i*2+1).getTime().getTime()));
+				}		
+				ResultSet resultSet = dbQuery.getDataWithParams(query, parameters, true);
+				String desc = "";
+				String group = "";
+				BillItemReportBean currentItem = null;
+				while (resultSet.next()) {
+					desc = resultSet.getString("descrip");
+					group = resultSet.getString("groupe")==null?"":resultSet.getString("groupe");
+					if(items.containsKey(desc)){
+						currentItem = items.get(desc);
+					    switch (i) {
+						case 0:
+							currentItem.setCOUNT_JANUARY(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_JANUARY(resultSet.getDouble("totAmount"));
+							break;
+						case 1:
+							currentItem.setCOUNT_FEBRUARY(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_FEBRUARY(resultSet.getDouble("totAmount"));
+							break;
+						case 2:
+							currentItem.setCOUNT_MARCH(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_MARCH(resultSet.getDouble("totAmount"));
+							break;
+						case 3:
+							currentItem.setCOUNT_APRIL(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_APRIL(resultSet.getDouble("totAmount"));
+							break;
+						case 4:
+							currentItem.setCOUNT_MAY(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_MAY(resultSet.getDouble("totAmount"));
+							break;
+						case 5:
+							currentItem.setCOUNT_JUNE(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_JUNE(resultSet.getDouble("totAmount"));
+							break;
+						case 6:
+							currentItem.setCOUNT_JULY(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_JULY(resultSet.getDouble("totAmount"));
+							break;
+						case 7:
+							currentItem.setCOUNT_AUGUST(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_AUGUST(resultSet.getDouble("totAmount"));
+							break;
+						case 8:
+							currentItem.setCOUNT_SEPTEMBER(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_SEPTEMBER(resultSet.getDouble("totAmount"));
+							break;
+						case 9:
+							currentItem.setCOUNT_OCTOBER(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_OCTOBER(resultSet.getDouble("totAmount"));
+							break;
+						case 10:
+							currentItem.setCOUNT_NOVEMBER(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_NOVEMBER(resultSet.getDouble("totAmount"));
+							break;
+						case 11:
+							currentItem.setCOUNT_DECEMBER(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_DECEMBER(resultSet.getDouble("totAmount"));
+							break;
+						case 12:
+							currentItem.setTOTAL_YEAR_COUNT(resultSet.getDouble("totCount"));
+							currentItem.setTOTAL_YEAR_AMOUNT(resultSet.getDouble("totAmount"));
+							break;
+						default:
+							break;
+						}
+						
+					}else{
+						currentItem = new BillItemReportBean();
+						currentItem.setBLI_ITEM_DESC(desc);
+						currentItem.setBLI_ITEM_GROUP(group);
+						items.put(desc, currentItem);
+						switch (i) {
+						case 0:
+							currentItem.setCOUNT_JANUARY(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_JANUARY(resultSet.getDouble("totAmount"));
+							break;
+						case 1:
+							currentItem.setCOUNT_FEBRUARY(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_FEBRUARY(resultSet.getDouble("totAmount"));
+							break;
+						case 2:
+							currentItem.setCOUNT_MARCH(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_MARCH(resultSet.getDouble("totAmount"));
+							break;
+						case 3:
+							currentItem.setCOUNT_APRIL(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_APRIL(resultSet.getDouble("totAmount"));
+							break;
+						case 4:
+							currentItem.setCOUNT_MAY(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_MAY(resultSet.getDouble("totAmount"));
+							break;
+						case 5:
+							currentItem.setCOUNT_JUNE(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_JUNE(resultSet.getDouble("totAmount"));
+							break;
+						case 6:
+							currentItem.setCOUNT_JULY(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_JULY(resultSet.getDouble("totAmount"));
+							break;
+						case 7:
+							currentItem.setCOUNT_AUGUST(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_AUGUST(resultSet.getDouble("totAmount"));
+							break;
+						case 8:
+							currentItem.setCOUNT_SEPTEMBER(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_SEPTEMBER(resultSet.getDouble("totAmount"));
+							break;
+						case 9:
+							currentItem.setCOUNT_OCTOBER(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_OCTOBER(resultSet.getDouble("totAmount"));
+							break;
+						case 10:
+							currentItem.setCOUNT_NOVEMBER(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_NOVEMBER(resultSet.getDouble("totAmount"));
+							break;
+						case 11:
+							currentItem.setCOUNT_DECEMBER(resultSet.getDouble("totCount"));
+							currentItem.setAMOUNT_DECEMBER(resultSet.getDouble("totAmount"));
+							break;
+						case 12:
+							currentItem.setTOTAL_YEAR_COUNT(resultSet.getDouble("totCount"));
+							currentItem.setTOTAL_YEAR_AMOUNT(resultSet.getDouble("totAmount"));
+							break;
+						default:
+							break;
+						}
+					    returnList.add(currentItem);
+					}					
+				}
+				parameters.clear();	
+			}
+		} catch (SQLException e) {
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			dbQuery.releaseConnection();
+		}
+		return returnList;
+	}
+
+	
+	public ArrayList<BillItemReportBean> getTotalCountAmountByQuery12(int year, String status, OperationType operationType) throws OHException, ParseException, SQLException{
+		
+		System.out.println("BBBBBBBBBBBBBBBBBBBBBBBB   " + operationType.getDescription());
+		String query ="Select groupe, descrip, totCount, totAmount from  ("
+		     + " SELECT bli.BLI_ITEM_GROUP as groupe, bli.BLI_ITEM_DESC as descrip, SUM(bli.bli_qty) as totCount,"		
+		     + " ABS(SUM(bli.BLI_ITEM_AMOUNT * bli.BLI_QTY)) as totAmount "
+		     + " FROM BILLITEMS bli JOIN BILLS bl ON bli.BLI_ID_BILL = bl.BLL_ID "
+		     
+		     + " JOIN OPERATION op ON op.OPE_ID_A = bli.BLI_ITEM_ID "
+		     
+		     + " WHERE bl.BLL_STATUS = '"+status+"' "
+		     + " AND op.OPE_OCL_ID_A = '"+ operationType.getCode() +"' AND DATE(bl.BLL_DATE) BETWEEN ? AND ? AND bli.BLI_ITEM_GROUP = 'OPE' GROUP BY descrip "
+        + ") source_table ORDER BY groupe, descrip";
+		
+		if(status.equals("D")){
+			query = "Select groupe, descrip, totCount, totAmount from  ("
+				     + " SELECT bli.BLI_ITEM_GROUP as groupe, bli.BLI_ITEM_DESC as descrip, SUM(bli.bli_qty) as totCount,"		
+				     + " ABS(SUM(bli.BLI_ITEM_AMOUNT * bli.BLI_QTY)) as totAmount "
+				     + " FROM BILLITEMS bli JOIN BILLS bl ON bli.BLI_ID_BILL = bl.BLL_ID "
+
+ 					 + " JOIN OPERATION op ON op.OPE_ID_A = bli.BLI_ITEM_ID "
+ 
+				     + " WHERE bl.BLL_STATUS != '"+status+"' "
+				     + " AND op.OPE_OCL_ID_A = '"+ operationType.getCode() +"' AND DATE(bl.BLL_DATE) BETWEEN ? AND ? AND bli.BLI_ITEM_GROUP = 'OPE'  GROUP BY descrip "
+		        + ") source_table ORDER BY groupe, descrip";
+		}
+		
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		List<Object> parameters = new ArrayList<Object>(3);
+		
+		//parameters.add(operationType.getCode());
 		String endFebruary;
 		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance(); 
 		endFebruary = cal.isLeapYear(year) ? "29/02/"+year: "28/02/"+year;

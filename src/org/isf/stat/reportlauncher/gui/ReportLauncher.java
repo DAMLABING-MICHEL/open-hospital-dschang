@@ -39,6 +39,8 @@ import org.isf.agetype.manager.AgeTypeBrowserManager;
 import org.isf.agetype.model.AgeType;
 import org.isf.generaldata.GeneralData;
 import org.isf.generaldata.MessageBundle;
+import org.isf.opetype.manager.OperationTypeBrowserManager;
+import org.isf.opetype.model.OperationType;
 import org.isf.parameters.manager.Param;
 import org.isf.stat.manager.GenericReportFromDateToDate;
 import org.isf.stat.manager.GenericReportMY;
@@ -77,7 +79,9 @@ public class ReportLauncher extends ModalJFrame{
 	private JButton jCSVButton = null;
 	private JPanel jMonthPanel = null;
 	private JLabel jMonthLabel = null;
+	private JLabel jChirurgyTypeLabel = null;
 	private JComboBox jMonthComboBox = null;
+	private JComboBox jChirurgyTypeComboBox = null;
 	private JLabel jYearLabel = null;
 	private JComboBox jYearComboBox = null;
 	private JLabel jFromDateLabel = null;
@@ -86,7 +90,6 @@ public class ReportLauncher extends ModalJFrame{
 	private VoDateTextField jFromDateField = null;
 	private int height = 0;
 	private ButtonGroup group = new ButtonGroup();
-	
 	private JLabel jRptLabel = null;
 	private JComboBox jRptComboBox = null;
 	
@@ -341,12 +344,21 @@ public class ReportLauncher extends ModalJFrame{
 			jMonthComboBox.setSelectedIndex(month);
 
 			jYearLabel = new JLabel();
-			jYearLabel.setText("        " + MessageBundle.getMessage("angal.stat.year"));
+			jYearLabel.setText("   " + MessageBundle.getMessage("angal.stat.year"));
 			jYearComboBox = new JComboBox();
-
 			for (int i=0;i<4;i++){
 				jYearComboBox.addItem((year-i)+"");
 			}
+			/////////////////////////////////////////////////
+			jChirurgyTypeLabel = new JLabel();
+			jChirurgyTypeLabel.setText(" " + MessageBundle.getMessage("angal.stat.Chirurgytype"));
+			jChirurgyTypeComboBox = new JComboBox();
+			OperationTypeBrowserManager manager = new OperationTypeBrowserManager();
+			ArrayList<OperationType> type = manager.getOperationType();
+			for (OperationType elem : type) {
+				jChirurgyTypeComboBox.addItem(elem);
+			}
+			jChirurgyTypeComboBox.setVisible(false);
 			
 			jFromDateLabel = new JLabel();
 			jFromDateLabel.setText(MessageBundle.getMessage("angal.stat.fromdate"));
@@ -373,6 +385,9 @@ public class ReportLauncher extends ModalJFrame{
 			jMonthPanel.add(jFromDateField, null);
 			jMonthPanel.add(jToDateLabel, null);
 			jMonthPanel.add(jToDateField, null);
+			
+			jMonthPanel.add(jChirurgyTypeLabel, null);
+			jMonthPanel.add(jChirurgyTypeComboBox, null);
 		}
 		return jMonthPanel;
 	}
@@ -382,6 +397,9 @@ public class ReportLauncher extends ModalJFrame{
 		String sParType="";
 		int rptIndex=jRptComboBox.getSelectedIndex();
 		sParType = reportMatrix[rptIndex][TYPE];
+		String filename = reportMatrix[rptIndex][FILENAME];
+		jChirurgyTypeLabel.setVisible(false);
+		jChirurgyTypeComboBox.setVisible(false);
 		if (sParType.equalsIgnoreCase("twodates")) {
 			jMonthComboBox.setVisible(false);
 			jMonthLabel.setVisible(false);
@@ -444,7 +462,13 @@ public class ReportLauncher extends ModalJFrame{
 			jToDateLabel.setVisible(false);
 			jToDateField.setVisible(false);
 			panelMoreChoose.setVisible(false);
-			//panelAgeRange.setVisible(false);
+			if(filename.equals("OH004_IncomesAllByPriceCodes_3_chirurgy")) {
+				jChirurgyTypeLabel.setVisible(true);
+				jChirurgyTypeComboBox.setVisible(true);
+			}else {
+				jChirurgyTypeComboBox.setVisible(false);
+				jChirurgyTypeLabel.setVisible(false);
+			}
 			this.setSize(this.getWidth(), height);
 		}
 		jCSVButton.setVisible(true);
@@ -626,7 +650,10 @@ public class ReportLauncher extends ModalJFrame{
 					new GenericReportFromDateToDate(fromDate, toDate, "OH004_IncomesAllByPriceCodes_3" ,year,"D","angal.stat.incomesallbypricecodes_3_title", toCSV);
 				}
 				if(reportMatrix[rptIndex][FILENAME].equals("OH004_IncomesAllByPriceCodes_3_chirurgy")){
-					new GenericReportFromDateToDate(fromDate, toDate, reportMatrix[rptIndex][FILENAME],year,"C","angal.stat.incomesallbypricecodes_2_title_chirurgy", toCSV);
+					OperationType operationType = (OperationType)jChirurgyTypeComboBox.getSelectedItem();
+					
+					//new GenericReportFromDateToDate(fromDate, toDate, reportMatrix[rptIndex][FILENAME],year,"C","angal.stat.incomesallbypricecodes_2_title_chirurgy", toCSV);
+					new GenericReportFromDateToDate(fromDate, toDate, reportMatrix[rptIndex][FILENAME],year,"C","angal.stat.incomesallbypricecodes_2_title_chirurgy", toCSV, operationType);
 				}
 				if(reportMatrix[rptIndex][FILENAME].equals("synthesisActivities")){
 					GregorianCalendar d = new GregorianCalendar();

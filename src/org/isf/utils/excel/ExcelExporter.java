@@ -27,6 +27,7 @@ import org.isf.accounting.model.Bill;
 import org.isf.generaldata.MessageBundle;
 import org.isf.hospital.manager.HospitalBrowsingManager;
 import org.isf.hospital.model.Hospital;
+import org.isf.opetype.model.OperationType;
 import org.isf.utils.exception.OHException;
 import org.isf.utils.jobjects.BillItemReportBean;
 
@@ -671,6 +672,63 @@ public class ExcelExporter {
 		outFile.close();
 	}
 	
+	public void GenericReportFromDateToDate_OH004_3_EXCEL(String fromDate, String toDate, String jasperFileName, Integer year, String status, String code_title, File exportFile, OperationType operationType) throws IOException {
+		String separator = "\t";
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		FileWriter outFile = new FileWriter(exportFile);
+		try{
+			BillBrowserManager billManager = new BillBrowserManager();
+			List<BillItemReportBean> collections = new ArrayList<BillItemReportBean>();
+			collections = billManager.getTotalCountAmountByQuery12(year,status, operationType);
+			Collections.sort(collections, new Comparator<BillItemReportBean>() {
+				public int compare(BillItemReportBean o1, BillItemReportBean o2) {
+					return o1.getBLI_ITEM_DESC().compareToIgnoreCase(o2.getBLI_ITEM_DESC());
+				}					
+			});
+			Collections.sort(collections, new Comparator<BillItemReportBean>() {
+				public int compare(BillItemReportBean o1, BillItemReportBean o2) {
+					return o1.getBLI_ITEM_GROUP().compareToIgnoreCase(o2.getBLI_ITEM_GROUP());
+				}					
+			});
+			
+			outFile.write(MessageBundle.getMessage("angal.medicalstock.multiplecharging.description") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stat.january") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.february") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.march") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.april") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.may") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.june") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.july") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.august") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.september") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.october") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.november") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.december") + separator);
+			outFile.write("\n");
+		
+			for (BillItemReportBean billItemReportBean : collections) {
+				outFile.write(billItemReportBean.getBLI_ITEM_DESC() + separator);
+				outFile.write(billItemReportBean.getCOUNT_JANUARY().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_FEBRUARY().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_MARCH().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_APRIL().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_MAY().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_JUNE().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_JULY().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_AUGUST().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_SEPTEMBER().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_OCTOBER().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_NOVEMBER().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_DECEMBER().intValue() + separator);
+				outFile.write("\n");					
+			}
+			Desktop.getDesktop().open(new File(exportFile.getAbsolutePath()));
+				
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		outFile.close();
+	}
 	public void exportResultsetToEXCEL_OH001(ResultSet resultSet, File exportFile) throws IOException, OHException {
 		String separator = "\t";
 		FileWriter outFile = new FileWriter(exportFile);
