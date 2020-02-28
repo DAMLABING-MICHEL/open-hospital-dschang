@@ -6,7 +6,7 @@
 \.settings/
 
 *.class
-
+result.txt
 logs/
 
 bin/
