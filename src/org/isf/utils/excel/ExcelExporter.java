@@ -193,18 +193,24 @@ public class ExcelExporter {
 					if (objVal != null) {
 						if (objVal instanceof Double) {							
 							Double val = (Double) objVal;
-							//strVal = format.format(val);
-							formated = format.format(val);							
-							strVal = trimCustom(formated);	
-							
+							try {
+								formated = format.format(val);							
+								strVal = trimCustom(formated);		
+							} catch (NumberFormatException e) {
+								strVal = "";
+							}
 						} else if (objVal instanceof Timestamp) {						
 							Timestamp val = (Timestamp) objVal;
 							strVal = sdf.format(val);
 						} else {
 							if(j==4){
-								Double val = Double.parseDouble(objVal.toString());					
-								formated = format.format(val);							
-								strVal = trimCustom(formated);
+								try {
+									Double val = Double.parseDouble(objVal.toString());
+									formated = format.format(val);							
+									strVal = trimCustom(formated);
+								} catch (NumberFormatException e) {
+									strVal = "";
+								}
 							}else{
 								strVal = objVal.toString().replace('"', ' ');
 							}
@@ -222,9 +228,13 @@ public class ExcelExporter {
 						qtyV = qtyV*priceV;	
 					}catch (Exception e) {
 						qtyV = 0.0;
-					}													
-					formated = format.format(qtyV);							
-					strVal = trimCustom(formated);	
+					}	
+					try {
+						formated = format.format(qtyV);							
+						strVal = trimCustom(formated);	
+					} catch (NumberFormatException e) {
+						strVal = "";
+					}
 					outFile.write(strVal + separator);
 				}
 			}
