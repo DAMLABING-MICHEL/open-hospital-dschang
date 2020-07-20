@@ -467,10 +467,25 @@ public class MedicalBrowser extends ModalJFrame { // implements
 						exportFile = new File(exportFile.getAbsoluteFile() + ".xls");
 
 					ExcelExporter xlsExport = new ExcelExporter();
-					try {
-						xlsExport.exportTableToExcel(table, exportFile);
-					} catch (IOException exc) {
-						logger.info("Export to excel error : " + exc.getMessage());
+					int choice = JOptionPane.showConfirmDialog(null, 
+							MessageBundle.getMessage("angal.medicals.export.all"), 
+							MessageBundle.getMessage("angal.therapy.warning"), 
+							JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+					if(choice == JOptionPane.YES_OPTION) {
+						try {
+							MedicalBrowsingManager medBrowserManager = new MedicalBrowsingManager();
+							xlsExport.exportMedicalsToExcel(medBrowserManager.getMedicals(), exportFile);
+						} catch (IOException exc) {
+							logger.info("Export to excel error : " + exc.getMessage());
+						}
+					}
+					else if(choice == JOptionPane.NO_OPTION) {
+						try {
+							//xlsExport.exportTableToExcel(table, exportFile);
+							xlsExport.exportMedicalsToExcel(medSearch, exportFile);
+						} catch (IOException exc) {
+							logger.info("Export to excel error : " + exc.getMessage());
+						}
 					}
 				}
 			}

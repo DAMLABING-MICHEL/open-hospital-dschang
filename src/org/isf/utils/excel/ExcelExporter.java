@@ -27,6 +27,9 @@ import org.isf.accounting.model.Bill;
 import org.isf.generaldata.MessageBundle;
 import org.isf.hospital.manager.HospitalBrowsingManager;
 import org.isf.hospital.model.Hospital;
+import org.isf.medicals.model.Medical;
+import org.isf.medicals.model.MedicalLot;
+import org.isf.medicalstock.model.Lot;
 import org.isf.opetype.model.OperationType;
 import org.isf.utils.exception.OHException;
 import org.isf.utils.jobjects.BillItemReportBean;
@@ -183,7 +186,7 @@ public class ExcelExporter {
 		outFile.write("Total");
 		
 		outFile.write("\n");
-
+		
 		for (int i = 0; i < model.getRowCount(); i++) {
 			for (int j = 0; j <= model.getColumnCount(); j++) {
 				String strVal;
@@ -921,6 +924,74 @@ public class ExcelExporter {
 			}
 		} catch (SQLException e) {
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		}
+		outFile.close();
+	}
+	
+	public void exportMedicalLotsToExcel(List<MedicalLot> medicals, File file) throws IOException {
+		String separator = "\t";
+		FileWriter outFile = new FileWriter(file);
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		
+		outFile.write(MessageBundle.getMessage("angal.medicals.code") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.descriptionm") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.lotid") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.lotexpiring") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.stockm"));
+		outFile.write("\n");
+
+		String medCode, desc, lotCode, expDate, qty;
+		for(MedicalLot medLot: medicals) {
+			double actualQty = medLot.getMedical().getInitialqty() + medLot.getMedical().getInqty() - medLot.getMedical().getOutqty();
+			medCode = medLot.isParent()? medLot.getMedical().getProd_code() : "";
+			desc = medLot.isParent()? medLot.getMedical().getDescription() : "";
+			Lot lot = medLot.getLot();
+			if(lot==null && !(medLot.isParent() && medLot.getChildren().size()==1)){
+				if(medLot.hasChildren()){
+					lotCode = "Multiple";
+					expDate = "Multiple";
+				}
+				else{
+					lotCode = "";
+					expDate = "";
+				}
+			}
+			else if(lot==null) {
+				lotCode = medLot.getChildren().get(0).getLot().getCode();
+				expDate = sdf.format(medLot.getChildren().get(0).getLot().getDueDate().getTime());
+			} else {
+				lotCode = medLot.getLot().getCode();
+				expDate = sdf.format(medLot.getLot().getDueDate().getTime());
+			}
+			qty = lot==null? String.valueOf(actualQty) : String.valueOf(medLot.getLot().getQuantity());
+			
+			outFile.write(medCode + separator);
+			outFile.write('"' + desc + '"' + separator);
+			outFile.write(lotCode + separator);
+			outFile.write(expDate + separator);
+			outFile.write(qty);
+			outFile.write("\n");
+		}
+		outFile.close();
+	}
+	
+	public void exportMedicalsToExcel(List<Medical> medicals, File file) throws IOException {
+		String separator = "\t";
+		FileWriter outFile = new FileWriter(file);
+		
+		outFile.write(MessageBundle.getMessage("angal.medicals.code") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.descriptionm") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.stockm") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.lastprice"));
+		outFile.write("\n");
+
+		for(Medical med: medicals) {
+			double actualQty = med.getInitialqty() + med.getInqty() - med.getOutqty();
+			outFile.write(med.getProd_code() + separator);
+			outFile.write('"' +med.getDescription()+ '"' + separator);
+			outFile.write(String.valueOf(actualQty) + separator);
+			outFile.write(String.valueOf(med.getLastprice()));
+			outFile.write("\n");
 		}
 		outFile.close();
 	}
