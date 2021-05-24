@@ -396,9 +396,6 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private JLabel lblGarante;
 	private JComboBox jComboGarante;
 	private JComboBox patientComboBox = null;
-	
-	private boolean rateApplied = false;
-	
 	public PatientBillEdit() {
 		PatientBillEdit newBill = new PatientBillEdit(null, new Bill(), true);
 		ico = new javax.swing.ImageIcon("rsc/icons/oh.png").getImage();
@@ -1885,11 +1882,8 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 					Price exa = (Price) itemChooser.getSelectedObject();
 
-					if(!rateApplied) {
-						if (pbiID != 0 && exa != null) {
-							exa = reductionPlanManager.getExamPrice(exa, pbiID);
-						}
-						rateApplied=true;
+					if (pbiID != 0 && exa != null) {
+						exa = reductionPlanManager.getExamPrice(exa, pbiID);
 					}
 					addItem(exa, 1, true, 0);
 				}
@@ -2970,6 +2964,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 					return false;
 				}
 			}
+			
 		}
 		this.selectedBillItem.setItemAmount(price);
 		this.selectedBillItem.setItemQuantity(qty);
@@ -2985,10 +2980,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		boolean isPrice = true;
 		BillItems item = null;
 		if (pbiID != 0 && oth != null) {
-			if(!rateApplied) {
-				rateApplied=true;
-				oth = reductionPlanManager.getOtherPrice(oth, pbiID);
-			}
+			oth = reductionPlanManager.getOtherPrice(oth, pbiID);
 		}
 
 		if (qty <= 0)
@@ -3041,10 +3033,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 	private BillItems addExamAndOperation(Price price) {
 		if (pbiID != 0 && price != null) {
-			if(!rateApplied) {
-				price = reductionPlanManager.getOperationPrice(price, pbiID);
-				rateApplied=true;
-			}
+			price = reductionPlanManager.getOperationPrice(price, pbiID);
 		}
 		BillItems item = addItem(price, 1, true, 0);
 		if (item != null) {
@@ -3062,11 +3051,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 			if (pbiID != 0) {
 				//TO REMOVE
-				if(!rateApplied) {
-					rateApplied=true;
-					price = reductionPlanManager.getMedicalPrice(price, pbiID);
-				}
-				
+				price = reductionPlanManager.getMedicalPrice(price, pbiID);
 			}
 			if (Param.bool("STOCKMVTONBILLSAVE")  ) {
 				if (containPrice(price, qty)) {
