@@ -72,6 +72,7 @@ public class ReductionPlanEdit extends ModalJFrame {
 	private JPanel buttonPanel;
 	private JLabel lblDescription;
 	private JTextField txtDescription;
+	private String descriptionBackup;
 	private JLabel lblMedicalrate;
 	private JTextField txtMedicalRate;
 	private JLabel lblOperationRate;
@@ -723,9 +724,19 @@ public class ReductionPlanEdit extends ModalJFrame {
 	}
 	private boolean loadDataInObject() throws OHException{
 		try {
-			if(manager.getReductionPlan(txtDescription.getText())!= null){
-				JOptionPane.showMessageDialog(ReductionPlanEdit.this, MessageBundle.getMessage("angal.reduction.descriptionused"));
-				return false;
+			if(isInsert) {
+				if(manager.getReductionPlan(txtDescription.getText())!= null){
+					JOptionPane.showMessageDialog(ReductionPlanEdit.this, MessageBundle.getMessage("angal.reduction.descriptionused"));
+					return false;
+				}
+			}
+			else {
+				if(!descriptionBackup.equals(txtDescription.getText())) {
+					if(manager.getReductionPlan(txtDescription.getText())!= null){
+						JOptionPane.showMessageDialog(ReductionPlanEdit.this, MessageBundle.getMessage("angal.reduction.descriptionused"));
+						return false;
+					}
+				}
 			}
 			reductionPlan.setDescription(txtDescription.getText());
 			reductionPlan.setExamReductions(examReductionList);
@@ -743,6 +754,7 @@ public class ReductionPlanEdit extends ModalJFrame {
 	}
 	private void loadDataFromObject(){
 		txtDescription.setText(this.reductionPlan.getDescription());
+		descriptionBackup = txtDescription.getText();
 		txtMedicalRate.setText(String.valueOf(this.reductionPlan.getMedicalRate()));
 		txtExamRate.setText(String.valueOf(this.reductionPlan.getExamRate()));
 		txtOperationRate.setText(String.valueOf(this.reductionPlan.getOperationRate()));
