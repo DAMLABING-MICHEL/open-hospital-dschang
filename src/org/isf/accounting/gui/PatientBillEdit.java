@@ -396,8 +396,11 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private JLabel lblGarante;
 	private JComboBox jComboGarante;
 	private JComboBox patientComboBox = null;
-	
-	private boolean rateApplied = false;
+
+	private ArrayList<Integer> examsList = new ArrayList<Integer>();
+	private ArrayList<Integer> operationsList = new ArrayList<Integer>();
+	private ArrayList<Integer> medicalsList = new ArrayList<Integer>();
+	private ArrayList<Integer> othersList = new ArrayList<Integer>();
 	
 	public PatientBillEdit() {
 		PatientBillEdit newBill = new PatientBillEdit(null, new Bill(), true);
@@ -1885,11 +1888,11 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 					Price exa = (Price) itemChooser.getSelectedObject();
 
-					if(!rateApplied) {
+					if(!examsList.contains(exa.getId())) {
 						if (pbiID != 0 && exa != null) {
 							exa = reductionPlanManager.getExamPrice(exa, pbiID);
 						}
-						rateApplied=true;
+						examsList.add(exa.getId());
 					}
 					addItem(exa, 1, true, 0);
 				}
@@ -2985,9 +2988,9 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		boolean isPrice = true;
 		BillItems item = null;
 		if (pbiID != 0 && oth != null) {
-			if(!rateApplied) {
-				rateApplied=true;
+			if(!othersList.contains(oth.getId())) {
 				oth = reductionPlanManager.getOtherPrice(oth, pbiID);
+				othersList.add(oth.getId());
 			}
 		}
 
@@ -3041,9 +3044,9 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 	private BillItems addExamAndOperation(Price price) {
 		if (pbiID != 0 && price != null) {
-			if(!rateApplied) {
+			if(!operationsList.contains(price.getId())) {
 				price = reductionPlanManager.getOperationPrice(price, pbiID);
-				rateApplied=true;
+				operationsList.add(price.getId());
 			}
 		}
 		BillItems item = addItem(price, 1, true, 0);
@@ -3062,8 +3065,8 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 			if (pbiID != 0) {
 				//TO REMOVE
-				if(!rateApplied) {
-					rateApplied=true;
+				if(!medicalsList.contains(price.getId())) {
+					medicalsList.add(price.getId());
 					price = reductionPlanManager.getMedicalPrice(price, pbiID);
 				}
 				
