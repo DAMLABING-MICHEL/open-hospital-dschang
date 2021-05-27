@@ -40,6 +40,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EventListener;
 
@@ -546,6 +547,12 @@ public class ReductionPlanEdit extends ModalJFrame {
 				public void actionPerformed(ActionEvent event) {
 					try {
 						if(loadDataInObject()){
+							if(reductionPlan.getDescription().trim().length() == 0) {
+								throw new OHException(
+										MessageBundle
+										.getMessage("angal.reduction.descriptionnotvalid"),
+								new SQLException("Cannot save invalid description"));
+							}
 							if(isInsert){
 								manager.newReductionPlan(reductionPlan);
 							}

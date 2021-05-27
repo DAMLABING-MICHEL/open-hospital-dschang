@@ -58,6 +58,7 @@ import javax.swing.table.TableRowSorter;
 import org.apache.log4j.chainsaw.Main;
 import org.eclipse.swt.browser.VisibilityWindowListener;
 import org.eclipse.swt.events.KeyAdapter;
+import org.hibernate.internal.util.SerializationHelper;
 import org.isf.accounting.manager.BillBrowserManager;
 import org.isf.accounting.model.Bill;
 import org.isf.accounting.model.BillItems;
@@ -1887,7 +1888,6 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
 					Price exa = (Price) itemChooser.getSelectedObject();
-
 					if(!examsList.contains(exa.getId())) {
 						if (pbiID != 0 && exa != null) {
 							exa = reductionPlanManager.getExamPrice(exa, pbiID);
