@@ -203,8 +203,14 @@ public class ReductionPlanBrowser extends ModalJFrame implements
 												.deleteReductionPlan(
 														reductionPlan,
 														forceDelete)) {
-									reductionPlanList.remove(reductionPlanList.size()
-											- table.getSelectedRow() - 1);									
+									if(reductionPlanList.size() == 1) {
+										reductionPlanList.remove(reductionPlanList.size()
+												- table.getSelectedRow() - 1);	
+									}
+									else {
+										reductionPlanList.remove(reductionPlanList.size()
+												- table.getSelectedRow());
+									}
 								}
 								((ReductionPlanModel) table.getModel()).fireTableDataChanged();
 								table.updateUI();
