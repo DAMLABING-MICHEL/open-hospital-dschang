@@ -58,6 +58,7 @@ import javax.swing.table.TableRowSorter;
 import org.apache.log4j.chainsaw.Main;
 import org.eclipse.swt.browser.VisibilityWindowListener;
 import org.eclipse.swt.events.KeyAdapter;
+import org.hibernate.internal.util.SerializationHelper;
 import org.isf.accounting.manager.BillBrowserManager;
 import org.isf.accounting.model.Bill;
 import org.isf.accounting.model.BillItems;
@@ -396,6 +397,12 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private JLabel lblGarante;
 	private JComboBox jComboGarante;
 	private JComboBox patientComboBox = null;
+
+	private ArrayList<Integer> examsList = new ArrayList<Integer>();
+	private ArrayList<Integer> operationsList = new ArrayList<Integer>();
+	private ArrayList<Integer> medicalsList = new ArrayList<Integer>();
+	private ArrayList<Integer> othersList = new ArrayList<Integer>();
+	
 	public PatientBillEdit() {
 		PatientBillEdit newBill = new PatientBillEdit(null, new Bill(), true);
 		ico = new javax.swing.ImageIcon("rsc/icons/oh.png").getImage();
@@ -1881,9 +1888,11 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
 					Price exa = (Price) itemChooser.getSelectedObject();
-
-					if (pbiID != 0 && exa != null) {
-						exa = reductionPlanManager.getExamPrice(exa, pbiID);
+					if(!examsList.contains(exa.getId())) {
+						if (pbiID != 0 && exa != null) {
+							exa = reductionPlanManager.getExamPrice(exa, pbiID);
+						}
+						examsList.add(exa.getId());
 					}
 					addItem(exa, 1, true, 0);
 				}
@@ -2964,7 +2973,6 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 					return false;
 				}
 			}
-			
 		}
 		this.selectedBillItem.setItemAmount(price);
 		this.selectedBillItem.setItemQuantity(qty);
@@ -2980,7 +2988,10 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		boolean isPrice = true;
 		BillItems item = null;
 		if (pbiID != 0 && oth != null) {
-			oth = reductionPlanManager.getOtherPrice(oth, pbiID);
+			if(!othersList.contains(oth.getId())) {
+				oth = reductionPlanManager.getOtherPrice(oth, pbiID);
+				othersList.add(oth.getId());
+			}
 		}
 
 		if (qty <= 0)
@@ -3033,7 +3044,10 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 	private BillItems addExamAndOperation(Price price) {
 		if (pbiID != 0 && price != null) {
-			price = reductionPlanManager.getOperationPrice(price, pbiID);
+			if(!operationsList.contains(price.getId())) {
+				price = reductionPlanManager.getOperationPrice(price, pbiID);
+				operationsList.add(price.getId());
+			}
 		}
 		BillItems item = addItem(price, 1, true, 0);
 		if (item != null) {
@@ -3051,7 +3065,11 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 			if (pbiID != 0) {
 				//TO REMOVE
-				price = reductionPlanManager.getMedicalPrice(price, pbiID);
+				if(!medicalsList.contains(price.getId())) {
+					medicalsList.add(price.getId());
+					price = reductionPlanManager.getMedicalPrice(price, pbiID);
+				}
+				
 			}
 			if (Param.bool("STOCKMVTONBILLSAVE")  ) {
 				if (containPrice(price, qty)) {
