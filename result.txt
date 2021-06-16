@@ -1,35 +1,33 @@
-Buildfile: C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\open-hospital-dschang\build.xml
+Buildfile: C:\Users\uni2grow\Documents\Open Hospital\Dschang\open-hospital-dschang\build.xml
 
 clean:
 
 build:
-    [javac] Compiling 465 source files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\open-hospital-dschang\bin
-    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.6
-    [javac] Note: C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\open-hospital-dschang\src\org\isf\sms\providers\SkebbyGateway.java uses or overrides a deprecated API.
+    [javac] Compiling 469 source files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\open-hospital-dschang\bin
+    [javac] Note: C:\Users\uni2grow\Documents\Open Hospital\Dschang\open-hospital-dschang\src\org\isf\sms\providers\SkebbyGateway.java uses or overrides a deprecated API.
     [javac] Note: Recompile with -Xlint:deprecation for details.
     [javac] Note: Some input files use unchecked or unsafe operations.
     [javac] Note: Recompile with -Xlint:unchecked for details.
-    [javac] 1 warning
-     [copy] Copying 2 files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\open-hospital-dschang\bin
+     [copy] Copying 2 files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\open-hospital-dschang\bin
 
 wrapper:
-    [mkdir] Created dir: C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44
 
 distribute:
-    [mkdir] Created dir: C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\lib
-    [mkdir] Created dir: C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\bin
-      [jar] Building jar: C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\bin\OH.jar
-     [copy] Copying 1 file to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44
-     [copy] Copying 1 file to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44
-     [copy] Copying 1 file to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44
-     [copy] Copying 1 file to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44
-     [copy] Copying 1 file to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44
-     [copy] Copying 83 files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\rsc
-     [copy] Copying 404 files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\rpt
-     [copy] Copying 8 files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\bundle
-     [copy] Copying 158 files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\lib
-     [copy] Copying 12 files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\doc
-     [copy] Copying 186 files to C:\Users\uni2grow\Documents\OPEN HOSPITAL STORE\DSCHANG\OpenHospital-1.8.2.44\mysql
+    [mkdir] Created dir: C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\lib
+    [mkdir] Created dir: C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\bin
+      [jar] Building jar: C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\bin\OH.jar
+     [copy] Copying 1 file to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44
+     [copy] Copying 1 file to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44
+     [copy] Copying 1 file to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44
+     [copy] Copying 1 file to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44
+     [copy] Copying 1 file to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44
+     [copy] Copying 83 files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\rsc
+     [copy] Copying 333 files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\rpt
+    [mkdir] Created dir: C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\rpt\PDF
+     [copy] Copying 8 files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\bundle
+     [copy] Copying 158 files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\lib
+     [copy] Copying 12 files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\doc
+     [copy] Copying 187 files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\mysql
 
 BUILD SUCCESSFUL
-Total time: 2 minutes 37 seconds
+Total time: 1 minute 4 seconds

@@ -111,7 +111,6 @@ public class PatientInsertExtended extends JDialog implements SelectionListener{
 	
 	
 	private static final long serialVersionUID = -827831581202765055L;
-
 	private EventListenerList patientListeners = new EventListenerList();
 	
 	protected Logger logger = LoggerFactory.getLogger(PatientInsertExtended.class);
@@ -989,7 +988,9 @@ public class PatientInsertExtended extends JDialog implements SelectionListener{
 		int maxLength = SmsParameters.ICC.length() + Integer.parseInt(Param.string("PHONELENGTH"));
 		if(actual.length()>=4){
 			String begin = actual.substring(0, 4);
-			
+			if(Param.bool("ENABLEMULTICOUNTRIES")) {
+				return true;
+			}
 			if(!SmsParameters.ICC.equals(begin)){
 				JOptionPane.showMessageDialog(PatientInsertExtended.this, MessageBundle
 						.getMessage("angal.patient.phoneicc")+" "+SmsParameters.ICC);
