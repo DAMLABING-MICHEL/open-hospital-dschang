@@ -29,8 +29,8 @@
 
 		<javac deprecation="off" optimize="${compile.optimize}" 
 			includeantruntime="false" srcdir="${src.dir}" destdir="${bin.dir}" 
-			classpathref="classpath" debug="true" target="1.6" compiler="javac1.6" 
-			source="1.6">
+			classpathref="classpath" debug="true" target="1.8" compiler="javac1.8" 
+			source="1.8">
 			<!-- character set of sources -->
 			<compilerarg value="-encoding" />
 			<compilerarg value="UTF8" />

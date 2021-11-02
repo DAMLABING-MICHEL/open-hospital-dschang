@@ -71,11 +71,11 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Returns all the distinct stored {@link BillItems}.
 	 * 
-	 * @return a list of  distinct {@link BillItems} or null if an error occurs.
+	 * @return a list of distinct {@link BillItems} or null if an error occurs.
 	 */
 	public ArrayList<BillItems> getDistinctItems() {
 		try {
@@ -87,8 +87,7 @@ public class BillBrowserManager {
 	}
 
 	/**
-	 * Retrieves all the {@link BillItems} associated to the passed {@link Bill}
-	 * id.
+	 * Retrieves all the {@link BillItems} associated to the passed {@link Bill} id.
 	 * 
 	 * @param billID
 	 *            the bill id.
@@ -109,8 +108,7 @@ public class BillBrowserManager {
 	/**
 	 * Retrieves all the stored {@link BillPayments}.
 	 * 
-	 * @return a list of bill payments or <code>null</code> if an error
-	 *         occurred.
+	 * @return a list of bill payments or <code>null</code> if an error occurred.
 	 */
 	public ArrayList<BillPayments> getPayments() {
 		try {
@@ -145,23 +143,22 @@ public class BillBrowserManager {
 	 * 
 	 * @param newBill
 	 *            the bill to store.
-	 * @param autoCommit 
+	 * @param autoCommit
 	 * @return the generated id.
 	 */
 	public int newBill(Bill newBill, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems) {
-		
-		boolean transactionState=DbQueryLogger.beginTrasaction();
-		DbQueryLogger dbQueryLogger=new DbQueryLogger();
-		try {						
-			int billID= ioOperations.newBill(newBill);
-			
+
+		boolean transactionState = DbQueryLogger.beginTrasaction();
+		DbQueryLogger dbQueryLogger = new DbQueryLogger();
+		try {
+			int billID = ioOperations.newBill(newBill);
+
 			if (billID == 0) {
-				JOptionPane.showMessageDialog(null,
-						MessageBundle.getMessage("angal.newbill.failedtosavebill"), //$NON-NLS-1$
+				JOptionPane.showMessageDialog(null, MessageBundle.getMessage("angal.newbill.failedtosavebill"), //$NON-NLS-1$
 						MessageBundle.getMessage("angal.newbill.title"), //$NON-NLS-1$
 						JOptionPane.ERROR_MESSAGE);
 			} else {
-				//getting patient
+				// getting patient
 				PatientBrowserManager patManager = new PatientBrowserManager();
 				Patient patient = patManager.getPatient(newBill.getPatID());
 				//
@@ -169,57 +166,55 @@ public class BillBrowserManager {
 				boolean itemsInserted = false;
 				if (Param.bool("CREATELABORATORYAUTO")) {
 					itemsInserted = newBillItemsWithAutomaticLaboratory(newBill, patient, billItems);
-				}else{
+				} else {
 					itemsInserted = newBillItems(billID, billItems);
 				}
-				
-				boolean paymentInserted=false;
-				if(itemsInserted){
-					paymentInserted=newBillPayments(billID, payItems);
+
+				boolean paymentInserted = false;
+				if (itemsInserted) {
+					paymentInserted = newBillPayments(billID, payItems);
 				}
-				
-				if(itemsInserted && paymentInserted){
-					////insert new laboratory according criteria
-					//newLaboratory(newBill, null, billItems);
+
+				if (itemsInserted && paymentInserted) {
+					//// insert new laboratory according criteria
+					// newLaboratory(newBill, null, billItems);
 					////
 					try {
 						dbQueryLogger.commit(transactionState);
 					} catch (OHException e) {
 						e.printStackTrace();
 						JOptionPane.showMessageDialog(null, e.getMessage());
-					} 
-				}
-				else{
+					}
+				} else {
 					try {
 						dbQueryLogger.rollback(transactionState);
-						
+
 					} catch (OHException e) {
 						e.printStackTrace();
 						JOptionPane.showMessageDialog(null, e.getMessage());
-					} 
+					}
 					return 0;
 				}
 			}
 			return billID;
-			
+
 		} catch (OHException e) {
 			try {
 				dbQueryLogger.rollback(transactionState);
-				
+
 			} catch (OHException ex) {
 				ex.printStackTrace();
-//				JOptionPane.showMessageDialog(null, e.getMessage());
-			} 
+				// JOptionPane.showMessageDialog(null, e.getMessage());
+			}
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			return 0;
-		}
-		finally {
+		} finally {
 			try {
 				dbQueryLogger.releaseConnection(transactionState);
 				DbQueryLogger.releaseTrasaction(transactionState);
 			} catch (OHException e) {
 				e.printStackTrace();
-			} 
+			}
 		}
 
 	}
@@ -231,43 +226,44 @@ public class BillBrowserManager {
 	 *            the bill id.
 	 * @param billItems
 	 *            the bill items to store.
-	 * @param autoCommit 
+	 * @param autoCommit
 	 * @return <code>true</code> if the {@link BillItems} have been store,
 	 *         <code>false</code> otherwise.
-	 * @throws OHException 
+	 * @throws OHException
 	 */
 	private boolean newBillItems(int billID, ArrayList<BillItems> billItems) throws OHException {
-//		try {
-			ArrayList<BillItems> newItems = this.getNewItems(billItems);
-			ArrayList<BillItems> deletedItems = this.getDeletedItems(billID, billItems);
-			if (Param.bool("STOCKMVTONBILLSAVE")) {
-				updateMedicalStock(deletedItems, billID, true);
-				updateMedicalStock(newItems, billID, false);
-			}
-			// Update therapy and lab if applied
-			updateTherapy(deletedItems, newItems);
-			updateOpearionRow(deletedItems, newItems,billID);
-			updateLaboratory(deletedItems, newItems,billID);
-			// Update labs if applied			
-			return ioOperations.newBillItems(billID, billItems);
-//		} catch (OHException e) {
-//			
-//			throw e;
-//		}
+		// try {
+		ArrayList<BillItems> newItems = this.getNewItems(billItems);
+		ArrayList<BillItems> deletedItems = this.getDeletedItems(billID, billItems);
+		if (Param.bool("STOCKMVTONBILLSAVE")) {
+			updateMedicalStock(deletedItems, billID, true);
+			updateMedicalStock(newItems, billID, false);
+		}
+		// Update therapy and lab if applied
+		updateTherapy(deletedItems, newItems);
+		updateOpearionRow(deletedItems, newItems, billID);
+		updateLaboratory(deletedItems, newItems, billID);
+		// Update labs if applied
+		return ioOperations.newBillItems(billID, billItems);
+		// } catch (OHException e) {
+		//
+		// throw e;
+		// }
 	}
-	
-	private boolean newBillItemsWithAutomaticLaboratory(Bill newBill, Patient patient, ArrayList<BillItems> billItems) throws OHException {
-			ArrayList<BillItems> newItems = this.getNewItems(billItems);
-			ArrayList<BillItems> deletedItems = this.getDeletedItems(newBill.getId(), billItems);
-			if (Param.bool("STOCKMVTONBILLSAVE")) {
-				updateMedicalStock(deletedItems, newBill.getId(), true);
-				updateMedicalStock(newItems, newBill.getId(), false);
-			}			
-			updateTherapy(deletedItems, newItems);
-			updateOpearionRow(deletedItems, newItems,newBill.getId());
-			updateLaboratory(deletedItems, newItems,newBill.getId());
-			createOrDeleteAutomaticallyLaboratory(newBill, patient, deletedItems, newItems, newBill.getId());				
-			return ioOperations.newBillItems(newBill.getId(), billItems);
+
+	private boolean newBillItemsWithAutomaticLaboratory(Bill newBill, Patient patient, ArrayList<BillItems> billItems)
+			throws OHException {
+		ArrayList<BillItems> newItems = this.getNewItems(billItems);
+		ArrayList<BillItems> deletedItems = this.getDeletedItems(newBill.getId(), billItems);
+		if (Param.bool("STOCKMVTONBILLSAVE")) {
+			updateMedicalStock(deletedItems, newBill.getId(), true);
+			updateMedicalStock(newItems, newBill.getId(), false);
+		}
+		updateTherapy(deletedItems, newItems);
+		updateOpearionRow(deletedItems, newItems, newBill.getId());
+		updateLaboratory(deletedItems, newItems, newBill.getId());
+		createOrDeleteAutomaticallyLaboratory(newBill, patient, deletedItems, newItems, newBill.getId());
+		return ioOperations.newBillItems(newBill.getId(), billItems);
 	}
 
 	private void updateTherapy(ArrayList<BillItems> deletedItems, ArrayList<BillItems> newItems) {
@@ -291,8 +287,8 @@ public class BillBrowserManager {
 			}
 		}
 	}
-	
-	private void updateOpearionRow(ArrayList<BillItems> deletedItems, ArrayList<BillItems> newItems, int billID){
+
+	private void updateOpearionRow(ArrayList<BillItems> deletedItems, ArrayList<BillItems> newItems, int billID) {
 		OperationRowBrowserManager opRowManager = new OperationRowBrowserManager();
 		for (BillItems item : deletedItems) {
 			if (item.getPrescriptionId() > 0) {
@@ -309,8 +305,8 @@ public class BillBrowserManager {
 			}
 		}
 	}
-	
-	private void updateLaboratory(ArrayList<BillItems> deletedItems, ArrayList<BillItems> newItems, int billID){
+
+	private void updateLaboratory(ArrayList<BillItems> deletedItems, ArrayList<BillItems> newItems, int billID) {
 		LabManager labManager = new LabManager();
 		for (BillItems item : deletedItems) {
 			if (item.getPrescriptionId() > 0) {
@@ -327,8 +323,9 @@ public class BillBrowserManager {
 			}
 		}
 	}
-	
-	private void createOrDeleteAutomaticallyLaboratory(Bill newBill, Patient patient, ArrayList<BillItems> deletedItems, ArrayList<BillItems> newItems, int billID){
+
+	private void createOrDeleteAutomaticallyLaboratory(Bill newBill, Patient patient, ArrayList<BillItems> deletedItems,
+			ArrayList<BillItems> newItems, int billID) {
 		LabManager labManager = new LabManager();
 		ExamBrowsingManager exaManager = new ExamBrowsingManager();
 		Laboratory lab = null;
@@ -338,11 +335,12 @@ public class BillBrowserManager {
 				if (item.getItemGroup().equals(ItemGroup.EXAM.getCode())) {
 					labManager.updateBillIdLaboratory(item.getPrescriptionId(), 0);
 				}
-			//System.out.println("deletedItems ss "+item.getPrescriptionId());
+				// System.out.println("deletedItems ss "+item.getPrescriptionId());
 			}
 		}
 		GregorianCalendar datep = TimeTools.getServerDateTime();
-		int currentProgNum = labManager.getProgMonth(datep.get(GregorianCalendar.MONTH)+1, datep.get(GregorianCalendar.YEAR));
+		int currentProgNum = labManager.getProgMonth(datep.get(GregorianCalendar.MONTH) + 1,
+				datep.get(GregorianCalendar.YEAR));
 		UserBrowsingManager manager = new UserBrowsingManager();
 		String userId = MainMenu.getUser();
 		String userName = manager.getUsrName(userId);
@@ -350,11 +348,12 @@ public class BillBrowserManager {
 		ArrayList<LaboratoryRow> labRow = new ArrayList<LaboratoryRow>();
 		boolean result = false;
 		for (BillItems item : newItems) {
-			//System.out.println("newItems "+item.getItemDescription());
-			if (item.getItemGroup()!=null && item.getItemGroup().equals(ItemGroup.EXAM.getCode())) {					
+			// System.out.println("newItems "+item.getItemDescription());
+			if (item.getItemGroup() != null && item.getItemGroup().equals(ItemGroup.EXAM.getCode())) {
 				if (Param.bool("CREATELABORATORYAUTO")) {
-					if ((newBill.getStatus().equals("C")) || (newBill.getStatus().equals("O") && Param.bool("CREATELABORATORYAUTOWITHOPENEDBILL")) ) {						
-						if(!(item.getPrescriptionId()>0)){
+					if ((newBill.getStatus().equals("C"))
+							|| (newBill.getStatus().equals("O") && Param.bool("CREATELABORATORYAUTOWITHOPENEDBILL"))) {
+						if (!(item.getPrescriptionId() > 0)) {
 							exa = exaManager.getExam(item.getItemId());
 							lab = new Laboratory();
 							lab.setExam(exa);
@@ -366,32 +365,37 @@ public class BillBrowserManager {
 							lab.setPatName(patient.getName());
 							lab.setSex(patient.getSex() + "");
 							lab.setPrescriber(userName);
-							lab.setBillId(newBill.getId()); //setting bill id
-							try{if(!(lab.getCode()>0)){lab.setMProg(++currentProgNum);}}catch(Exception exp){}
+							lab.setBillId(newBill.getId()); // setting bill id
+							try {
+								if (!(lab.getCode() > 0)) {
+									lab.setMProg(++currentProgNum);
+								}
+							} catch (Exception exp) {
+							}
 							if (lab.getExam().getProcedure() == 1) {
 								result = labManager.newLabFirstProcedure2(lab);
-								System.out.println("code du lab cree proc 1 "+lab.getCode());
+								System.out.println("code du lab cree proc 1 " + lab.getCode());
 							} else {
-								result = labManager.newLabSecondProcedure2(lab, labRow);	
-								System.out.println("code du lab cree proc 2 "+lab.getCode());
+								result = labManager.newLabSecondProcedure2(lab, labRow);
+								System.out.println("code du lab cree proc 2 " + lab.getCode());
 							}
 							if (!result) {
-								JOptionPane.showMessageDialog(null,MessageBundle
-												.getMessage("angal.labnew.thedatacouldnotbesaved"));
+								JOptionPane.showMessageDialog(null,
+										MessageBundle.getMessage("angal.labnew.thedatacouldnotbesaved"));
 								return;
-							}else{
-								//item.setItemRealId(lab.getCode());
+							} else {
+								// item.setItemRealId(lab.getCode());
 								item.setPrescriptionId(lab.getCode());
 							}
 						}
-					}					
+					}
 				}
-			}			
+			}
 		}
 	}
 
 	private ArrayList<BillItems> getDeletedItems(int billID, List<BillItems> newListItems) throws OHException {
-		
+
 		List<BillItems> oldListItems = ioOperations.getItems(billID, false);
 
 		if (oldListItems == null || oldListItems.size() == 0) {
@@ -400,34 +404,33 @@ public class BillBrowserManager {
 
 		ArrayList<BillItems> deletedList = new ArrayList<BillItems>();
 		boolean found = false;
-		boolean updated=false;
+		boolean updated = false;
 
 		for (BillItems oldItem : oldListItems) {
 			found = false;
-			updated=false;
-			BillItems updatedItem=null;
+			updated = false;
+			BillItems updatedItem = null;
 			for (BillItems newItem : newListItems) {
 				if (newItem.getId() > 0 && newItem.getId() == oldItem.getId()) {
 					found = true;
-					if(oldItem.getItemQuantity()!= newItem.getItemQuantity()){
-						double diff=oldItem.getItemQuantity()-newItem.getItemQuantity();
+					if (oldItem.getItemQuantity() != newItem.getItemQuantity()) {
+						double diff = oldItem.getItemQuantity() - newItem.getItemQuantity();
 						try {
-							updatedItem=oldItem.clone();
+							updatedItem = oldItem.clone();
 							updatedItem.setItemQuantity(diff);
-							updated=true;
+							updated = true;
 						} catch (CloneNotSupportedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-							updatedItem=null;
-						}						
+							updatedItem = null;
+						}
 					}
 					break;
 				}
 			}
 			if (!found) {
 				deletedList.add(oldItem);
-			}
-			else if (updated){
+			} else if (updated) {
 				deletedList.add(updatedItem);
 			}
 		}
@@ -454,8 +457,9 @@ public class BillBrowserManager {
 
 	}
 
-	private void updateMedicalStock(ArrayList<BillItems> medicalItems, int billID, boolean isCharge) throws OHException {
-		
+	private void updateMedicalStock(ArrayList<BillItems> medicalItems, int billID, boolean isCharge)
+			throws OHException {
+
 		try {
 			BillBrowserManager billManager = new BillBrowserManager();
 			Bill bill = billManager.getBill(billID);
@@ -480,11 +484,11 @@ public class BillBrowserManager {
 
 			PatientBrowserManager patmanager = new PatientBrowserManager();
 			Patient patient = patmanager.getPatient(bill.getPatID());
-			
+
 			if (selectedWard != null) {
 				for (BillItems billItem : medicalItems) {
-					String itemGroup=billItem.getItemGroup();
-					if (itemGroup!=null && itemGroup.equalsIgnoreCase(ItemGroup.MEDICAL.getCode())) {
+					String itemGroup = billItem.getItemGroup();
+					if (itemGroup != null && itemGroup.equalsIgnoreCase(ItemGroup.MEDICAL.getCode())) {
 						addStockMvt(selectedWard, patient, billItem, isCharge);
 					}
 				}
@@ -498,27 +502,28 @@ public class BillBrowserManager {
 
 	}
 
-	private void addStockMvt(Ward selectedWard, Patient patient,  BillItems billItem,
-			boolean isCharge) throws OHException {
-		
+	private void addStockMvt(Ward selectedWard, Patient patient, BillItems billItem, boolean isCharge)
+			throws OHException {
+
 		MovWardBrowserManager mvtManager = new MovWardBrowserManager();
-		
+
 		double qty = Double.parseDouble(String.valueOf(billItem.getItemQuantity()));
 		if (isCharge) {
 			qty = -qty;
-			if(qty>0){
-				//Check that the stock does not go negative
-				MedicalWard medWard=mvtManager.getMedicalsWard(selectedWard.getCode(), Integer.parseInt(billItem.getItemId()));
-				if(medWard.getQty()<qty){
+			if (qty > 0) {
+				// Check that the stock does not go negative
+				MedicalWard medWard = mvtManager.getMedicalsWard(selectedWard.getCode(),
+						Integer.parseInt(billItem.getItemId()));
+				if (medWard.getQty() < qty) {
 					throw new OHException(MessageBundle.getMessage("angal.newbill.qtynotinstock"));
 				}
 			}
-		}
-		else{
-			//Check that the stock does not go negative
-			MedicalWard medWard=mvtManager.getMedicalsWard(selectedWard.getCode(), Integer.parseInt(billItem.getItemId()));
-			
-			if(medWard==null || medWard.getQty()<qty){
+		} else {
+			// Check that the stock does not go negative
+			MedicalWard medWard = mvtManager.getMedicalsWard(selectedWard.getCode(),
+					Integer.parseInt(billItem.getItemId()));
+
+			if (medWard == null || medWard.getQty() < qty) {
 				throw new OHException(MessageBundle.getMessage("angal.newbill.qtynotinstock"));
 			}
 		}
@@ -558,62 +563,60 @@ public class BillBrowserManager {
 	 * 
 	 * @param updateBill
 	 *            the bill to update.
-	 * @return <code>true</code> if the bill has been updated,
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if the bill has been updated, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean updateBill(Bill updateBill, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems) {
-		boolean transactionState=DbQueryLogger.beginTrasaction();
-		DbQueryLogger dbQueryLogger=new DbQueryLogger();
+		boolean transactionState = DbQueryLogger.beginTrasaction();
+		DbQueryLogger dbQueryLogger = new DbQueryLogger();
 		try {
-			//getting patient
+			// getting patient
 			PatientBrowserManager patManager = new PatientBrowserManager();
 			Patient patient = patManager.getPatient(updateBill.getPatID());
 			//
-			
-			boolean res= ioOperations.updateBill(updateBill);
-			//boolean itemsInserted=newBillItems(updateBill.getId(), billItems);
+
+			boolean res = ioOperations.updateBill(updateBill);
+			// boolean itemsInserted=newBillItems(updateBill.getId(), billItems);
 			boolean itemsInserted = false;
 			if (Param.bool("CREATELABORATORYAUTO")) {
 				itemsInserted = newBillItemsWithAutomaticLaboratory(updateBill, patient, billItems);
-			}else{
+			} else {
 				itemsInserted = newBillItems(updateBill.getId(), billItems);
 			}
-			boolean paymentsInserted=false;
-			if(itemsInserted){
-				paymentsInserted=newBillPayments(updateBill.getId(), payItems);
+			boolean paymentsInserted = false;
+			if (itemsInserted) {
+				paymentsInserted = newBillPayments(updateBill.getId(), payItems);
 			}
-			
-			if(itemsInserted && paymentsInserted){
+
+			if (itemsInserted && paymentsInserted) {
 				try {
 					dbQueryLogger.commit(transactionState);
 				} catch (OHException e) {
 					e.printStackTrace();
 					JOptionPane.showMessageDialog(null, e.getMessage());
-				} 
-			}
-			else{
+				}
+			} else {
 				try {
 					dbQueryLogger.rollback(transactionState);
 				} catch (OHException e) {
 					e.printStackTrace();
 					JOptionPane.showMessageDialog(null, e.getMessage());
-				} 
-				
+				}
+
 				return false;
 			}
-			
+
 			return res;
 		} catch (OHException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			return false;
-		}
-		finally {
+		} finally {
 			try {
 				dbQueryLogger.releaseConnection(transactionState);
 				DbQueryLogger.releaseTrasaction(transactionState);
 			} catch (OHException e) {
 				e.printStackTrace();
-			} 
+			}
 		}
 	}
 
@@ -622,8 +625,7 @@ public class BillBrowserManager {
 	 * 
 	 * @param patID
 	 *            the patient id.
-	 * @return the list of pending bills or <code>null</code> if an error
-	 *         occurred.
+	 * @return the list of pending bills or <code>null</code> if an error occurred.
 	 */
 	public ArrayList<Bill> getPendingBills(int patID) {
 		try {
@@ -633,6 +635,7 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
+
 	public ArrayList<Bill> getPendingBills2(int patID) {
 		try {
 			return ioOperations.getPendingBills2(patID);
@@ -641,32 +644,33 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
-	 public ArrayList<Bill> getPendingBillsAffiliate(int patID) {
-			try {
-				return ioOperations.getPendingBillsAffiliate(patID);
-			} catch (OHException e) {
-				JOptionPane.showMessageDialog(null, e.getMessage());
-				return null;
-			}
+
+	public ArrayList<Bill> getPendingBillsAffiliate(int patID) {
+		try {
+			return ioOperations.getPendingBillsAffiliate(patID);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
 	}
-	 
-	 public ArrayList<Bill> getPendingBillsSpecificItem(String itemId) {
-			try {
-				return ioOperations.getPendingBillsSpecificItem(itemId);
-			} catch (OHException e) {
-				JOptionPane.showMessageDialog(null, e.getMessage());
-				return null;
-			}
-	 }
-	 
-	 public ArrayList<Bill> getPendingBillsSpecificGarante(User garante) {
-			try {
-				return ioOperations.getPendingBillsSpecificGarante(garante);
-			} catch (OHException e) {
-				JOptionPane.showMessageDialog(null, e.getMessage());
-				return null;
-			}
-	 }
+
+	public ArrayList<Bill> getPendingBillsSpecificItem(String itemId) {
+		try {
+			return ioOperations.getPendingBillsSpecificItem(itemId);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+
+	public ArrayList<Bill> getPendingBillsSpecificGarante(User garante) {
+		try {
+			return ioOperations.getPendingBillsSpecificGarante(garante);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
 
 	/**
 	 * Get all the {@link Bill}s.
@@ -716,41 +720,40 @@ public class BillBrowserManager {
 	 * 
 	 * @param deleteBill
 	 *            the bill to delete.
-	 * @return <code>true</code> if the bill has been deleted,
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if the bill has been deleted, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean deleteBill(Bill deleteBill) {
-		
-		boolean transactionState=DbQueryLogger.beginTrasaction();
-		DbQueryLogger dbQueryLogger=new DbQueryLogger();
+
+		boolean transactionState = DbQueryLogger.beginTrasaction();
+		DbQueryLogger dbQueryLogger = new DbQueryLogger();
 		try {
-			ArrayList<BillItems> deletedItems =this.getItems(deleteBill.getId());
+			ArrayList<BillItems> deletedItems = this.getItems(deleteBill.getId());
 			ArrayList<BillItems> newItems = new ArrayList<BillItems>();
-			
-			boolean res= ioOperations.deleteBill(deleteBill);
-			
+
+			boolean res = ioOperations.deleteBill(deleteBill);
+
 			if (Param.bool("STOCKMVTONBILLSAVE")) {
 				updateMedicalStock(deletedItems, deleteBill.getId(), true);
 			}
-         
+
 			// Update therapy and lab if applied
 			updateTherapy(deletedItems, newItems);
-			updateOpearionRow(deletedItems, newItems,deleteBill.getId());
-			updateLaboratory(deletedItems, newItems,deleteBill.getId());
-			
+			updateOpearionRow(deletedItems, newItems, deleteBill.getId());
+			updateLaboratory(deletedItems, newItems, deleteBill.getId());
+
 			try {
 				dbQueryLogger.commit(transactionState);
 			} catch (Exception e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, e.getMessage());
-			} 
-			
+			}
+
 			return res;
 		} catch (OHException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			return false;
-		}
-		finally {
+		} finally {
 			try {
 				dbQueryLogger.releaseConnection(transactionState);
 				DbQueryLogger.releaseTrasaction(transactionState);
@@ -768,8 +771,8 @@ public class BillBrowserManager {
 	 *            the low date range endpoint, inclusive.
 	 * @param dateTo
 	 *            the high date range endpoint, inclusive.
-	 * @return a list of retrieved {@link Bill}s or <code>null</code> if an
-	 *         error occurred.
+	 * @return a list of retrieved {@link Bill}s or <code>null</code> if an error
+	 *         occurred.
 	 */
 	public ArrayList<Bill> getBills(GregorianCalendar dateFrom, GregorianCalendar dateTo) {
 		try {
@@ -779,7 +782,8 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
-	public ArrayList<Bill> getBills(GregorianCalendar dateFrom, GregorianCalendar dateTo,Patient patient) {
+
+	public ArrayList<Bill> getBills(GregorianCalendar dateFrom, GregorianCalendar dateTo, Patient patient) {
 		try {
 			return ioOperations.getBills(dateFrom, dateTo, patient);
 		} catch (OHException e) {
@@ -787,6 +791,7 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
+
 	public ArrayList<Bill> getBills(GregorianCalendar dateFrom, GregorianCalendar dateTo, User userGarant) {
 		try {
 			return ioOperations.getBills(dateFrom, dateTo, userGarant);
@@ -795,7 +800,8 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
-	public ArrayList<Bill> getBills(GregorianCalendar dateFrom, GregorianCalendar dateTo,BillItems billItem) {
+
+	public ArrayList<Bill> getBills(GregorianCalendar dateFrom, GregorianCalendar dateTo, BillItems billItem) {
 		try {
 			return ioOperations.getBills(dateFrom, dateTo, billItem);
 		} catch (OHException e) {
@@ -809,8 +815,8 @@ public class BillBrowserManager {
 	 * 
 	 * @param payments
 	 *            the {@link BillPayments} associated to the bill to retrieve.
-	 * @return a list of {@link Bill} associated to the passed
-	 *         {@link BillPayments} or <code>null</code> if an error occurred.
+	 * @return a list of {@link Bill} associated to the passed {@link BillPayments}
+	 *         or <code>null</code> if an error occurred.
 	 */
 	public ArrayList<Bill> getBills(ArrayList<BillPayments> billPayments) {
 		if (billPayments.isEmpty())
@@ -841,7 +847,8 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
-	public ArrayList<BillPayments> getPayments(GregorianCalendar dateFrom, GregorianCalendar dateTo,Patient patient) {
+
+	public ArrayList<BillPayments> getPayments(GregorianCalendar dateFrom, GregorianCalendar dateTo, Patient patient) {
 		try {
 			return ioOperations.getPayments(dateFrom, dateTo, patient);
 		} catch (OHException e) {
@@ -851,13 +858,13 @@ public class BillBrowserManager {
 	}
 
 	/**
-	 * Retrieves all the {@link BillPayments} associated to the passed
-	 * {@link Bill} list.
+	 * Retrieves all the {@link BillPayments} associated to the passed {@link Bill}
+	 * list.
 	 * 
 	 * @param bills
 	 *            the bill list.
-	 * @return a list of {@link BillPayments} associated to the passed bill list
-	 *         or <code>null</code> if an error occurred.
+	 * @return a list of {@link BillPayments} associated to the passed bill list or
+	 *         <code>null</code> if an error occurred.
 	 */
 	public ArrayList<BillPayments> getPayments(ArrayList<Bill> billArray) {
 		try {
@@ -870,6 +877,7 @@ public class BillBrowserManager {
 
 	/**
 	 * return the price of the given item
+	 * 
 	 * @param item
 	 * @param patien
 	 * @return
@@ -877,7 +885,7 @@ public class BillBrowserManager {
 	public Price getPrice(String itemId, ItemGroup group, Patient patient) {
 
 		int pbiID = patient.getReductionPlanID();
-		
+
 		PriceListManager prcManager = new PriceListManager();
 		ReductionPlanManager reductionPlanManager = new ReductionPlanManager();
 
@@ -913,10 +921,11 @@ public class BillBrowserManager {
 
 		return price;
 	}
+
 	public Price getPriceFromListWithoutReduction(String itemId, ItemGroup group, Patient patient) {
 
 		int pbiID = patient.getReductionPlanID();
-		
+
 		PriceListManager prcManager = new PriceListManager();
 		ReductionPlanManager reductionPlanManager = new ReductionPlanManager();
 
@@ -937,10 +946,10 @@ public class BillBrowserManager {
 	}
 
 	public boolean hasPrescription(Integer patCode) {
-		TherapyManager thManager=new TherapyManager();
-		boolean hasTherapy=thManager.hasTherapiesRowsNotYetBought(patCode);
-		boolean hasOpe=new OperationRowBrowserManager().hasOperationWithoutBill(patCode.toString());
-		boolean hasExam=new LabManager().hasLabWithoutBill(patCode.toString());
+		TherapyManager thManager = new TherapyManager();
+		boolean hasTherapy = thManager.hasTherapiesRowsNotYetBought(patCode);
+		boolean hasOpe = new OperationRowBrowserManager().hasOperationWithoutBill(patCode.toString());
+		boolean hasExam = new LabManager().hasLabWithoutBill(patCode.toString());
 		return hasTherapy || hasOpe || hasExam;
 	}
 
@@ -954,7 +963,7 @@ public class BillBrowserManager {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
-		
+
 	}
 
 	public boolean closeBill(Bill bill) throws OHException {
@@ -962,10 +971,11 @@ public class BillBrowserManager {
 		bill.setBalance(0.0);
 		bill.setStatus("C");
 		return ioOperations.updateBill(bill);
-		
+
 	}
 
-	public ArrayList<BillItemReportBean> getTotalCountAmountByQuery12(int year,String status) throws OHException, ParseException, SQLException{
+	public ArrayList<BillItemReportBean> getTotalCountAmountByQuery12(int year, String status)
+			throws OHException, ParseException, SQLException {
 		try {
 			return ioOperations.getTotalCountAmountByQuery12(year, status);
 		} catch (OHException e) {
@@ -973,16 +983,17 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
-	
-	public HashMap<String, Double> getTotalCountAmountByQuery(String billDesc, GregorianCalendar dateFrom, GregorianCalendar dateTo) throws OHException{
+
+	public HashMap<String, Double> getTotalCountAmountByQuery(String billDesc, GregorianCalendar dateFrom,
+			GregorianCalendar dateTo) throws OHException {
 		try {
-			return ioOperations.getTotalCountAmountByQuery(billDesc,dateFrom,dateTo);
+			return ioOperations.getTotalCountAmountByQuery(billDesc, dateFrom, dateTo);
 		} catch (OHException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			return null;
 		}
 	}
-	
+
 	public boolean updateBillItemsExportStatus(BillItems updateBillItem) throws OHException {
 		try {
 			return ioOperations.updateBillItemsExportStatus(updateBillItem);
@@ -991,22 +1002,24 @@ public class BillBrowserManager {
 			return false;
 		}
 	}
-//	public ArrayList<String> getBillItemsDesc() throws OHException {
-//		try {
-//			return ioOperations.getBillItemsDesc();
-//		} catch (OHException e) {
-//			JOptionPane.showMessageDialog(null, e.getMessage());
-//			return null;
-//		}
-//	}
-	private String getIsAdmitted( Patient patientSelected) {
+
+	// public ArrayList<String> getBillItemsDesc() throws OHException {
+	// try {
+	// return ioOperations.getBillItemsDesc();
+	// } catch (OHException e) {
+	// JOptionPane.showMessageDialog(null, e.getMessage());
+	// return null;
+	// }
+	// }
+	private String getIsAdmitted(Patient patientSelected) {
 		AdmissionBrowserManager man = new AdmissionBrowserManager();
 		Admission adm = new Admission();
 		adm = man.getCurrentAdmission(patientSelected);
 		return (adm == null ? "R" : "I");
 	}
 
-	public ArrayList<BillItemReportBean> getTotalCountAmountByQuery12(int year,String status, OperationType operationType) throws OHException, ParseException, SQLException{
+	public ArrayList<BillItemReportBean> getTotalCountAmountByQuery12(int year, String status,
+			OperationType operationType) throws OHException, ParseException, SQLException {
 		try {
 			return ioOperations.getTotalCountAmountByQuery12(year, status, operationType);
 		} catch (OHException e) {
