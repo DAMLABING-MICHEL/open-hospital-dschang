@@ -30,4 +30,4 @@ distribute:
      [copy] Copying 187 files to C:\Users\uni2grow\Documents\Open Hospital\Dschang\OpenHospital-1.8.2.44\mysql
 
 BUILD SUCCESSFUL
-Total time: 1 minute 19 seconds
+Total time: 1 minute 4 seconds

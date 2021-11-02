@@ -1171,6 +1171,9 @@ public class PatientInsert extends JDialog implements ActionListener{
 		int maxLength = SmsParameters.ICC.length() + Integer.parseInt(Param.string("PHONELENGTH"));
 		if(actual.length()>=4){
 			String begin = actual.substring(0, 4);
+			if(Param.bool("ENABLEMULTICOUNTRIES")) {
+				return true;
+			}
 			if(!SmsParameters.ICC.equals(begin)){
 				JOptionPane.showMessageDialog(PatientInsert.this, MessageBundle
 						.getMessage("angal.patient.phoneicc")+" "+SmsParameters.ICC);
