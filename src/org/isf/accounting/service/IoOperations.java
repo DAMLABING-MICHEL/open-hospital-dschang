@@ -14,6 +14,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import org.isf.accounting.model.Bill;
+import org.isf.accounting.model.BillItemPayments;
 import org.isf.accounting.model.BillItems;
 import org.isf.accounting.model.BillPayments;
 import org.isf.generaldata.MessageBundle;
@@ -356,6 +357,78 @@ public class IoOperations {
 		}
 		return payments;
 	}
+	
+	/**
+	 * Retrieves all the {@link BillPayments} for the specified date range.
+	 * 
+	 * @param dateFrom
+	 *            low endpoint, inclusive, for the date range.
+	 * @param dateTo
+	 *            high endpoint, inclusive, for the date range.
+	 * @return a list of {@link BillItemPayments} for the specified date range.
+	 * @throws OHException
+	 *             if an error occurs retrieving the bill payments.
+	 */
+	public ArrayList<BillItemPayments> getItemPayments(GregorianCalendar dateFrom, GregorianCalendar dateTo)
+			throws OHException {
+		ArrayList<BillItemPayments> payments = null;
+		StringBuilder query = new StringBuilder("SELECT * FROM BILLITEMPAYMENTS");
+		query.append(" WHERE BIP_DATE BETWEEN ? AND ?");
+		query.append(" ORDER BY BIP_ID_BILL, BIP_DATE ASC");
+
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		try {
+			List<Object> parameters = new ArrayList<Object>(2);
+			parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+			parameters.add(new Timestamp(dateTo.getTime().getTime()));
+			ResultSet resultSet = dbQuery.getDataWithParams(query.toString(), parameters, true);
+
+			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
+			while (resultSet.next()) {
+				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_ID_BILL"),
+						resultSet.getInt("BIP_ID_BILL_ITEM"),
+						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
+						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
+			}
+		} catch (SQLException e) {
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			dbQuery.releaseConnection();
+		}
+		return payments;
+	}
+	public ArrayList<BillItemPayments> getItemPayments(GregorianCalendar dateFrom, GregorianCalendar dateTo, Patient patient)
+			throws OHException {
+		ArrayList<BillItemPayments> payments = null;
+		StringBuilder query = new StringBuilder("SELECT * FROM BILLITEMPAYMENTS BIP INNER JOIN BILLS BLL ON BIP.BIP_ID_BILL= BLL.BLL_ID ");
+		query.append(" WHERE BIP.BIP_DATE BETWEEN ? AND ? ");
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		try {
+			List<Object> parameters = new ArrayList<Object>(2);
+			parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+			parameters.add(new Timestamp(dateTo.getTime().getTime()));
+			if(patient!=null){
+				query.append(" AND (BLL.BLL_PAT_AFFILIATED_PERSON=? OR BLL.BLL_ID_PAT=? ) ");
+				parameters.add(patient.getCode());
+				parameters.add(patient.getCode());
+			}
+			query.append(" ORDER BY BLP_ID_BILL, BIP_DATE ASC ");
+			ResultSet resultSet = dbQuery.getDataWithParams(query.toString(), parameters, true);
+
+			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
+			while (resultSet.next()) {
+				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_ID_BILL"),
+						resultSet.getInt("BIP_ID_BILL_ITEM"),
+						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
+						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
+			}
+		} catch (SQLException e) {
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			dbQuery.releaseConnection();
+		}
+		return payments;
+	}
 
 	/**
 	 * Retrieves all the {@link BillPayments} for the specified {@link Bill} id,
@@ -386,6 +459,45 @@ public class IoOperations {
 				payments.add(new BillPayments(resultSet.getInt("BLP_ID"), resultSet.getInt("BLP_ID_BILL"),
 						convertToGregorianCalendar(resultSet.getTimestamp("BLP_DATE")),
 						resultSet.getDouble("BLP_AMOUNT"), resultSet.getString("BLP_USR_ID_A")));
+			}
+		} catch (SQLException e) {
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			dbQuery.releaseConnection();
+		}
+		return payments;
+	}
+	
+	/**
+	 * Retrieves all the {@link BillItemPayments} for the specified {@link Bill} id,
+	 * or all the stored {@link BillItemPayments} if no id is indicated.
+	 * 
+	 * @param billID
+	 *            the bill id or <code>0</code>.
+	 * @return the list of bill item payments.
+	 * @throws OHException
+	 *             if an error occurs retrieving the bill item payments.
+	 */
+	public ArrayList<BillItemPayments> getItemPayments(int billID) throws OHException {
+		ArrayList<BillItemPayments> payments = null;
+
+		List<Object> parameters = new ArrayList<Object>(1);
+		StringBuilder query = new StringBuilder("SELECT * FROM BILLITEMPAYMENTS");
+		if (billID != 0) {
+			query.append(" WHERE BIP_ID_BILL = ?");
+			parameters.add(billID);
+		}
+		query.append(" ORDER BY BIP_ID_BILL, BIP_DATE ASC");
+
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		try {
+			ResultSet resultSet = dbQuery.getDataWithParams(query.toString(), parameters, true);
+			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
+			while (resultSet.next()) {
+				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_ID_BILL"),
+						resultSet.getInt("BIP_ID_BILL_ITEM"),
+						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
+						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
 			}
 		} catch (SQLException e) {
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
@@ -553,6 +665,52 @@ public class IoOperations {
 				if (item.getId() <= 0) {
 					List<Object> parameters = new ArrayList<Object>(6);
 					parameters.add(billID);
+					parameters.add(new java.sql.Timestamp(item.getDate().getTime().getTime()));
+					parameters.add(item.getAmount());
+					parameters.add(item.getUser());
+					
+					parameters.add(MainMenu.getUser());
+					parameters.add(new java.sql.Timestamp(TimeTools.getServerDateTime().getTime().getTime()));										
+					result = result && dbQuery.setDataWithParams(query, parameters, false);
+				}
+			}
+
+			if (result) {
+				dbQuery.commit();
+			}
+		} finally {
+
+			dbQuery.releaseConnection();
+		}
+		return result;
+	}
+	
+	/**
+	 * Stores a list of {@link BillItemPayments} associated to a {@link Bill}.
+	 * 
+	 * @param billID
+	 *            the bill id.
+	 * @param payItems
+	 *            the bill item payments.
+	 * @return <code>true</code> if the payment have stored, <code>false</code>
+	 *         otherwise.
+	 * @throws OHException
+	 *             if an error occurs during the store procedure.
+	 */
+	public boolean newBillItemPayments(int billID, ArrayList<BillItemPayments> payItems) throws OHException {
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		boolean result = true;
+		try {
+
+			String query = "INSERT INTO BILLITEMPAYMENTS (" + "BIP_ID_BILL, BIP_ID_BILL_ITEM, BIP_DATE, BIP_AMOUNT, BIP_USR_ID_A,"
+					+ "BIP_CREATE_BY, BIP_CREATE_DATE) "
+					+ "VALUES (?,?,?,?,?,?)";
+
+			for (BillItemPayments item : payItems) {
+				if (item.getId() <= 0) {
+					List<Object> parameters = new ArrayList<Object>(6);
+					parameters.add(billID);
+					parameters.add(item.getItemID());
 					parameters.add(new java.sql.Timestamp(item.getDate().getTime().getTime()));
 					parameters.add(item.getAmount());
 					parameters.add(item.getUser());

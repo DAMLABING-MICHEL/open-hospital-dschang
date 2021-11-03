@@ -61,6 +61,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.hibernate.internal.util.SerializationHelper;
 import org.isf.accounting.manager.BillBrowserManager;
 import org.isf.accounting.model.Bill;
+import org.isf.accounting.model.BillItemListItem;
+import org.isf.accounting.model.BillItemPayments;
 import org.isf.accounting.model.BillItems;
 import org.isf.accounting.model.BillPayments;
 import org.isf.generaldata.GeneralData;
@@ -278,6 +280,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private JPanel jPanelPatient;
 	private JTable jTablePayment;
 	private JScrollPane jScrollPanePayment;
+	private JScrollPane jScrollPaneItemPayment;
 	private JTextField jTextFieldPatient;
 	private JPanel jPanelData;
 	private JTable jTableTotal;
@@ -297,10 +300,13 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private JPanel jPanelButtonsPayment;
 	private JPanel jPanelButtonsBill;
 	private JPanel jPanelButtonsActions;
+	private JPanel jPanelButtonsItemPaymentActions;
 	private JButton jButtonClose;
 	private JButton jButtonPaid;
 	private JButton jButtonPrintPayment;
 	private JButton jButtonSave;
+	private JButton jButtonSaveItemPayments;
+	private JButton jButtonCloseItemPayments;
 	private JButton jButtonBalance;
 	private JButton jButtonCustom;
 	private JButton jButtonPickPatient;
@@ -361,6 +367,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 
 	// Prices, Items and Payments for the tables
 	private ArrayList<BillItems> billItems = new ArrayList<BillItems>();
+	private ArrayList<BillItemPayments> billItemPayments = new ArrayList<BillItemPayments>();
 	private ArrayList<BillItems> billItemsRemoved = new ArrayList<BillItems>();
 	private ArrayList<BillPayments> payItems = new ArrayList<BillPayments>();
 	private ArrayList<Price> prcListArray = new ArrayList<Price>();
@@ -447,6 +454,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		billDate = bill.getDate();
 		billItems = billManager.getItems(thisBill.getId());
 		payItems = billManager.getPayments(thisBill.getId());
+		billItemPayments = billManager.getItemPayments(thisBill.getId());
 		//billItemsSaved = billItems.size();
 		payItemsSaved = payItems.size();
 		if (!insert) {
@@ -574,6 +582,18 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		}
 		return jPanelData;
 	}
+	
+	private JTable getJTableItemPayment() {
+		ArrayList<BillItemListItem> itemListItems = new ArrayList<BillItemListItem>();
+		for (BillItems billItem : this.billItems) {
+			BillItemListItem itemListItem = new BillItemListItem(billItem, false, 0.0);
+			itemListItems.add(itemListItem);
+		}
+		BillItemPaymentTableModel itemPaymentTableModel = new BillItemPaymentTableModel(itemListItems);
+		JTable jTableItemPayment = new JTable(itemPaymentTableModel);
+		
+		return jTableItemPayment;
+	}
 
 	private JPanel getJPanelPatient() {
 		if (jPanelPatient == null) {
@@ -604,14 +624,12 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 				jTextFieldPatient.setText(thisBill.getPatName());
 			}
 			jTextFieldPatient.setEditable(false);
-
 		}
 		return jTextFieldPatient;
 	}
 
 	private JDateChooser getJCalendarDate() {
 		if (jCalendarDate == null) {
-
 			if (insert) {
 				billDate.set(Calendar.YEAR, RememberDates.getLastBillDateGregorian().get(Calendar.YEAR));
 				billDate.set(Calendar.MONTH, RememberDates.getLastBillDateGregorian().get(Calendar.MONTH));
@@ -1063,6 +1081,19 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		}
 		return jPanelButtonsPayment;
 	}
+	
+	private JPanel getJPanelButtonsItemPaymentActions() {
+		if (jPanelButtonsItemPaymentActions == null) {
+			jPanelButtonsItemPaymentActions = new JPanel();
+			jPanelButtonsItemPaymentActions.setAlignmentX(Component.RIGHT_ALIGNMENT);
+			jPanelButtonsItemPaymentActions.setAlignmentY(Component.CENTER_ALIGNMENT);
+			jPanelButtonsItemPaymentActions.setLayout(new BoxLayout(jPanelButtonsItemPaymentActions, BoxLayout.LINE_AXIS));
+			jPanelButtonsItemPaymentActions.add(getJButtonSaveItemPayments());
+			jPanelButtonsItemPaymentActions.add(Box.createRigidArea(new Dimension(10, 0)));
+			jPanelButtonsItemPaymentActions.add(getJButtonCloseItemPayments());
+		}
+		return jPanelButtonsItemPaymentActions;
+	}
 
 	private JPanel getJPanelButtonsActions() {
 		if (jPanelButtonsActions == null) {
@@ -1125,7 +1156,39 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		}
 		return jButtonBalance;
 	}
+	
+	private JButton getJButtonSaveItemPayments() {
+		if (jButtonSaveItemPayments == null) {
 
+			jButtonSaveItemPayments = new JButton();
+			jButtonSaveItemPayments.setText(MessageBundle.getMessage("angal.common.save")); //$NON-NLS-1$
+			jButtonSaveItemPayments.setMnemonic(KeyEvent.VK_S);
+			jButtonSaveItemPayments.setMaximumSize(new Dimension(ButtonWidth, ButtonHeight));
+			jButtonSaveItemPayments.setIcon(new ImageIcon("rsc/icons/save_button.png")); //$NON-NLS-1$
+			jButtonSaveItemPayments.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+				}
+			});
+		}
+		return jButtonSaveItemPayments;
+	}
+	private JButton getJButtonCloseItemPayments() {
+		if (jButtonCloseItemPayments == null) {
+
+			jButtonCloseItemPayments = new JButton();
+			jButtonCloseItemPayments.setText(MessageBundle.getMessage("angal.common.close")); //$NON-NLS-1$
+			jButtonCloseItemPayments.setMnemonic(KeyEvent.VK_DELETE);
+			jButtonCloseItemPayments.setMaximumSize(new Dimension(ButtonWidth, ButtonHeight));
+			jButtonCloseItemPayments.setIcon(new ImageIcon("rsc/icons/close_button.png")); //$NON-NLS-1$
+			jButtonCloseItemPayments.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+				}
+			});
+		}
+		return jButtonCloseItemPayments;
+	}
 	private JButton getJButtonSave() {
 		if (jButtonSave == null) {
 
@@ -1692,11 +1755,17 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 									MessageBundle.getMessage("angal.newbill.invaliddate"), //$NON-NLS-1$
 									JOptionPane.ERROR_MESSAGE);
 						} else {
+							JTable jTableItemPayment = getJTableItemPayment();
+							BillItemPaymentEdit itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
+							BillItemPaymentEdit.init(itemPaymentEdit);
 							addPayment(datePay, amount.doubleValue());
 						}
 					} else {
 						// tocorrect 
 						datePay = TimeTools.getServerDateTime();
+						JTable jTableItemPayment = getJTableItemPayment();
+						BillItemPaymentEdit itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
+						BillItemPaymentEdit.init(itemPaymentEdit);						BillItemPaymentEdit.init(itemPaymentEdit);
 						addPayment(datePay, amount.doubleValue());
 					}
 					if( balance.doubleValue() > 0) 

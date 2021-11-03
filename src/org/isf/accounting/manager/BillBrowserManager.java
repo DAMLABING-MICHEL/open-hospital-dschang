@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 
 import org.isf.accounting.gui.PatientBillEdit;
 import org.isf.accounting.model.Bill;
+import org.isf.accounting.model.BillItemPayments;
 import org.isf.accounting.model.BillItems;
 import org.isf.accounting.model.BillPayments;
 import org.isf.accounting.service.IoOperations;
@@ -132,6 +133,25 @@ public class BillBrowserManager {
 			return new ArrayList<BillPayments>();
 		try {
 			return ioOperations.getPayments(billID);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets all the {@link BillItemPayments} for the specified {@link Bill}.
+	 * 
+	 * @param billID
+	 *            the bill id.
+	 * @return a list of {@link BillItemPayments} or <code>null</code> if an error
+	 *         occurred.
+	 */
+	public ArrayList<BillItemPayments> getItemPayments(int billID) {
+		if (billID == 0)
+			return new ArrayList<BillItemPayments>();
+		try {
+			return ioOperations.getItemPayments(billID);
 		} catch (OHException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			return null;
