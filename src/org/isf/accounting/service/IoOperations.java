@@ -704,11 +704,11 @@ public class IoOperations {
 
 			String query = "INSERT INTO BILLITEMPAYMENTS (" + "BIP_ID_BILL, BIP_ID_BILL_ITEM, BIP_DATE, BIP_AMOUNT, BIP_USR_ID_A,"
 					+ "BIP_CREATE_BY, BIP_CREATE_DATE) "
-					+ "VALUES (?,?,?,?,?,?)";
+					+ "VALUES (?,?,?,?,?,?,?)";
 
 			for (BillItemPayments item : payItems) {
 				if (item.getId() <= 0) {
-					List<Object> parameters = new ArrayList<Object>(6);
+					List<Object> parameters = new ArrayList<Object>(7);
 					parameters.add(billID);
 					parameters.add(item.getItemID());
 					parameters.add(new java.sql.Timestamp(item.getDate().getTime().getTime()));

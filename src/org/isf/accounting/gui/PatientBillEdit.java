@@ -311,6 +311,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private JButton jButtonCustom;
 	private JButton jButtonPickPatient;
 	private JButton jButtonTrashPatient;
+	BillItemPaymentEdit itemPaymentEdit;
 	
 	private ArrayList<User> users;
 
@@ -589,7 +590,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 			BillItemListItem itemListItem = new BillItemListItem(billItem, false, 0.0);
 			itemListItems.add(itemListItem);
 		}
-		BillItemPaymentTableModel itemPaymentTableModel = new BillItemPaymentTableModel(itemListItems);
+		BillItemPaymentTableModel itemPaymentTableModel = new BillItemPaymentTableModel(itemListItems, itemPaymentEdit);
 		JTable jTableItemPayment = new JTable(itemPaymentTableModel);
 		
 		return jTableItemPayment;
@@ -1333,7 +1334,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 						}						
 						//adding garante
 						
-						billID = billManager.newBill(newBill, billItems, payItems);
+						billID = billManager.newBill(newBill, billItems, payItems, new ArrayList<BillItemPayments>());
 						if (billID == 0) {
 							JOptionPane.showMessageDialog(PatientBillEdit.this,
 									MessageBundle.getMessage("angal.newbill.failedtosavebill"), //$NON-NLS-1$
@@ -1756,7 +1757,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 									JOptionPane.ERROR_MESSAGE);
 						} else {
 							JTable jTableItemPayment = getJTableItemPayment();
-							BillItemPaymentEdit itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
+							itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
 							BillItemPaymentEdit.init(itemPaymentEdit);
 							addPayment(datePay, amount.doubleValue());
 						}
@@ -1765,7 +1766,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 						datePay = TimeTools.getServerDateTime();
 						JTable jTableItemPayment = getJTableItemPayment();
 						BillItemPaymentEdit itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
-						BillItemPaymentEdit.init(itemPaymentEdit);						BillItemPaymentEdit.init(itemPaymentEdit);
+						BillItemPaymentEdit.init(itemPaymentEdit);
 						addPayment(datePay, amount.doubleValue());
 					}
 					if( balance.doubleValue() > 0) 
