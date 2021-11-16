@@ -374,7 +374,7 @@ public class IoOperations {
 		ArrayList<BillItemPayments> payments = null;
 		StringBuilder query = new StringBuilder("SELECT * FROM BILLITEMPAYMENTS");
 		query.append(" WHERE BIP_DATE BETWEEN ? AND ?");
-		query.append(" ORDER BY BIP_ID_BILL, BIP_DATE ASC");
+		query.append(" ORDER BY BIP_BILL_ID, BIP_DATE ASC");
 
 		DbQueryLogger dbQuery = new DbQueryLogger();
 		try {
@@ -385,8 +385,8 @@ public class IoOperations {
 
 			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
 			while (resultSet.next()) {
-				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_ID_BILL"),
-						resultSet.getInt("BIP_ID_BILL_ITEM"),
+				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_BILL_ID"),
+						resultSet.getInt("BIP_ITEM_ID"),
 						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
 						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
 			}
@@ -400,7 +400,7 @@ public class IoOperations {
 	public ArrayList<BillItemPayments> getItemPayments(GregorianCalendar dateFrom, GregorianCalendar dateTo, Patient patient)
 			throws OHException {
 		ArrayList<BillItemPayments> payments = null;
-		StringBuilder query = new StringBuilder("SELECT * FROM BILLITEMPAYMENTS BIP INNER JOIN BILLS BLL ON BIP.BIP_ID_BILL= BLL.BLL_ID ");
+		StringBuilder query = new StringBuilder("SELECT * FROM BILLITEMPAYMENTS BIP INNER JOIN BILLS BLL ON BIP.BIP_BILL_ID= BLL.BLL_ID ");
 		query.append(" WHERE BIP.BIP_DATE BETWEEN ? AND ? ");
 		DbQueryLogger dbQuery = new DbQueryLogger();
 		try {
@@ -417,8 +417,8 @@ public class IoOperations {
 
 			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
 			while (resultSet.next()) {
-				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_ID_BILL"),
-						resultSet.getInt("BIP_ID_BILL_ITEM"),
+				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_BILL_ID"),
+						resultSet.getInt("BIP_ITEM_ID"),
 						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
 						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
 			}
@@ -482,20 +482,21 @@ public class IoOperations {
 		ArrayList<BillItemPayments> payments = null;
 
 		List<Object> parameters = new ArrayList<Object>(1);
-		StringBuilder query = new StringBuilder("SELECT * FROM BILLITEMPAYMENTS");
+		StringBuilder query = new StringBuilder("SELECT BIP_ITEM_ID, SUM(BIP_AMOUNT)  FROM BILLITEMPAYMENTS");
 		if (billID != 0) {
-			query.append(" WHERE BIP_ID_BILL = ?");
+			query.append(" WHERE BIP_BILL_ID = ?");
 			parameters.add(billID);
 		}
-		query.append(" ORDER BY BIP_ID_BILL, BIP_DATE ASC");
+		query.append(" GROUP BY BIP_ITEM_ID");
+		query.append(" ORDER BY BIP_DATE ASC");
 
 		DbQueryLogger dbQuery = new DbQueryLogger();
 		try {
 			ResultSet resultSet = dbQuery.getDataWithParams(query.toString(), parameters, true);
 			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
 			while (resultSet.next()) {
-				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_ID_BILL"),
-						resultSet.getInt("BIP_ID_BILL_ITEM"),
+				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_BILL_ID"),
+						resultSet.getInt("BIP_ITEM_ID"),
 						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
 						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
 			}
@@ -702,7 +703,7 @@ public class IoOperations {
 		boolean result = true;
 		try {
 
-			String query = "INSERT INTO BILLITEMPAYMENTS (" + "BIP_ID_BILL, BIP_ID_BILL_ITEM, BIP_DATE, BIP_AMOUNT, BIP_USR_ID_A,"
+			String query = "INSERT INTO BILLITEMPAYMENTS (" + "BIP_BILL_ID, BIP_ITEM_ID, BIP_DATE, BIP_AMOUNT, BIP_USR_ID_A,"
 					+ "BIP_CREATE_BY, BIP_CREATE_DATE) "
 					+ "VALUES (?,?,?,?,?,?,?)";
 

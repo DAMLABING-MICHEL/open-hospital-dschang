@@ -312,6 +312,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private JButton jButtonPickPatient;
 	private JButton jButtonTrashPatient;
 	BillItemPaymentEdit itemPaymentEdit;
+	ArrayList<BillItemListItem> itemListItems = new ArrayList<BillItemListItem>();
 	
 	private ArrayList<User> users;
 
@@ -371,6 +372,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private ArrayList<BillItemPayments> billItemPayments = new ArrayList<BillItemPayments>();
 	private ArrayList<BillItems> billItemsRemoved = new ArrayList<BillItems>();
 	private ArrayList<BillPayments> payItems = new ArrayList<BillPayments>();
+	private ArrayList<BillItemPayments> billPayItems = new ArrayList<BillItemPayments>();
 	private ArrayList<Price> prcListArray = new ArrayList<Price>();
 	private ArrayList<MedicalWard> medWardList = new ArrayList<MedicalWard>();
 	//private Ward selectedWard;
@@ -455,6 +457,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		billDate = bill.getDate();
 		billItems = billManager.getItems(thisBill.getId());
 		payItems = billManager.getPayments(thisBill.getId());
+		billPayItems = billManager.getItemPayments(thisBill.getId());
 		billItemPayments = billManager.getItemPayments(thisBill.getId());
 		//billItemsSaved = billItems.size();
 		payItemsSaved = payItems.size();
@@ -585,7 +588,6 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	}
 	
 	private JTable getJTableItemPayment() {
-		ArrayList<BillItemListItem> itemListItems = new ArrayList<BillItemListItem>();
 		for (BillItems billItem : this.billItems) {
 			BillItemListItem itemListItem = new BillItemListItem(billItem, false, 0.0);
 			itemListItems.add(itemListItem);
@@ -1334,7 +1336,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 						}						
 						//adding garante
 						
-						billID = billManager.newBill(newBill, billItems, payItems, new ArrayList<BillItemPayments>());
+						billID = billManager.newBill(newBill, billItems, payItems, billPayItems);
 						if (billID == 0) {
 							JOptionPane.showMessageDialog(PatientBillEdit.this,
 									MessageBundle.getMessage("angal.newbill.failedtosavebill"), //$NON-NLS-1$
@@ -1386,7 +1388,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 						}
 						//adding garante
 						
-						if(billManager.updateBill(updateBill, billItems, payItems)){
+						if(billManager.updateBill(updateBill, billItems, payItems, billPayItems)){
 							fireBillInserted(updateBill);
 						}
 						else{
@@ -1759,6 +1761,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 							JTable jTableItemPayment = getJTableItemPayment();
 							itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
 							BillItemPaymentEdit.init(itemPaymentEdit);
+							System.out.println("itemListItems.get(0).getPayAmount()");
 							addPayment(datePay, amount.doubleValue());
 						}
 					} else {

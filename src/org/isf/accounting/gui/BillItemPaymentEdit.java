@@ -172,7 +172,7 @@ class BillItemPaymentTableModel extends AbstractTableModel
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     	BillItemListItem row = data.get(rowIndex);
 	    if(3 == columnIndex) {
-	    	if((Double) aValue != 3500) {
+	    	if(false) {//(Double) aValue != 3500
 	    		JOptionPane.showMessageDialog(owner,
 					MessageBundle.getMessage("angal.newbill.payementinthefuturenotallowed"), //$NON-NLS-1$
 					MessageBundle.getMessage("angal.newbill.invaliddate"), //$NON-NLS-1$
