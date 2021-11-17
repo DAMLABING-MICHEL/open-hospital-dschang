@@ -154,7 +154,7 @@ public class BillBrowserManager {
 			return ioOperations.getItemPayments(billID);
 		} catch (OHException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
-			return null;
+			return new ArrayList<BillItemPayments>();
 		}
 	}
 
@@ -166,7 +166,7 @@ public class BillBrowserManager {
 	 * @param autoCommit
 	 * @return the generated id.
 	 */
-	public int newBill(Bill newBill, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemPayments> billPayItems) {
+	public int newBill(Bill newBill, String user, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemPayments> billPayItems) {
 
 		boolean transactionState = DbQueryLogger.beginTrasaction();
 		DbQueryLogger dbQueryLogger = new DbQueryLogger();
@@ -197,7 +197,7 @@ public class BillBrowserManager {
 				
 				boolean itemPaymentInserted = false;
 				if (itemsInserted) {
-					paymentInserted = newBillItemPayments(billID, billPayItems);
+					paymentInserted = newBillItemPayments(billID, user, billPayItems);
 				}
 
 				if (itemsInserted && paymentInserted) {
@@ -593,9 +593,9 @@ public class BillBrowserManager {
 	 * @return <code>true</code> if the item payment have stored, <code>false</code>
 	 *         otherwise.
 	 */
-	private boolean newBillItemPayments(int billID, ArrayList<BillItemPayments> billPayItems) {
+	private boolean newBillItemPayments(int billID, String user, ArrayList<BillItemPayments> billPayItems) {
 		try {
-			return ioOperations.newBillItemPayments(billID, billPayItems);
+			return ioOperations.newBillItemPayments(billID, user, billPayItems);
 		} catch (OHException e) {
 			return false;
 		}
@@ -609,7 +609,7 @@ public class BillBrowserManager {
 	 * @return <code>true</code> if the bill has been updated, <code>false</code>
 	 *         otherwise.
 	 */
-	public boolean updateBill(Bill updateBill, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemPayments> billPayItems) {
+	public boolean updateBill(Bill updateBill, String user, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemPayments> billPayItems) {
 		boolean transactionState = DbQueryLogger.beginTrasaction();
 		DbQueryLogger dbQueryLogger = new DbQueryLogger();
 		try {
@@ -633,7 +633,7 @@ public class BillBrowserManager {
 			
 			boolean itemPaymentsInserted = false;
 			if (itemsInserted) {
-				itemPaymentsInserted = newBillItemPayments(updateBill.getId(), billPayItems);
+				itemPaymentsInserted = newBillItemPayments(updateBill.getId(), user, billPayItems);
 			}
 
 			if (itemsInserted && paymentsInserted) {

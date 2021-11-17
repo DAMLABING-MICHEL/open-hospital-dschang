@@ -1,5 +1,7 @@
 package org.isf.accounting.model;
 
+import java.util.ArrayList;
+
 /**
  * Pure Model BillItems : represents an item in the Bill
  * @author Mwithi
@@ -70,6 +72,23 @@ public class BillItems {
 		this.itemAmount = itemAmount;
 		this.itemQuantity = itemQuantity;
 		this.itemAmountBrut = itemAmountBrut;
+	}
+	
+	public Double toPayFrom(ArrayList<BillItemPayments> list) {
+		ArrayList<BillItemPayments> items = new ArrayList<BillItemPayments>();
+		Double sum = 0.0, amount = this.getItemAmount() * this.getItemQuantity();
+		for(BillItemPayments item : list) {
+			if(this.getId() == item.getItemID()) {
+				items.add(item);
+			}
+		}
+		if(items.isEmpty()) {
+			return amount;
+		}
+		for (BillItemPayments item : items) {
+			sum += item.getAmount();
+		}
+		return amount-sum;
 	}
 
 	public int getId() {
