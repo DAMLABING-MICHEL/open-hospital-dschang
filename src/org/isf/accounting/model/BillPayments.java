@@ -1,5 +1,6 @@
 package org.isf.accounting.model;
 
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -38,6 +39,14 @@ public class BillPayments implements Comparable<Object>{
 		this.date = date;
 		this.amount = amount;
 		this.user = user;		
+	}
+	
+	public static Double totalFrom(ArrayList<BillPayments> payItems) {
+		Double sum = 0.0;
+		for (BillPayments item : payItems) {
+			sum += item.amount;
+		}
+		return sum;
 	}
 
 	public int getId() {

@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 
 import org.isf.accounting.gui.PatientBillEdit;
 import org.isf.accounting.model.Bill;
+import org.isf.accounting.model.BillItemListItem;
 import org.isf.accounting.model.BillItemPayments;
 import org.isf.accounting.model.BillItems;
 import org.isf.accounting.model.BillPayments;
@@ -166,7 +167,7 @@ public class BillBrowserManager {
 	 * @param autoCommit
 	 * @return the generated id.
 	 */
-	public int newBill(Bill newBill, String user, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemPayments> billPayItems) {
+	public int newBill(Bill newBill, String user, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemListItem> billListItems) {
 
 		boolean transactionState = DbQueryLogger.beginTrasaction();
 		DbQueryLogger dbQueryLogger = new DbQueryLogger();
@@ -189,6 +190,9 @@ public class BillBrowserManager {
 				} else {
 					itemsInserted = newBillItems(billID, billItems);
 				}
+				
+				ArrayList<BillItems> items = ioOperations.getItems(billID, true);
+				ArrayList<BillItemPayments> billPayItems = BillItemPayments.fromList(billListItems, items);
 
 				boolean paymentInserted = false;
 				if (itemsInserted) {
@@ -609,7 +613,7 @@ public class BillBrowserManager {
 	 * @return <code>true</code> if the bill has been updated, <code>false</code>
 	 *         otherwise.
 	 */
-	public boolean updateBill(Bill updateBill, String user, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemPayments> billPayItems) {
+	public boolean updateBill(Bill updateBill, String user, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemListItem> billListItems) {
 		boolean transactionState = DbQueryLogger.beginTrasaction();
 		DbQueryLogger dbQueryLogger = new DbQueryLogger();
 		try {
@@ -626,18 +630,26 @@ public class BillBrowserManager {
 			} else {
 				itemsInserted = newBillItems(updateBill.getId(), billItems);
 			}
+			
 			boolean paymentsInserted = false;
 			if (itemsInserted) {
 				paymentsInserted = newBillPayments(updateBill.getId(), payItems);
 			}
-			
-			boolean itemPaymentsInserted = false;
-			if (itemsInserted) {
-				itemPaymentsInserted = newBillItemPayments(updateBill.getId(), user, billPayItems);
-			}
 
 			if (itemsInserted && paymentsInserted) {
 				try {
+					dbQueryLogger.commit(transactionState);
+					
+					transactionState = DbQueryLogger.beginTrasaction();
+					dbQueryLogger = new DbQueryLogger();
+					
+					ArrayList<BillItems> items = ioOperations.getItems(updateBill.getId(), true);
+					ArrayList<BillItemPayments> billPayItems = BillItemPayments.fromList(billListItems, items);
+				
+					boolean itemPaymentsInserted = false;
+					if (itemsInserted) {
+						itemPaymentsInserted = newBillItemPayments(updateBill.getId(), user, billPayItems);
+					}
 					dbQueryLogger.commit(transactionState);
 				} catch (OHException e) {
 					e.printStackTrace();

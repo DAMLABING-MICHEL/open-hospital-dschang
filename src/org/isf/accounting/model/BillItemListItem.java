@@ -2,6 +2,7 @@ package org.isf.accounting.model;
 
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 
 import javax.swing.JCheckBox;
@@ -12,7 +13,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.isf.utils.jobjects.DateAdapter;
 import org.isf.utils.time.TimeTools;
 
-public class BillItemListItem extends BillItems {
+public class BillItemListItem extends BillItems implements Comparable<Object> {
 
 	private boolean isSelected;
 	private Double payAmount = 0.0;
@@ -30,6 +31,7 @@ public class BillItemListItem extends BillItems {
 		this.setPayAmount(payAmount);
 		this.setDate(TimeTools.getServerDateTime());
 		this.setToPay(item.toPayFrom(billPaidItems) - this.getPayAmount());
+		this.setPaidAmount(item.paidAmount(billPaidItems));
 		this.setBillID(item.getBillID());
 		this.setId(item.getId());
 		this.setItemAmount(item.getItemAmount());
@@ -77,6 +79,35 @@ public class BillItemListItem extends BillItems {
 		return null;
 	};
 	
+	public static void sort(ArrayList<BillItemListItem> list, Boolean asc) {
+		list.sort(new Comparator<BillItemListItem>() {
+		    @Override
+		    public int compare(BillItemListItem a, BillItemListItem b) {
+		        if(asc == true) {
+		        	return a.getPayAmount() > b.getPayAmount() ? 1 : (a.getPayAmount() < b.getPayAmount()) ? -1 : 0;
+		        }
+		        return a.getPayAmount() > b.getPayAmount() ? -1 : (a.getPayAmount() < b.getPayAmount()) ? 1 : 0;
+		    }
+		});
+	}
+	
+	public static void setPayAmount(ArrayList<BillItemListItem> items, Double amount) {
+		BillItemListItem.sort(items, true);
+		Double amnt = new Double(amount);
+		for (BillItemListItem item : items) {
+			if(item.getToPay() <= amnt) {
+				item.setPayAmount(item.getToPay());
+				item.setSelected(true);
+				amnt -= item.getToPay();
+			}
+			else if(amnt != 0.0) {
+				item.setPayAmount(amnt);
+				item.setSelected(true);
+				break;
+			}
+		}
+	}
+	
 	@XmlJavaTypeAdapter(DateAdapter.class)
 	public GregorianCalendar getDate() {
 		return date;
@@ -120,6 +151,15 @@ public class BillItemListItem extends BillItems {
 	
 	public void toggleSelected() {
 		this.isSelected = !this.isSelected;
+	}
+
+	@Override
+	public int compareTo(Object object) {
+		if(object instanceof BillItemListItem) {
+			if(this.getToPay() < ((BillItemListItem) object).getToPay()) return -1;
+			if(this.getToPay() > ((BillItemListItem) object).getToPay()) return 1;
+		}
+		return 0;
 	}
 
 }

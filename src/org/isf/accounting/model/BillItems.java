@@ -78,7 +78,7 @@ public class BillItems {
 		ArrayList<BillItemPayments> items = new ArrayList<BillItemPayments>();
 		Double sum = 0.0, amount = this.getItemAmount() * this.getItemQuantity();
 		for(BillItemPayments item : list) {
-			if(this.getId() == item.getItemID()) {
+			if(this.getItemId().equals(item.getItemID())) {
 				items.add(item);
 			}
 		}
@@ -89,6 +89,20 @@ public class BillItems {
 			sum += item.getAmount();
 		}
 		return amount-sum;
+	}
+	
+	public Double paidAmount(ArrayList<BillItemPayments> list) {
+		ArrayList<BillItemPayments> items = new ArrayList<BillItemPayments>();
+		Double amount = 0.0;
+		for(BillItemPayments item : list) {
+			if(this.getItemId().equals(item.getItemID())) {
+				items.add(item);
+			}
+		}
+		for (BillItemPayments item : items) {
+			amount += item.getAmount();
+		}
+		return amount;
 	}
 
 	public int getId() {

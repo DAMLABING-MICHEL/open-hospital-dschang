@@ -587,14 +587,16 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 		return jPanelData;
 	}
 	
-	private JTable getJTableItemPayment() {
+	private JTable getJTableItemPayment(Double paymentAmount) {
 		for (BillItems billItem : this.billItems) {
 			BillItemListItem itemListItem = new BillItemListItem(billItem, billPaidItems, false, 0.0);
-			if(itemListItem.getToPay() > 0) {
+			if(itemListItem.getToPay() > 0.0) {
 				itemListItems.add(itemListItem);
 			}
 		}
-		BillItemPaymentTableModel itemPaymentTableModel = new BillItemPaymentTableModel(itemListItems, itemPaymentEdit);
+		BillItemPaymentTableModel itemPaymentTableModel = new BillItemPaymentTableModel(
+				itemListItems, itemPaymentEdit, paymentAmount
+		);
 		JTable jTableItemPayment = new JTable(itemPaymentTableModel);
 		
 		return jTableItemPayment;
@@ -1340,7 +1342,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 						}						
 						//adding garante
 						
-						billID = billManager.newBill(newBill, user, billItems, payItems, BillItemPayments.fromList(itemListItems));
+						billID = billManager.newBill(newBill, user, billItems, payItems, itemListItems);
 						if (billID == 0) {
 							JOptionPane.showMessageDialog(PatientBillEdit.this,
 									MessageBundle.getMessage("angal.newbill.failedtosavebill"), //$NON-NLS-1$
@@ -1407,7 +1409,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 						}
 						//adding garante
 						
-						if(billManager.updateBill(updateBill, user, billItems, payItems, BillItemPayments.fromList(itemListItems))){
+						if(billManager.updateBill(updateBill, user, billItems, payItems, itemListItems)){
 							fireBillInserted(updateBill);
 						}
 						else{
@@ -1551,16 +1553,15 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 										JOptionPane.ERROR_MESSAGE);
 								return;
 							} else {
-								JTable jTableItemPayment = getJTableItemPayment();
+								JTable jTableItemPayment = getJTableItemPayment(balance.doubleValue());
 								itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
 								BillItemPaymentEdit.init(itemPaymentEdit);
-								System.out.println("itemListItems.get(0).getPayAmount()");
 								addPayment(datePay, balance.doubleValue());
 							}
 
 						} else {
 							datePay = TimeTools.getServerDateTime();
-							JTable jTableItemPayment = getJTableItemPayment();
+							JTable jTableItemPayment = getJTableItemPayment(balance.doubleValue());
 							itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
 							BillItemPaymentEdit.init(itemPaymentEdit);
 							System.out.println("itemListItems.get(0).getPayAmount()");
@@ -1683,7 +1684,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 									MessageBundle.getMessage("angal.newbill.invaliddate"), //$NON-NLS-1$
 									JOptionPane.ERROR_MESSAGE);
 						} else {
-							JTable jTableItemPayment = getJTableItemPayment();
+							JTable jTableItemPayment = getJTableItemPayment(amount.doubleValue());
 							itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
 							BillItemPaymentEdit.init(itemPaymentEdit);
 							System.out.println("itemListItems.get(0).getPayAmount()");
@@ -1692,7 +1693,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 					} else {
 						// tocorrect 
 						//datePay = new GregorianCalendar();
-						JTable jTableItemPayment = getJTableItemPayment();
+						JTable jTableItemPayment = getJTableItemPayment(amount.doubleValue());
 						itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
 						BillItemPaymentEdit.init(itemPaymentEdit);
 						System.out.println("itemListItems.get(0).getPayAmount()");
@@ -1793,7 +1794,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 									MessageBundle.getMessage("angal.newbill.invaliddate"), //$NON-NLS-1$
 									JOptionPane.ERROR_MESSAGE);
 						} else {
-							JTable jTableItemPayment = getJTableItemPayment();
+							JTable jTableItemPayment = getJTableItemPayment(amount.doubleValue());
 							itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
 							BillItemPaymentEdit.init(itemPaymentEdit);
 							System.out.println("itemListItems.get(0).getPayAmount()");
@@ -1802,7 +1803,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 					} else {
 						// tocorrect 
 						datePay = TimeTools.getServerDateTime();
-						JTable jTableItemPayment = getJTableItemPayment();
+						JTable jTableItemPayment = getJTableItemPayment(amount.doubleValue());
 						BillItemPaymentEdit itemPaymentEdit = new BillItemPaymentEdit(jTableItemPayment, getJPanelButtonsItemPaymentActions());
 						BillItemPaymentEdit.init(itemPaymentEdit);
 						addPayment(datePay, amount.doubleValue());

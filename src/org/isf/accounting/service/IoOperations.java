@@ -386,7 +386,7 @@ public class IoOperations {
 			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
 			while (resultSet.next()) {
 				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_BILL_ID"),
-						resultSet.getInt("BIP_ITEM_ID"),
+						resultSet.getString("BIP_ITEM_ID"),
 						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
 						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
 			}
@@ -418,7 +418,7 @@ public class IoOperations {
 			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
 			while (resultSet.next()) {
 				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_BILL_ID"),
-						resultSet.getInt("BIP_ITEM_ID"),
+						resultSet.getString("BIP_ITEM_ID"),
 						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
 						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
 			}
@@ -482,7 +482,7 @@ public class IoOperations {
 		ArrayList<BillItemPayments> payments = null;
 
 		List<Object> parameters = new ArrayList<Object>(1);
-		StringBuilder query = new StringBuilder("SELECT BIP_ITEM_ID, SUM(BIP_AMOUNT)  FROM BILLITEMPAYMENTS");
+		StringBuilder query = new StringBuilder("SELECT *  FROM BILLITEMPAYMENTS");
 		if (billID != 0) {
 			query.append(" WHERE BIP_BILL_ID = ?");
 			parameters.add(billID);
@@ -495,7 +495,7 @@ public class IoOperations {
 			payments = new ArrayList<BillItemPayments>(resultSet.getFetchSize());
 			while (resultSet.next()) {
 				payments.add(new BillItemPayments(resultSet.getInt("BIP_ID"), resultSet.getInt("BIP_BILL_ID"),
-						resultSet.getInt("BIP_ITEM_ID"),
+						resultSet.getString("BIP_ITEM_ID"),
 						convertToGregorianCalendar(resultSet.getTimestamp("BIP_DATE")),
 						resultSet.getDouble("BIP_AMOUNT"), resultSet.getString("BIP_USR_ID_A")));
 			}
