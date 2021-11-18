@@ -45,51 +45,28 @@ import java.util.List;
 
 import javax.swing.SwingConstants;
 
-public class BillItemPaymentEdit extends JDialog implements ActionListener {
-
-	private final JPanel contentPanel = new JPanel();
-	private JPanel jPanelButtonsItemPaymentActions;
-	JScrollPane contentScrollPane = new JScrollPane();
-	private EventListenerList billItemEditListeners = new EventListenerList();
-	private JTable jTableItemPayment;
+abstract class BillItemPaymentDialog {
 	
-	private void initComponent() {
+	public static void initComponent(JDialog dialog, JTable jTableItemPayment, JPanel jPanelButtonsItemPaymentActions) {
+		JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
 		contentPanel.setSize(600, 350);
 		contentPanel.add(jTableItemPayment.getTableHeader(), BorderLayout.PAGE_START);
+		JScrollPane contentScrollPane = new JScrollPane();
 		contentScrollPane.setSize(600, 310);
 		contentScrollPane.setViewportView(jTableItemPayment);
 		jPanelButtonsItemPaymentActions.setSize(600, 40);
 		contentPanel.add(contentScrollPane);
 		contentPanel.add(jPanelButtonsItemPaymentActions);
-		this.setContentPane(contentPanel);
-	}
-	
-	public static void init(BillItemPaymentEdit itemPaymentEdit) {
-		itemPaymentEdit.setTitle("angal.accounting.edititemtopay");
-		itemPaymentEdit.setLocationRelativeTo(null);
-		itemPaymentEdit.setSize(650, 400);
-		itemPaymentEdit.setLocationRelativeTo(null);
-		itemPaymentEdit.setModal(true);
-		itemPaymentEdit.setVisible(true);
-		itemPaymentEdit.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-	}
-
-	/**
-	 * Create the dialog.
-	 */
-	public BillItemPaymentEdit(
-			JTable jTableItemPayment, JPanel jPanelButtonsItemPaymentActions
-		) {
-		this.jTableItemPayment = jTableItemPayment;
-		this.jPanelButtonsItemPaymentActions = jPanelButtonsItemPaymentActions;
-		initComponent();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		dialog.setContentPane(contentPanel);
+		dialog.setModal(true);
+		dialog.setTitle("angal.accounting.edititemtopay");
+		dialog.setLocationRelativeTo(null);
+		dialog.setSize(650, 400);
+		dialog.setLocationRelativeTo(null);
+		dialog.setModal(true);
+		dialog.setVisible(true);
+		dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 	}
 }
 
