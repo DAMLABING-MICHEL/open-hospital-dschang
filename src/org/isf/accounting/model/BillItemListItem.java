@@ -28,9 +28,9 @@ public class BillItemListItem extends BillItems implements Comparable<Object> {
 	
 	public BillItemListItem(BillItems item, ArrayList<BillItemPayments> billPaidItems, boolean isSelected, Double payAmount) {
 		this.setSelected(isSelected);
-		this.setPayAmount(payAmount);
+		//this.setPayAmount(payAmount);
 		this.setDate(TimeTools.getServerDateTime());
-		this.setToPay(item.toPayFrom(billPaidItems) - this.getPayAmount());
+		this.setToPay(item.toPayFrom(billPaidItems));
 		this.setPaidAmount(item.paidAmount(billPaidItems));
 		this.setBillID(item.getBillID());
 		this.setId(item.getId());
@@ -89,6 +89,27 @@ public class BillItemListItem extends BillItems implements Comparable<Object> {
 		        return a.getPayAmount() > b.getPayAmount() ? -1 : (a.getPayAmount() < b.getPayAmount()) ? 1 : 0;
 		    }
 		});
+	}
+	
+	public static ArrayList<BillItemListItem> checkedItems(ArrayList<BillItemListItem> items) {
+		ArrayList<BillItemListItem> checkedItems = new ArrayList<BillItemListItem>();
+		for (BillItemListItem item : items) {
+			if(item.isSelected) {
+				items.add(item);
+			}
+		}
+		return checkedItems;
+	}
+	
+	public static Double remainingAmount(ArrayList<BillItemListItem> items, Double paymentAmount) {
+		Double remainingAmount = new Double(paymentAmount);
+		for (BillItemListItem item : items) {
+			if(item.isSelected) {
+				remainingAmount -= item.getPayAmount();
+			}
+		}
+
+		return remainingAmount;
 	}
 	
 	public static void setPayAmount(ArrayList<BillItemListItem> items, Double amount) {

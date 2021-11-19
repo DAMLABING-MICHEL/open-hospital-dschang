@@ -76,19 +76,13 @@ public class BillItems {
 	
 	public Double toPayFrom(ArrayList<BillItemPayments> list) {
 		ArrayList<BillItemPayments> items = new ArrayList<BillItemPayments>();
-		Double sum = 0.0, amount = this.getItemAmount() * this.getItemQuantity();
+		Double amount = this.getItemAmount() * this.getItemQuantity();
 		for(BillItemPayments item : list) {
 			if(this.getItemId().equals(item.getItemID())) {
-				items.add(item);
+				amount -= item.getAmount();
 			}
 		}
-		if(items.isEmpty()) {
-			return amount;
-		}
-		for (BillItemPayments item : items) {
-			sum += item.getAmount();
-		}
-		return amount-sum;
+		return amount;
 	}
 	
 	public Double paidAmount(ArrayList<BillItemPayments> list) {

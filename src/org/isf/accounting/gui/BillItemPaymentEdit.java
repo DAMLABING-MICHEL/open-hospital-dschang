@@ -3,6 +3,7 @@ package org.isf.accounting.gui;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 
 import javax.swing.BoxLayout;
@@ -37,6 +38,7 @@ import javax.swing.ListSelectionModel;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -48,25 +50,26 @@ import javax.swing.SwingConstants;
 abstract class BillItemPaymentDialog {
 	
 	public static void initComponent(JDialog dialog, JTable jTableItemPayment, JPanel jPanelButtonsItemPaymentActions) {
+		if(dialog == null) {
+			dialog = new JDialog();
+		}
 		JPanel contentPanel = new JPanel();
+		JPanel tablePanel = new JPanel();
+		contentPanel.setSize(600, 300);
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
-		contentPanel.setSize(600, 350);
-		contentPanel.add(jTableItemPayment.getTableHeader(), BorderLayout.PAGE_START);
+		tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.PAGE_AXIS));
+		tablePanel.add(jTableItemPayment.getTableHeader());
 		JScrollPane contentScrollPane = new JScrollPane();
-		contentScrollPane.setSize(600, 310);
 		contentScrollPane.setViewportView(jTableItemPayment);
-		jPanelButtonsItemPaymentActions.setSize(600, 40);
-		contentPanel.add(contentScrollPane);
+		tablePanel.add(contentScrollPane);
+		contentPanel.add(tablePanel);
 		contentPanel.add(jPanelButtonsItemPaymentActions);
-		dialog.setContentPane(contentPanel);
-		dialog.setModal(true);
 		dialog.setTitle("angal.accounting.edititemtopay");
-		dialog.setLocationRelativeTo(null);
 		dialog.setSize(650, 400);
 		dialog.setLocationRelativeTo(null);
+		dialog.setContentPane(contentPanel);
 		dialog.setModal(true);
 		dialog.setVisible(true);
-		dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 	}
 }
 
@@ -90,7 +93,7 @@ class BillItemPaymentTableModel extends AbstractTableModel
     private ArrayList<BillItems> billItems;
     private Bill bill;
     private BillBrowserManager billManager = new BillBrowserManager();
-    private Double paymentTotal = 0.0;
+    private Double paymentAmount = 0.0;
      
     private final String[] columnNames = new String[] {
             "Id", "Item Description", "To Pay", "Paid Amount", "Pay Amount", "Pay"
@@ -101,12 +104,12 @@ class BillItemPaymentTableModel extends AbstractTableModel
     };
  
     public BillItemPaymentTableModel(
-    		ArrayList<BillItemListItem> data, JDialog owner, double paymentTotal
+    		ArrayList<BillItemListItem> data, JDialog owner, double paymentAmount
     ){
         this.data = data;
         this.owner = owner;
-        BillItemListItem.setPayAmount(data, paymentTotal);
-        this.paymentTotal = paymentTotal;
+        BillItemListItem.setPayAmount(data, paymentAmount);
+        this.paymentAmount = paymentAmount;
     }
      
     @Override
@@ -170,11 +173,12 @@ class BillItemPaymentTableModel extends AbstractTableModel
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     	BillItemListItem row = data.get(rowIndex);
+    	Double value = (Double)aValue;
 	    if(4 == columnIndex) {
-	    	if(false) {//(Double) aValue != 3500
+	    	if(value > row.getToPay()) {//(Double) aValue != 3500
 	    		JOptionPane.showMessageDialog(owner,
-					MessageBundle.getMessage("angal.newbill.payementinthefuturenotallowed"), //$NON-NLS-1$
-					MessageBundle.getMessage("angal.newbill.invaliddate"), //$NON-NLS-1$
+	    			MessageBundle.getMessage("angal.newbill.exceedpayamount"), //$NON-NLS-1$
+					MessageBundle.getMessage("angal.newbill.outofrange"), //$NON-NLS-1$
 					JOptionPane.PLAIN_MESSAGE);
 	    	} else {
 	    		row.setPayAmount((Double) aValue);
