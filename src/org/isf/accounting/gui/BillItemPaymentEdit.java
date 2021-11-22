@@ -113,7 +113,6 @@ class BillItemPaymentTableModel extends AbstractTableModel
     private ArrayList<BillItems> billItems;
     private Bill bill;
     private BillBrowserManager billManager = new BillBrowserManager();
-    private Double paymentTotal = 0.0;
      
     private final String[] columnNames = new String[] {
             "Id", "Item Description", "To Pay", "Paid Amount", "Pay Amount", "Pay"
@@ -124,12 +123,10 @@ class BillItemPaymentTableModel extends AbstractTableModel
     };
  
     public BillItemPaymentTableModel(
-    		ArrayList<BillItemListItem> data, JDialog owner, double paymentTotal
+    		ArrayList<BillItemListItem> data, JDialog owner
     ){
         this.data = data;
         this.owner = owner;
-        BillItemListItem.setPayAmount(data, paymentTotal);
-        this.paymentTotal = paymentTotal;
     }
      
     @Override
@@ -201,7 +198,7 @@ class BillItemPaymentTableModel extends AbstractTableModel
 					JOptionPane.PLAIN_MESSAGE);
 	    	} else {
 	    		row.setPayAmount((Double) aValue);
-	    		row.setToPay((row.getItemAmount()*row.getItemQuantity()) - row.getPaidAmount());
+	    		row.setToPay((row.getItemAmount()*row.getItemQuantity()) - row.getPaidAmount() - row.getPayAmount());
 	    	}
             
         }

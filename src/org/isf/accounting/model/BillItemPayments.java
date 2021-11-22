@@ -16,7 +16,7 @@ public class BillItemPayments implements Comparable<Object>{
 
 	private int id;
 	private int billID;
-	private String itemID;
+	private int itemID;
 	private GregorianCalendar date;
 	private double amount;
 	private String user;
@@ -32,7 +32,7 @@ public class BillItemPayments implements Comparable<Object>{
 		
 	}
 	
-	public BillItemPayments(int id, int billID, String itemID, GregorianCalendar date,
+	public BillItemPayments(int id, int billID, int itemID, GregorianCalendar date,
 			double amount, String user) {
 		super();
 		this.id = 0;
@@ -46,21 +46,15 @@ public class BillItemPayments implements Comparable<Object>{
 	public BillItemPayments(BillItemListItem item) {
 		super();
 		this.id = 0;
-		this.itemID = item.getItemId();
+		this.itemID = item.getId();
 		this.date = item.getDate();
 		this.amount = item.getPayAmount();	
 	}
 	
-	public static ArrayList<BillItemPayments> fromList(ArrayList<BillItemListItem> list, ArrayList<BillItems> billItems) {
+	public static ArrayList<BillItemPayments> fromList(ArrayList<BillItemListItem> list) {
 		ArrayList<BillItemPayments> items = new ArrayList<BillItemPayments>();
 		for (BillItemListItem item : list) {
-			for (BillItems it : billItems) {
-				if(it.getItemDescription().equals(item.getItemDescription())) {
-					item.setItemId(it.getItemId());
-					items.add(new BillItemPayments(item));
-					break;
-				}
-			}
+			items.add(new BillItemPayments(item));
 		}
 		return items;
 	}
@@ -91,11 +85,11 @@ public class BillItemPayments implements Comparable<Object>{
 		this.billID = billID;
 	}
 	
-	public String getItemID() {
+	public int getItemID() {
 		return itemID;
 	}
 
-	public void setItemID(String itemID) {
+	public void setItemID(int itemID) {
 		this.itemID = itemID;
 	}
 

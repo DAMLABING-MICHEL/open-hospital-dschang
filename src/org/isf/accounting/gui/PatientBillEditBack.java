@@ -62,7 +62,6 @@ import org.eclipse.swt.browser.VisibilityWindowListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.isf.accounting.manager.BillBrowserManager;
 import org.isf.accounting.model.Bill;
-import org.isf.accounting.model.BillItemListItem;
 import org.isf.accounting.model.BillItemPayments;
 import org.isf.accounting.model.BillItems;
 import org.isf.accounting.model.BillPayments;
@@ -2578,7 +2577,7 @@ public class PatientBillEditBack extends JDialog implements SelectionListener, P
 						}
 						System.out.println("TOTAL=" + total);	
 						System.out.println("BALANCE=" + balance);	
-						billID = billManager.newBill(newBill, user, billItems, payItems, new ArrayList<BillItemListItem>());
+						billID = billManager.newBill(newBill, billItems, payItems, new ArrayList<BillItemPayments>());
 					
 						if (billID == 0) {
 							JOptionPane.showMessageDialog(PatientBillEditBack.this,
