@@ -609,7 +609,7 @@ public class BillBrowserManager {
 	 * @return <code>true</code> if the bill has been updated, <code>false</code>
 	 *         otherwise.
 	 */
-	public boolean updateBill(Bill updateBill, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemPayments> billPayItems) {
+	public boolean updateBill(Bill updateBill, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems) {
 		boolean transactionState = DbQueryLogger.beginTrasaction();
 		DbQueryLogger dbQueryLogger = new DbQueryLogger();
 		try {
@@ -629,11 +629,6 @@ public class BillBrowserManager {
 			boolean paymentsInserted = false;
 			if (itemsInserted) {
 				paymentsInserted = newBillPayments(updateBill.getId(), payItems);
-			}
-			
-			boolean itemPaymentsInserted = false;
-			if (itemsInserted) {
-				itemPaymentsInserted = newBillItemPayments(updateBill.getId(), billPayItems);
 			}
 
 			if (itemsInserted && paymentsInserted) {

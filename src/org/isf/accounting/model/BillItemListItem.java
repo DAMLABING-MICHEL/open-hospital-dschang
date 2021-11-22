@@ -11,7 +11,6 @@ public class BillItemListItem extends BillItems {
 	private boolean isSelected;
 	private Double payAmount;
 	
-	
 	public BillItemListItem() {
 		super();
 	}
