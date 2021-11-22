@@ -166,7 +166,7 @@ public class BillBrowserManager {
 	 * @param autoCommit
 	 * @return the generated id.
 	 */
-	public int newBill(Bill newBill, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems, ArrayList<BillItemPayments> billPayItems) {
+	public int newBill(Bill newBill, ArrayList<BillItems> billItems, ArrayList<BillPayments> payItems) {
 
 		boolean transactionState = DbQueryLogger.beginTrasaction();
 		DbQueryLogger dbQueryLogger = new DbQueryLogger();
@@ -193,11 +193,6 @@ public class BillBrowserManager {
 				boolean paymentInserted = false;
 				if (itemsInserted) {
 					paymentInserted = newBillPayments(billID, payItems);
-				}
-				
-				boolean itemPaymentInserted = false;
-				if (itemsInserted) {
-					paymentInserted = newBillItemPayments(billID, billPayItems);
 				}
 
 				if (itemsInserted && paymentInserted) {
@@ -578,24 +573,6 @@ public class BillBrowserManager {
 	private boolean newBillPayments(int billID, ArrayList<BillPayments> payItems) {
 		try {
 			return ioOperations.newBillPayments(billID, payItems);
-		} catch (OHException e) {
-			return false;
-		}
-	}
-	
-	/**
-	 * Stores a list of {@link BillItemPayments} associated to a {@link Bill}.
-	 * 
-	 * @param billID
-	 *            the bill id.
-	 * @param billPayItems
-	 *            the bill item payments.
-	 * @return <code>true</code> if the item payment have stored, <code>false</code>
-	 *         otherwise.
-	 */
-	private boolean newBillItemPayments(int billID, ArrayList<BillItemPayments> billPayItems) {
-		try {
-			return ioOperations.newBillItemPayments(billID, billPayItems);
 		} catch (OHException e) {
 			return false;
 		}

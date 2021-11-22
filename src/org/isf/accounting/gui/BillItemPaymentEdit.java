@@ -26,7 +26,6 @@ import org.isf.patient.model.Patient;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
@@ -102,15 +101,13 @@ class BillItemPaymentTableModel extends AbstractTableModel
     private final String[] columnNames = new String[] {
             "Id", "Item Description", "Amount", "Pay Amount", "Pay"
     };
-    private JDialog owner;
     private final Class[] columnClass = new Class[] {
         Integer.class, String.class, Double.class, Double.class, Boolean.class
     };
  
-    public BillItemPaymentTableModel(List<BillItemListItem> data, JDialog owner)
+    public BillItemPaymentTableModel(List<BillItemListItem> data)
     {
         this.data = data;
-        this.owner = owner;
     }
      
     @Override
@@ -166,19 +163,11 @@ class BillItemPaymentTableModel extends AbstractTableModel
         return null;
     }
     
-    
-    
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     	BillItemListItem row = data.get(rowIndex);
 	    if(3 == columnIndex) {
-	    	if((Double) aValue != 3500) {
-	    		JOptionPane.showMessageDialog(owner,
-					MessageBundle.getMessage("angal.newbill.payementinthefuturenotallowed"), //$NON-NLS-1$
-					MessageBundle.getMessage("angal.newbill.invaliddate"), //$NON-NLS-1$
-					JOptionPane.PLAIN_MESSAGE);
-	    	} else row.setPayAmount((Double) aValue);
-            
+            row.setPayAmount((Double) aValue);
         }
         else if(4 == columnIndex) {
             row.setSelected((boolean) aValue);
