@@ -487,6 +487,7 @@ public class IoOperations {
 			query.append(" WHERE BIP_BILL_ID = ?");
 			parameters.add(billID);
 		}
+		query.append(" GROUP BY BIP_ITEM_ID");
 		query.append(" ORDER BY BIP_DATE ASC");
 
 		DbQueryLogger dbQuery = new DbQueryLogger();
@@ -697,14 +698,13 @@ public class IoOperations {
 	 * @throws OHException
 	 *             if an error occurs during the store procedure.
 	 */
-	public boolean newBillItemPayments(int billID, String user, ArrayList<BillItemPayments> payItems) throws OHException {
-		BillItemPayments.fillWith(payItems, billID, user);
+	public boolean newBillItemPayments(int billID, ArrayList<BillItemPayments> payItems) throws OHException {
 		DbQueryLogger dbQuery = new DbQueryLogger();
 		boolean result = true;
 		try {
 
 			String query = "INSERT INTO BILLITEMPAYMENTS (" + "BIP_BILL_ID, BIP_ITEM_ID, BIP_DATE, BIP_AMOUNT, BIP_USR_ID_A,"
-					+ "BIP_CREATED_BY, BIP_CREATE_DATE) "
+					+ "BIP_CREATE_BY, BIP_CREATE_DATE) "
 					+ "VALUES (?,?,?,?,?,?,?)";
 
 			for (BillItemPayments item : payItems) {

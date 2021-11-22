@@ -17,12 +17,9 @@ import javax.swing.event.EventListenerList;
 import javax.swing.table.AbstractTableModel;
 
 import org.isf.accounting.gui.PatientBillEdit.BillItemEditListener;
-import org.isf.accounting.manager.BillBrowserManager;
-import org.isf.accounting.model.Bill;
 import org.isf.accounting.model.BillItemListItem;
 import org.isf.accounting.model.BillItemPayments;
 import org.isf.accounting.model.BillItems;
-import org.isf.accounting.model.BillPayments;
 import org.isf.generaldata.MessageBundle;
 import org.isf.patient.gui.SelectPatient.SelectionListener;
 import org.isf.patient.model.Patient;
@@ -45,7 +42,7 @@ import java.util.List;
 
 import javax.swing.SwingConstants;
 
-public class BillItemPaymentEdit extends JDialog implements ActionListener {
+public class BillItemPaymentEdit extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
 	private JPanel jPanelButtonsItemPaymentActions;
@@ -78,18 +75,10 @@ public class BillItemPaymentEdit extends JDialog implements ActionListener {
 	/**
 	 * Create the dialog.
 	 */
-	public BillItemPaymentEdit(
-			JTable jTableItemPayment, JPanel jPanelButtonsItemPaymentActions
-		) {
+	public BillItemPaymentEdit(JTable jTableItemPayment, JPanel jPanelButtonsItemPaymentActions) {
 		this.jTableItemPayment = jTableItemPayment;
 		this.jPanelButtonsItemPaymentActions = jPanelButtonsItemPaymentActions;
 		initComponent();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 }
 
@@ -109,22 +98,17 @@ class BillItemListRenderer extends JCheckBox implements ListCellRenderer {
 class BillItemPaymentTableModel extends AbstractTableModel
 {
     private final List<BillItemListItem> data;
-    private ArrayList<BillPayments> payItems;
-    private ArrayList<BillItems> billItems;
-    private Bill bill;
-    private BillBrowserManager billManager = new BillBrowserManager();
      
     private final String[] columnNames = new String[] {
-            "Id", "Item Description", "To Pay", "Paid Amount", "Pay Amount", "Pay"
+            "Id", "Item Description", "Amount", "Pay Amount", "Pay"
     };
     private JDialog owner;
     private final Class[] columnClass = new Class[] {
-        Integer.class, String.class, Double.class, Double.class, Double.class, Boolean.class
+        Integer.class, String.class, Double.class, Double.class, Boolean.class
     };
  
-    public BillItemPaymentTableModel(
-    		ArrayList<BillItemListItem> data, JDialog owner
-    ){
+    public BillItemPaymentTableModel(List<BillItemListItem> data, JDialog owner)
+    {
         this.data = data;
         this.owner = owner;
     }
@@ -155,7 +139,7 @@ class BillItemPaymentTableModel extends AbstractTableModel
     
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-    	if(columnIndex == 4 || columnIndex == 5) {
+    	if(columnIndex == 3 || columnIndex == 4) {
     		return true;
     	} else return false;
     }
@@ -171,15 +155,12 @@ class BillItemPaymentTableModel extends AbstractTableModel
             return row.getItemDescription();
         }
         else if(2 == columnIndex) {
-            return row.getToPay();
+            return row.getItemAmount();
         }
         else if(3 == columnIndex) {
-            return row.getPaidAmount();
-        }
-        else if(4 == columnIndex) {
             return row.getPayAmount();
         }
-        else if(5 == columnIndex) {
+        else if(4 == columnIndex) {
             return row.isSelected();
         }
         return null;
@@ -190,19 +171,16 @@ class BillItemPaymentTableModel extends AbstractTableModel
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     	BillItemListItem row = data.get(rowIndex);
-	    if(4 == columnIndex) {
+	    if(3 == columnIndex) {
 	    	if(false) {//(Double) aValue != 3500
 	    		JOptionPane.showMessageDialog(owner,
 					MessageBundle.getMessage("angal.newbill.payementinthefuturenotallowed"), //$NON-NLS-1$
 					MessageBundle.getMessage("angal.newbill.invaliddate"), //$NON-NLS-1$
 					JOptionPane.PLAIN_MESSAGE);
-	    	} else {
-	    		row.setPayAmount((Double) aValue);
-	    		row.setToPay((row.getItemAmount()*row.getItemQuantity()) - row.getPaidAmount() - row.getPayAmount());
-	    	}
+	    	} else row.setPayAmount((Double) aValue);
             
         }
-        else if(5 == columnIndex) {
+        else if(4 == columnIndex) {
             row.setSelected((boolean) aValue);
         }
     }

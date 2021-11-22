@@ -1,6 +1,5 @@
 package org.isf.accounting.model;
 
-import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -35,38 +34,12 @@ public class BillItemPayments implements Comparable<Object>{
 	public BillItemPayments(int id, int billID, int itemID, GregorianCalendar date,
 			double amount, String user) {
 		super();
-		this.id = 0;
+		this.id = id;
 		this.billID = billID;
 		this.itemID = itemID;
 		this.date = date;
 		this.amount = amount;
 		this.user = user;		
-	}
-	
-	public BillItemPayments(BillItemListItem item) {
-		super();
-		this.id = 0;
-		this.itemID = item.getId();
-		this.date = item.getDate();
-		this.amount = item.getPayAmount();	
-	}
-	
-	public static ArrayList<BillItemPayments> fromList(ArrayList<BillItemListItem> list) {
-		ArrayList<BillItemPayments> items = new ArrayList<BillItemPayments>();
-		for (BillItemListItem item : list) {
-			items.add(new BillItemPayments(item));
-		}
-		return items;
-	}
-	
-	public static void fillWith(
-			ArrayList<BillItemPayments> list, int billID, String user
-	) {
-		ArrayList<BillItemPayments> items = new ArrayList<BillItemPayments>();
-		for (BillItemPayments item : list) {
-			item.setBillID(billID);
-			item.setUser(user);
-		}
 	}
 
 	public int getId() {
