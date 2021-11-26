@@ -334,9 +334,6 @@ public class IoOperations {
 			if (autoCommit)
 				dbQuery.releaseConnection();
 		}
-		for (BillItems item : billItems) {
-			System.out.println(item.getItemId());
-		}
 		return billItems;
 	}
 	
@@ -693,7 +690,6 @@ public class IoOperations {
 					found = true;
 					if (oldItem.getItemQuantity() != newItem.getItemQuantity()) {
 						double diff = newItem.getItemQuantity() - oldItem.getItemQuantity();
-						System.out.println(diff);
 						try {
 							updatedItem = oldItem.clone();
 							updatedItem.setItemQuantity(diff);
