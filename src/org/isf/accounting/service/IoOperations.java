@@ -238,13 +238,142 @@ public class IoOperations {
 				BillItems bliItem = new BillItems(resultSet.getInt("BLI_ID"), resultSet.getInt("BLI_ID_BILL"),
 						resultSet.getBoolean("BLI_IS_PRICE"), resultSet.getString("BLI_ID_PRICE"),
 						resultSet.getString("BLI_ITEM_DESC"), resultSet.getDouble("BLI_ITEM_AMOUNT"),
-						resultSet.getDouble("BLI_QTY"));
+						resultSet.getDouble("BLI_QTY"), convertToGregorianCalendar(resultSet.getTimestamp("BLI_DATE")));
 				bliItem.setItemId(resultSet.getString("BLI_ITEM_ID"));
 				bliItem.setItemGroup(resultSet.getString("BLI_ITEM_GROUP"));
 				bliItem.setPrescriptionId(resultSet.getInt("BLI_PRESC_ID"));
 				bliItem.setItemAmountBrut(resultSet.getInt("BLI_ITEM_AMOUNT_BRUT"));
 				bliItem.setExport_status(resultSet.getString("BLI_EXPORT_STATUS"));
 				billItems.add(bliItem);
+			}
+		} catch (SQLException e) {
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			if (autoCommit)
+				dbQuery.releaseConnection();
+		}
+		return billItems;
+	}
+	
+	public ArrayList<BillItems> getItems(int billID, boolean autoCommit, GregorianCalendar dateFrom, GregorianCalendar dateTo) throws OHException {
+		ArrayList<BillItems> billItems = null;
+
+		List<Object> parameters = new ArrayList<Object>(3);
+		StringBuilder query = new StringBuilder("SELECT * FROM BILLITEMS");
+		query.append(" WHERE DATE(BLI_DATE) BETWEEN ? AND ?");
+		parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		parameters.add(new Timestamp(dateTo.getTime().getTime()));
+		if (billID != 0) {
+			query.append(" AND BLI_ID_BILL = ?");
+			parameters.add(billID);
+		}
+		query.append(" ORDER BY BLI_ID ASC");
+
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		try {
+			ResultSet resultSet = dbQuery.getDataWithParams(query.toString(), parameters, autoCommit);
+			billItems = new ArrayList<BillItems>(resultSet.getFetchSize());
+			while (resultSet.next()) {
+				BillItems bliItem = new BillItems(resultSet.getInt("BLI_ID"), resultSet.getInt("BLI_ID_BILL"),
+						resultSet.getBoolean("BLI_IS_PRICE"), resultSet.getString("BLI_ID_PRICE"),
+						resultSet.getString("BLI_ITEM_DESC"), resultSet.getDouble("BLI_ITEM_AMOUNT"),
+						resultSet.getDouble("BLI_QTY"), convertToGregorianCalendar(resultSet.getTimestamp("BLI_DATE")));
+				bliItem.setItemId(resultSet.getString("BLI_ITEM_ID"));
+				bliItem.setItemGroup(resultSet.getString("BLI_ITEM_GROUP"));
+				bliItem.setPrescriptionId(resultSet.getInt("BLI_PRESC_ID"));
+				bliItem.setItemAmountBrut(resultSet.getInt("BLI_ITEM_AMOUNT_BRUT"));
+				bliItem.setExport_status(resultSet.getString("BLI_EXPORT_STATUS"));
+				billItems.add(bliItem);
+			}
+		} catch (SQLException e) {
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			if (autoCommit)
+				dbQuery.releaseConnection();
+		}
+		return billItems;
+	}
+	
+	public ArrayList<BillItems> getItemsBy(int billID, boolean autoCommit) throws OHException {
+		ArrayList<BillItems> billItems = null;
+
+		List<Object> parameters = new ArrayList<Object>(3);
+		String queryString = "SELECT BLI_ITEM_ID, BLI_ITEM_GROUP, BLI_ID, BLI_ID_BILL, BLI_ITEM_DESC, BLI_IS_PRICE, BLI_ITEM_AMOUNT, SUM(BLI_QTY) AS BLI_QTY, BLI_ID_PRICE FROM BILLITEMS";
+		StringBuilder query = new StringBuilder(queryString);
+		if (billID != 0) {
+			query.append(" WHERE BLI_ID_BILL = ?");
+			parameters.add(billID);
+		}
+		query.append(" GROUP BY BLI_ITEM_DESC");
+		query.append(" ORDER BY BLI_ID ASC");
+
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		try {
+			ResultSet resultSet = dbQuery.getDataWithParams(query.toString(), parameters, autoCommit);
+			billItems = new ArrayList<BillItems>();
+			while (resultSet.next()) {
+				BillItems bliItem = new BillItems(
+					resultSet.getInt("BLI_ID"), 
+					resultSet.getInt("BLI_ID_BILL"),
+					resultSet.getBoolean("BLI_IS_PRICE"), 
+					resultSet.getString("BLI_ID_PRICE"),
+					resultSet.getString("BLI_ITEM_DESC"), 
+					resultSet.getDouble("BLI_ITEM_AMOUNT"),
+					resultSet.getDouble("BLI_QTY"),	
+					null
+				);
+				bliItem.setItemId(resultSet.getString("BLI_ITEM_ID"));
+				bliItem.setItemGroup(resultSet.getString("BLI_ITEM_GROUP"));
+				if(bliItem.getItemQuantity() != 0.0) {
+					billItems.add(bliItem);
+				}
+			}
+		} catch (SQLException e) {
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			if (autoCommit)
+				dbQuery.releaseConnection();
+		}
+		for (BillItems item : billItems) {
+			System.out.println(item.getItemId());
+		}
+		return billItems;
+	}
+	
+	public ArrayList<BillItems> getItemsBy(int billID, boolean autoCommit, GregorianCalendar dateFrom, GregorianCalendar dateTo) throws OHException {
+		ArrayList<BillItems> billItems = null;
+
+		List<Object> parameters = new ArrayList<Object>(3);
+		String queryString = "SELECT BLI_ITEM_ID, BLI_ITEM_GROUP, BLI_ID, BLI_ID_BILL, BLI_ITEM_DESC, BLI_IS_PRICE, BLI_ITEM_AMOUNT, SUM(BLI_QTY) AS BLI_QTY, BLI_ID_PRICE FROM BILLITEMS";
+		StringBuilder query = new StringBuilder(queryString);
+		query.append(" WHERE DATE(BLI_DATE) BETWEEN ? AND ?");
+		parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		parameters.add(new Timestamp(dateTo.getTime().getTime()));
+		if (billID != 0) {
+			query.append(" WHERE BLI_ID_BILL = ?");
+			parameters.add(billID);
+		}
+
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		try {
+			ResultSet resultSet = dbQuery.getDataWithParams(query.toString(), parameters, autoCommit);
+			billItems = new ArrayList<BillItems>();
+			while (resultSet.next()) {
+				BillItems bliItem = new BillItems(
+					resultSet.getInt("BLI_ID"), 
+					resultSet.getInt("BLI_ID_BILL"),
+					resultSet.getBoolean("BLI_IS_PRICE"), 
+					resultSet.getString("BLI_ID_PRICE"),
+					resultSet.getString("BLI_ITEM_DESC"), 
+					resultSet.getDouble("BLI_ITEM_AMOUNT"),
+					resultSet.getDouble("BLI_QTY"),	
+					null
+				);
+				bliItem.setItemId(resultSet.getString("BLI_ITEM_ID"));
+				bliItem.setItemGroup(resultSet.getString("BLI_ITEM_GROUP"));
+				if(bliItem.getItemQuantity() != 0.0) {
+					billItems.add(bliItem);
+				}
 			}
 		} catch (SQLException e) {
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
@@ -273,7 +402,8 @@ public class IoOperations {
 						resultSet.getString("BLI_ID_PRICE"),
 						resultSet.getString("BLI_ITEM_DESC"), 
 						resultSet.getDouble("BLI_ITEM_AMOUNT"),
-						resultSet.getDouble("BLI_QTY"));
+						resultSet.getDouble("BLI_QTY"),
+						convertToGregorianCalendar(resultSet.getTimestamp("BLI_DATE")));
 				bliItem.setItemId(resultSet.getString("BLI_ITEM_ID"));
 				bliItem.setItemGroup(resultSet.getString("BLI_ITEM_GROUP"));
 				billItems.add(bliItem);
@@ -482,7 +612,7 @@ public class IoOperations {
 	 * @throws OHException
 	 *             if an error occurs during the store operation.
 	 */
-	public boolean newBillItems(int billID, ArrayList<BillItems> billItems) throws OHException {
+	public boolean newBillItems(int billID, ArrayList<BillItems> billItems, GregorianCalendar itemDate) throws OHException {
 		DbQueryLogger dbQuery = new DbQueryLogger();
 		boolean result = true;
 		// ArrayList<BillItems> medicalItems = new ArrayList<BillItems>();
@@ -490,13 +620,15 @@ public class IoOperations {
 			// With this INSERT and UPDATE processes are equals
 			String query = "DELETE FROM BILLITEMS WHERE BLI_ID_BILL = ?";
 			List<Object> parameters = Collections.<Object>singletonList(billID);
-			dbQuery.setDataWithParams(query, parameters, false);
+			//dbQuery.setDataWithParams(query, parameters, false);
 
 			query = "INSERT INTO BILLITEMS ("
 					+ " BLI_ID_BILL, BLI_IS_PRICE, BLI_ID_PRICE, BLI_ITEM_DESC, BLI_ITEM_AMOUNT, BLI_QTY, BLI_ITEM_ID, "
-					+ " BLI_ITEM_GROUP, BLI_PRESC_ID, BLI_ITEM_AMOUNT_BRUT, BLI_EXPORT_STATUS) "
-					+ " VALUES (?,?,?,?,?,?,?,?, ?,?,?)";
+					+ " BLI_ITEM_GROUP, BLI_PRESC_ID, BLI_ITEM_AMOUNT_BRUT,BLI_DATE, BLI_EXPORT_STATUS) "
+					+ " VALUES (?,?,?,?,?,?,?,?, ?,?,?,?)";
 
+			billItems = this.getNewItems(billID, billItems);
+			
 			for (BillItems item : billItems) {				
 				parameters = new ArrayList<Object>(6);
 				parameters.add(billID);
@@ -509,6 +641,7 @@ public class IoOperations {
 				parameters.add(item.getItemGroup());
 				parameters.add(item.getPrescriptionId());
 				parameters.add(item.getItemAmountBrut());
+				parameters.add(new java.sql.Timestamp(itemDate.getTime().getTime()));
 				if(BillItemStatus.Status.EXPORTED.getCode().equalsIgnoreCase(item.getExport_status())){
 					parameters.add(item.getExport_status());
 				}
@@ -526,6 +659,66 @@ public class IoOperations {
 			dbQuery.releaseConnection();
 		}
 		return result;
+	}
+	
+	private ArrayList<BillItems> getNewItems(int billID, ArrayList<BillItems> newListItems) throws OHException {
+
+		List<BillItems> oldListItems = this.getItemsBy(billID, false);
+
+		if(oldListItems == null) {
+			for(int i=0; i<oldListItems.size(); i++) {
+				if(oldListItems.get(i).getItemQuantity() == 0.0) {
+					oldListItems.remove(i);
+				}
+			}
+		}
+		
+		if (oldListItems == null || oldListItems.size() == 0) {
+			return newListItems;
+		}
+
+		ArrayList<BillItems> newList = new ArrayList<BillItems>();
+		boolean found = false;
+		boolean updated = false;
+		int i = 0;
+		BillItems newItem = null;
+		for (BillItems oldItem : oldListItems) {
+			BillItems updatedItem = null;
+			found = false;
+			updated = false;
+			i=0;
+			for (i = 0; i<newListItems.size(); i++) {
+				newItem = newListItems.get(i);
+				if (newItem.getItemId().equals(oldItem.getItemId())) {
+					found = true;
+					if (oldItem.getItemQuantity() != newItem.getItemQuantity()) {
+						double diff = newItem.getItemQuantity() - oldItem.getItemQuantity();
+						System.out.println(diff);
+						try {
+							updatedItem = oldItem.clone();
+							updatedItem.setItemQuantity(diff);
+							updated = true;
+						} catch (CloneNotSupportedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							updatedItem = null;
+						}
+					}
+					newListItems.remove(i);
+					break;
+				}
+			}
+			if (!found) {
+				oldItem.setItemQuantity(-oldItem.getItemQuantity());
+				newList.add(oldItem);
+			} else if (updated) {	
+				newList.add(updatedItem);
+			}
+		}
+		for(BillItems item: newListItems) {
+			newList.add(item);
+		}
+		return newList;
 	}
 
 	/**

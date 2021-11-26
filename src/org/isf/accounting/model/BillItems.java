@@ -1,5 +1,7 @@
 package org.isf.accounting.model;
 
+import java.util.GregorianCalendar;
+
 /**
  * Pure Model BillItems : represents an item in the Bill
  * @author Mwithi
@@ -15,6 +17,7 @@ public class BillItems {
 	private double itemQuantity;
 	private double itemAmountBrut;
 	private String export_status;
+	private GregorianCalendar itemDate;
 	
 	/**
 	 * Store the item Real Id that is involved in this bill item (medId, exaId, opeId...)
@@ -48,7 +51,7 @@ public class BillItems {
 	}
 
 	public BillItems(int id, int billID, boolean isPrice, String priceID,
-			String itemDescription, double itemAmount, double itemQuantity) {
+			String itemDescription, double itemAmount, double itemQuantity, GregorianCalendar itemDate) {
 		super();
 		this.id = id;
 		this.billID = billID;
@@ -57,10 +60,11 @@ public class BillItems {
 		this.itemDescription = itemDescription;
 		this.itemAmount = itemAmount;
 		this.itemQuantity = itemQuantity;
+		this.itemDate = itemDate;
 	}
 	
-	public BillItems(int id, int billID, boolean isPrice, String priceID,
-			String itemDescription, double itemAmount, double itemQuantity, double itemAmountBrut) {
+	public BillItems(int id, int billID, boolean isPrice, String priceID, String itemDescription,
+			double itemAmount, double itemQuantity, double itemAmountBrut, GregorianCalendar itemDate) {
 		super();
 		this.id = id;
 		this.billID = billID;
@@ -70,6 +74,7 @@ public class BillItems {
 		this.itemAmount = itemAmount;
 		this.itemQuantity = itemQuantity;
 		this.itemAmountBrut = itemAmountBrut;
+		this.itemDate = itemDate;
 	}
 
 	public int getId() {
@@ -127,6 +132,14 @@ public class BillItems {
 	public void setItemQuantity(double itemQuantity) {
 		this.itemQuantity = itemQuantity;
 	}
+	
+	public GregorianCalendar getItemDate() {
+		return itemDate;
+	}
+
+	public void setItemDate(GregorianCalendar itemDate) {
+		this.itemDate = itemDate;
+	}
 
 	public String getItemId() {
 		return itemId;
@@ -168,7 +181,7 @@ public class BillItems {
 	public BillItems clone() throws CloneNotSupportedException {
 		BillItems clone=new BillItems(this.getId(), this.getBillID(), 
 				this.isPrice(), this.getPriceID(), this.getItemDescription(), 
-				this.getItemAmount(), this.getItemQuantity());
+				this.getItemAmount(), this.getItemQuantity(), this.getItemDate());
 		clone.setItemGroup(this.getItemGroup());
 		clone.setItemId(this.getItemId());
 		return clone;

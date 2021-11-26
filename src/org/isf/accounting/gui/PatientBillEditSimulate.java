@@ -436,7 +436,7 @@ public class PatientBillEditSimulate extends JDialog implements SelectionListene
 	private void setBill(Bill bill) {
 		this.thisBill = bill;
 		billDate = bill.getDate();
-		billItems = billManager.getItems(thisBill.getId());
+		billItems = billManager.getItemsBy(thisBill.getId());
 		payItems = billManager.getPayments(thisBill.getId());
 		//billItemsSaved = billItems.size();
 		payItemsSaved = payItems.size();
@@ -1528,7 +1528,7 @@ public class PatientBillEditSimulate extends JDialog implements SelectionListene
 					}
 
 					BillItems newItem = new BillItems(0, billID, false, "", 
-							desc, amount, 1, amount);
+							desc, amount, 1, amount, new GregorianCalendar());
 					addItem(newItem);
 				}
 			});
@@ -1598,7 +1598,7 @@ public class PatientBillEditSimulate extends JDialog implements SelectionListene
 			if(brut!=null)
 				priceBrut = brut.getPrice();
 											
-			BillItems item = new BillItems(0, billID, isPrice, prc.getGroup() + prc.getItem(), prc.getDesc(), amount, qty, priceBrut);
+			BillItems item = new BillItems(0, billID, isPrice, prc.getGroup() + prc.getItem(), prc.getDesc(), amount, qty, priceBrut, new GregorianCalendar());
 			item.setItemId(prc.getItem());
 			item.setItemGroup(prc.getGroup());
 			item.setPrescriptionId(prescId);

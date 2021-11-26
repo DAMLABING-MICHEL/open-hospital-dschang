@@ -2,6 +2,7 @@ package org.isf.accounting.manager;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
@@ -104,6 +105,39 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
+	
+	public ArrayList<BillItems> getItems(int billID, GregorianCalendar dateFrom, GregorianCalendar dateTo) {
+		if (billID == 0)
+			return new ArrayList<BillItems>();
+		try {
+			return ioOperations.getItems(billID, true, dateFrom, dateTo);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+	
+	public ArrayList<BillItems> getItemsBy(int billID) {
+		if (billID == 0)
+			return new ArrayList<BillItems>();
+		try {
+			return ioOperations.getItemsBy(billID, true);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+	
+	public ArrayList<BillItems> getItemsBy(int billID, GregorianCalendar dateFrom, GregorianCalendar dateTo) {
+		if (billID == 0)
+			return new ArrayList<BillItems>();
+		try {
+			return ioOperations.getItemsBy(billID, true, dateFrom, dateTo);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
 
 	/**
 	 * Retrieves all the stored {@link BillPayments}.
@@ -167,7 +201,7 @@ public class BillBrowserManager {
 				if (Param.bool("CREATELABORATORYAUTO")) {
 					itemsInserted = newBillItemsWithAutomaticLaboratory(newBill, patient, billItems);
 				} else {
-					itemsInserted = newBillItems(billID, billItems);
+					itemsInserted = newBillItems(billID, billItems, newBill.getDate());
 				}
 
 				boolean paymentInserted = false;
@@ -231,20 +265,20 @@ public class BillBrowserManager {
 	 *         <code>false</code> otherwise.
 	 * @throws OHException
 	 */
-	private boolean newBillItems(int billID, ArrayList<BillItems> billItems) throws OHException {
+	private boolean newBillItems(int billId, ArrayList<BillItems> billItems, GregorianCalendar itemDate) throws OHException {
 		// try {
 		ArrayList<BillItems> newItems = this.getNewItems(billItems);
-		ArrayList<BillItems> deletedItems = this.getDeletedItems(billID, billItems);
+		ArrayList<BillItems> deletedItems = this.getDeletedItems(billId, billItems);
 		if (Param.bool("STOCKMVTONBILLSAVE")) {
-			updateMedicalStock(deletedItems, billID, true);
-			updateMedicalStock(newItems, billID, false);
+			updateMedicalStock(deletedItems, billId, true);
+			updateMedicalStock(newItems, billId, false);
 		}
 		// Update therapy and lab if applied
 		updateTherapy(deletedItems, newItems);
-		updateOpearionRow(deletedItems, newItems, billID);
-		updateLaboratory(deletedItems, newItems, billID);
+		updateOpearionRow(deletedItems, newItems, billId);
+		updateLaboratory(deletedItems, newItems, billId);
 		// Update labs if applied
-		return ioOperations.newBillItems(billID, billItems);
+		return ioOperations.newBillItems(billId, billItems, itemDate);
 		// } catch (OHException e) {
 		//
 		// throw e;
@@ -263,7 +297,8 @@ public class BillBrowserManager {
 		updateOpearionRow(deletedItems, newItems, newBill.getId());
 		updateLaboratory(deletedItems, newItems, newBill.getId());
 		createOrDeleteAutomaticallyLaboratory(newBill, patient, deletedItems, newItems, newBill.getId());
-		return ioOperations.newBillItems(newBill.getId(), billItems);
+		
+		return ioOperations.newBillItems(newBill.getId(), billItems, TimeTools.getServerDateTime());
 	}
 
 	private void updateTherapy(ArrayList<BillItems> deletedItems, ArrayList<BillItems> newItems) {
@@ -396,7 +431,14 @@ public class BillBrowserManager {
 
 	private ArrayList<BillItems> getDeletedItems(int billID, List<BillItems> newListItems) throws OHException {
 
-		List<BillItems> oldListItems = ioOperations.getItems(billID, false);
+		List<BillItems> oldListItems = ioOperations.getItemsBy(billID, false);
+		if(oldListItems == null) {
+			for(int i=0; i<oldListItems.size(); i++) {
+				if(oldListItems.get(i).getItemQuantity() == 0.0) {
+					oldListItems.remove(i);
+				}
+			}
+		}
 
 		if (oldListItems == null || oldListItems.size() == 0) {
 			return new ArrayList<BillItems>();
@@ -436,6 +478,7 @@ public class BillBrowserManager {
 		}
 		return deletedList;
 	}
+
 
 	/**
 	 * Return all new Item added to the bill
@@ -581,7 +624,7 @@ public class BillBrowserManager {
 			if (Param.bool("CREATELABORATORYAUTO")) {
 				itemsInserted = newBillItemsWithAutomaticLaboratory(updateBill, patient, billItems);
 			} else {
-				itemsInserted = newBillItems(updateBill.getId(), billItems);
+				itemsInserted = newBillItems(updateBill.getId(), billItems, TimeTools.getServerDateTime());
 			}
 			boolean paymentsInserted = false;
 			if (itemsInserted) {
