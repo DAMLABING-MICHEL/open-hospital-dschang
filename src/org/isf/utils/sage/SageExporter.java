@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -188,7 +190,10 @@ public class SageExporter {
 		String factureNumber = "";
 		String reference = "";
 		BillBrowserManager billsManager = new BillBrowserManager();
-		List<Bill> billList=billsManager.getBills(dateFrom, dateTo);
+		ArrayList<BillItems> items = billsManager.getItemsBy(dateFrom, dateTo);
+		BillItems.removeItemsWithNullQuantity(items);
+		NavigableMap<Integer, ArrayList<BillItems>> bills = BillItems.toMap(items);
+		//List<Bill> billList=billsManager.getBills(dateFrom, dateTo);
 		ExamBrowsingManager examManager = new ExamBrowsingManager();
 		MedicalBrowsingManager medicalManager = new MedicalBrowsingManager();
 		OperationBrowserManager operationManager = new OperationBrowserManager();
@@ -207,7 +212,8 @@ public class SageExporter {
 		///control here
 		//System.out.println("size of "+billList.size());
 		int numBill = 0;
-		for (Bill bill : billList) {
+		for (Entry<Integer, ArrayList<BillItems>> entry : bills.entrySet()) {
+			Bill bill = billsManager.getBill(entry.getKey());
 			if(bill.getStatus().equalsIgnoreCase("D"))
 				continue;
 			numBill++;
@@ -217,7 +223,7 @@ public class SageExporter {
 		}
 		boolean exportWithAlready = false;
 		boolean continueExport = true;
-		int alreadyExportedCount = checkIfAlreadyExportedExist(billList);
+		int alreadyExportedCount = checkIfAlreadyExportedExist(bills);
 		if( alreadyExportedCount > 0 ){
 			int response = JOptionPane.showConfirmDialog(null,
 					MessageBundle.getMessage("angal.sageexport.someproductarealreadyexported"),
@@ -244,9 +250,9 @@ public class SageExporter {
 		
 		if(continueExport){
 			FileWriter outFile = new FileWriter(file);
-			for (Iterator<Bill> iterator = billList.iterator(); iterator.hasNext();) {
+			for (Entry<Integer, ArrayList<BillItems>> entry: bills.entrySet()) {
 				
-				Bill bill = (Bill) iterator.next();
+				Bill bill = billsManager.getBill(entry.getKey());
 				
 				if(bill.getStatus().equalsIgnoreCase("D")){
 					continue;
@@ -266,7 +272,7 @@ public class SageExporter {
 				other = null;
 				typologieAccount = "";
 				account_Amount.clear();
-				currentBillItemsList = billsManager.getItems(bill.getId());
+				currentBillItemsList = entry.getValue();
 				for (Iterator<BillItems> iterator2 = currentBillItemsList.iterator(); iterator2.hasNext();) {
 					BillItems currentBillItem = (BillItems) iterator2.next();
 					String itemId = currentBillItem.getItemId();
@@ -409,18 +415,19 @@ public class SageExporter {
 		return returnValue;
 	}
 	
-	public static int checkIfAlreadyExportedExist(List<Bill> billList){
+	public static int checkIfAlreadyExportedExist(NavigableMap<Integer, ArrayList<BillItems>> bills){
 		int count = 0;
 		BillBrowserManager billsManager = new BillBrowserManager();
 		List<BillItems> currentBillItemsList = new ArrayList<BillItems>();
-		for (Iterator<Bill> iterator = billList.iterator(); iterator.hasNext();) {
-			Bill bill = (Bill) iterator.next();
+		for (Entry<Integer, ArrayList<BillItems>> entry: bills.entrySet()) {
+			Bill bill = billsManager.getBill(entry.getKey());
 			if(bill.getStatus().equalsIgnoreCase("D")){
 				continue;
 			}
-			currentBillItemsList = billsManager.getItems(bill.getId());
+			currentBillItemsList = entry.getValue();
 			for (Iterator<BillItems> iterator2 = currentBillItemsList.iterator(); iterator2.hasNext();) {
 				BillItems currentBillItem = (BillItems) iterator2.next();
+				System.out.println(bill.getId()+" "+currentBillItem.getExport_status());
 				if(currentBillItem.getExport_status().equalsIgnoreCase(BillItemStatus.Status.EXPORTED.getCode())){
 					count++;
 				}

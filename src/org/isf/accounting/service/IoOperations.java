@@ -381,6 +381,49 @@ public class IoOperations {
 		return billItems;
 	}
 	
+	public ArrayList<BillItems> getItemsBy(boolean autoCommit, GregorianCalendar dateFrom, GregorianCalendar dateTo) throws OHException {
+		ArrayList<BillItems> billItems = null;
+
+		List<Object> parameters = new ArrayList<Object>(3);
+		String queryString = "SELECT BLI_ITEM_ID, BLI_ITEM_GROUP, BLI_ID, BLI_ID_BILL, BLI_ITEM_DESC, BLI_IS_PRICE, BLI_ITEM_AMOUNT, SUM(BLI_QTY) AS BLI_QTY, BLI_ID_PRICE, BLI_EXPORT_STATUS FROM BILLITEMS";
+		StringBuilder query = new StringBuilder(queryString);
+		query.append(" WHERE DATE(BLI_DATE) BETWEEN ? AND ?");
+		query.append(" GROUP BY BLI_ITEM_DESC");
+		query.append(" ORDER BY BLI_ID_BILL ASC");
+		parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		parameters.add(new Timestamp(dateTo.getTime().getTime()));
+
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		try {
+			ResultSet resultSet = dbQuery.getDataWithParams(query.toString(), parameters, autoCommit);
+			billItems = new ArrayList<BillItems>();
+			while (resultSet.next()) {
+				BillItems bliItem = new BillItems(
+					resultSet.getInt("BLI_ID"), 
+					resultSet.getInt("BLI_ID_BILL"),
+					resultSet.getBoolean("BLI_IS_PRICE"), 
+					resultSet.getString("BLI_ID_PRICE"),
+					resultSet.getString("BLI_ITEM_DESC"), 
+					resultSet.getDouble("BLI_ITEM_AMOUNT"),
+					resultSet.getDouble("BLI_QTY"),	
+					null
+				);
+				bliItem.setItemId(resultSet.getString("BLI_ITEM_ID"));
+				bliItem.setItemGroup(resultSet.getString("BLI_ITEM_GROUP"));
+				bliItem.setExport_status(resultSet.getString("BLI_EXPORT_STATUS"));
+				if(bliItem.getItemQuantity() != 0.0) {
+					billItems.add(bliItem);
+				}
+			}
+		} catch (SQLException e) {
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			if (autoCommit)
+				dbQuery.releaseConnection();
+		}
+		return billItems;
+	}
+	
 	public ArrayList<BillItems> getDistictsBillItems() throws OHException {
 		ArrayList<BillItems> billItems = null;
 		String query1 = "SELECT BLI_ITEM_ID, BLI_ITEM_GROUP, BLI_ID, BLI_ID_BILL, BLI_ITEM_DESC,BLI_IS_PRICE,BLI_ITEM_AMOUNT,BLI_QTY,BLI_ID_PRICE FROM BILLITEMS GROUP BY BLI_ITEM_DESC";
@@ -581,18 +624,14 @@ public class IoOperations {
 			parameters.add(newBill.getGarante());
 			
 			ResultSet result = dbQuery.setDataReturnGeneratedKeyWithParams(query, parameters, true);
-
 			if (result.next())
 				billID = result.getInt(1);
 			else
 				return 0;
-
 			return billID;
-
 		} catch (SQLException e) {
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
 		} finally {
-
 			dbQuery.releaseConnection();
 		}
 	}

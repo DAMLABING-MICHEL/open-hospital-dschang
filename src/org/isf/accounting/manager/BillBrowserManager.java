@@ -138,6 +138,15 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
+	
+	public ArrayList<BillItems> getItemsBy(GregorianCalendar dateFrom, GregorianCalendar dateTo) {
+		try {
+			return ioOperations.getItemsBy(true, dateFrom, dateTo);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
 
 	/**
 	 * Retrieves all the stored {@link BillPayments}.

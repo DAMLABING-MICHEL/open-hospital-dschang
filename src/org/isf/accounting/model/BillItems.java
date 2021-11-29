@@ -1,6 +1,9 @@
 package org.isf.accounting.model;
 
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 /**
  * Pure Model BillItems : represents an item in the Bill
@@ -75,6 +78,24 @@ public class BillItems {
 		this.itemQuantity = itemQuantity;
 		this.itemAmountBrut = itemAmountBrut;
 		this.itemDate = itemDate;
+	}
+	
+	public static void removeItemsWithNullQuantity(ArrayList<BillItems> items) {
+		for(int i=0; i<items.size(); i++) {
+			if(items.get(i).getItemQuantity() == 0.0) items.remove(i);
+		}
+	}
+	
+	public static NavigableMap<Integer, ArrayList<BillItems>> toMap(ArrayList<BillItems> items) {
+		NavigableMap<Integer, ArrayList<BillItems>> mapBills = new TreeMap<Integer, ArrayList<BillItems>>();
+		for (BillItems item : items) {
+			ArrayList<BillItems> billItems = mapBills.get(item.getBillID());
+			if(billItems == null) {
+				mapBills.put(item.getBillID(), billItems = new ArrayList<BillItems>());
+			}
+			billItems.add(item);
+		}
+		return mapBills;
 	}
 
 	public int getId() {
