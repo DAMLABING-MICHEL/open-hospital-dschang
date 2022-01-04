@@ -373,11 +373,16 @@ public class SageExporter {
 					typologieAccount = "";
 				}
 				////////////////////////	
-	            operationlabel = journalCode+"-"+date+"-"+bill.getPatName();            	
-	            input = formatterAmount.format(bill.getAmount());            	
+	            operationlabel = journalCode+"-"+date+"-"+bill.getPatName();
+	            Double input2 = 0.0;
+	            for (BillItems item : entry.getValue()) {
+	            	input2 += item.getItemAmount() * item.getItemQuantity();
+				}
+	            //input = formatterAmount.format(bill.getAmount());
+	            input = formatterAmount.format(input2);
 	            input = input.replace(".", ",");
 	            output = "0,00";
-	            if(bill.getAmount()!=0){
+	            if(input2!=0){//bill.getAmount()!=0
 	            	outFile.write(String.format(EXPORT_FORMAT, journalCode, date, factureNumber, reference, generalAccount, "", operationlabel, input, output));
 	            }
 	            Iterator<String> account_AmountIter=account_Amount.keySet().iterator();           
