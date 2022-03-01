@@ -7,7 +7,7 @@
 		 printOrder="Vertical"
 		 orientation="Landscape"
 		 pageWidth="555"
-		 pageHeight="150"
+		 pageHeight="180"
 		 columnWidth="515"
 		 columnSpacing="0"
 		 leftMargin="20"
@@ -131,7 +131,7 @@ ORDER BY BLP_DATE ASC]]></queryString>
 			</band>
 		</pageFooter>
 		<summary>
-			<band height="81"  isSplitAllowed="true" >
+			<band height="105"  isSplitAllowed="true" >
 				<textField isStretchWithOverflow="false" pattern="#,##0.0" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="319"
@@ -194,10 +194,10 @@ ORDER BY BLP_DATE ASC]]></queryString>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="1"
-						y="37"
-						width="511"
-						height="35"
+						x="0"
+						y="74"
+						width="500"
+						height="25"
 						key="textField-28"/>
 					<box></box>
 					<textElement textAlignment="Center" verticalAlignment="Bottom">

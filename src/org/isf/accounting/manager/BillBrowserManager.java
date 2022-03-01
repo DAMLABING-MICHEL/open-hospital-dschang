@@ -633,6 +633,7 @@ public class BillBrowserManager {
 			if (Param.bool("CREATELABORATORYAUTO")) {
 				itemsInserted = newBillItemsWithAutomaticLaboratory(updateBill, patient, billItems);
 			} else {
+				System.out.println(updateBill.getId()+" "+billItems.size());
 				itemsInserted = newBillItems(updateBill.getId(), billItems, TimeTools.getServerDateTime());
 			}
 			boolean paymentsInserted = false;

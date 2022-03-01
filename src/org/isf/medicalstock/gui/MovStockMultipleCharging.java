@@ -1853,7 +1853,7 @@ public class MovStockMultipleCharging extends ModalJFrame implements SupplierLis
 						JOptionPane.ERROR_MESSAGE);
 			return -1;
 		}
-		if (qty <= 0) {
+		if (qty <= 0 ) {
 			if (showMessage)
 				JOptionPane.showMessageDialog(MovStockMultipleCharging.this,
 						MessageBundle.getMessage("angal.medicalstockwardedit.invalidquantitypleasetryagain"), //$NON-NLS-1$

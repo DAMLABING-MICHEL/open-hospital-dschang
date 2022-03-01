@@ -861,6 +861,7 @@ public class IoOperations {
 		query.append("LEFT JOIN WARD ON MMV_WRD_ID_A = WRD_ID_A ");
 		query.append("LEFT JOIN SUPPLIER ON MMV_FROM = SUP_ID where MMV_WRD_ID_A_FROM is null ");
 
+System.out.println(toDate(dateFrom) +" à "+toDate(dateTo));
 		if ((dateFrom != null) && (dateTo != null)) {
 			query.append(" AND DATE(MMV_DATE) BETWEEN DATE(?) and DATE(?) ");
 			parameters.add(toDate(dateFrom));
@@ -979,7 +980,6 @@ public class IoOperations {
 				parameters.add(medicalCode);
 			}
 		}
-
 		if ((movFrom != null) && (movTo != null)) {
 			if (parameters.size()!=0) query.append("and ");
 			query.append("(DATE(MMV_DATE) between DATE(?) and DATE(?)) ");
@@ -1025,6 +1025,7 @@ public class IoOperations {
 				movements.add(movement);
 				count++;
 			}
+			System.out.println( count);
 		} catch (SQLException e) {
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
 		} finally{

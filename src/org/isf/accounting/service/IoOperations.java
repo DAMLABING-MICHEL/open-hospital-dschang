@@ -298,13 +298,13 @@ public class IoOperations {
 		ArrayList<BillItems> billItems = null;
 
 		List<Object> parameters = new ArrayList<Object>(3);
-		String queryString = "SELECT BLI_ITEM_ID, BLI_ITEM_GROUP, BLI_ID, BLI_ID_BILL, BLI_ITEM_DESC, BLI_IS_PRICE, BLI_ITEM_AMOUNT, SUM(BLI_QTY) AS BLI_QTY, BLI_ID_PRICE FROM BILLITEMS";
+		String queryString = "SELECT BLI_ITEM_ID, BLI_ITEM_GROUP, BLI_ID, BLI_ID_BILL, BLI_ITEM_DESC, BLI_IS_PRICE, BLI_ITEM_AMOUNT, BLI_QTY, BLI_ID_PRICE, BLI_DATE  FROM BILLITEMS"; //SUM(BLI_QTY) as
 		StringBuilder query = new StringBuilder(queryString);
 		if (billID != 0) {
 			query.append(" WHERE BLI_ID_BILL = ?");
 			parameters.add(billID);
 		}
-		query.append(" GROUP BY BLI_ITEM_DESC");
+		//query.append(" GROUP BY BLI_ITEM_DESC");
 		query.append(" ORDER BY BLI_ID ASC");
 
 		DbQueryLogger dbQuery = new DbQueryLogger();
@@ -324,6 +324,7 @@ public class IoOperations {
 				);
 				bliItem.setItemId(resultSet.getString("BLI_ITEM_ID"));
 				bliItem.setItemGroup(resultSet.getString("BLI_ITEM_GROUP"));
+				bliItem.setItemDate(convertToGregorianCalendar(resultSet.getTimestamp("BLI_DATE")));
 				if(bliItem.getItemQuantity() != 0.0) {
 					billItems.add(bliItem);
 				}
@@ -426,7 +427,7 @@ public class IoOperations {
 	
 	public ArrayList<BillItems> getDistictsBillItems() throws OHException {
 		ArrayList<BillItems> billItems = null;
-		String query1 = "SELECT BLI_ITEM_ID, BLI_ITEM_GROUP, BLI_ID, BLI_ID_BILL, BLI_ITEM_DESC,BLI_IS_PRICE,BLI_ITEM_AMOUNT,BLI_QTY,BLI_ID_PRICE FROM BILLITEMS GROUP BY BLI_ITEM_DESC";
+		String query1 = "SELECT BLI_ITEM_ID, BLI_ITEM_GROUP, BLI_ID, BLI_ID_BILL, BLI_ITEM_DESC,BLI_IS_PRICE,BLI_ITEM_AMOUNT,BLI_QTY,BLI_ID_PRICE, BLI_DATE FROM BILLITEMS GROUP BY BLI_ITEM_DESC";
 		
 		DbQueryLogger dbQuery = new DbQueryLogger();
 		int size = 0;
@@ -784,7 +785,7 @@ public class IoOperations {
 					parameters.add(new java.sql.Timestamp(item.getDate().getTime().getTime()));
 					parameters.add(item.getAmount());
 					parameters.add(item.getUser());
-					
+					System.out.println(item.getUser()+" "+MainMenu.getUser());
 					parameters.add(MainMenu.getUser());
 					parameters.add(new java.sql.Timestamp(TimeTools.getServerDateTime().getTime().getTime()));										
 					result = result && dbQuery.setDataWithParams(query, parameters, false);

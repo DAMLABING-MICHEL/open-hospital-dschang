@@ -314,7 +314,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 	private static final int ButtonWidth = 160;
 	private static final int ButtonWidthBill = 160;
 	private static final int ButtonWidthPayment = 160;
-	private static final int PriceWidth = 150;
+	private static final int PriceWidth = 90; // 150 
 	private static final int QuantityWidth = 40;
 	private static final int BillHeight = 200;
 	private static final int TotalHeight = 30;
@@ -2391,7 +2391,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 				return item;
 			}
 			if (c == 0) {
-				return item.getItemDescription();
+				return item.getItemDescription()+" ["+formatDateTimeReport(item.getItemDate())+"]";
 			}
 			if (c == 1) {
 				return item.getItemQuantity();
@@ -2459,7 +2459,7 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 				return payItems.get(r);
 			}
 			if (c == 0) {
-				return formatDateTime(payItems.get(r).getDate());
+				return formatDateTime(payItems.get(r).getDate())+" ["+payItems.get(r).getUser() +"]";
 			}
 			if (c == 1) {
 				return payItems.get(r).getAmount();
@@ -3349,5 +3349,9 @@ public class PatientBillEdit extends JDialog implements SelectionListener, Presc
 			jComboGarante.setSelectedItem(thisBill.getGarante());
 		}
 		return jComboGarante;
+	}
+	public String formatDateTimeReport(GregorianCalendar time) {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  //$NON-NLS-1$
+		return format.format(time.getTime());
 	}
 }
