@@ -193,7 +193,7 @@ public class Login extends JDialog implements ActionListener, KeyListener {
 			pwd = new JPasswordField(25);
 			pwd.setName("pwd");
 			pwd.setText("");
-			pwd.setText("u2g");  //JUST FOR TESTING PURPOSE
+			//pwd.setText("u2g");  //JUST FOR TESTING PURPOSE
 			pwd.addKeyListener(myFrame);
 
 			JPanel pwdPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));

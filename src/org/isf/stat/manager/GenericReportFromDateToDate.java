@@ -46,6 +46,7 @@ import org.isf.hospital.model.Hospital;
 import org.isf.lab.manager.LabManager;
 import org.isf.opd.manager.OpdBrowserManager;
 import org.isf.operation.manager.OperationRowBrowserManager;
+import org.isf.opetype.model.OperationType;
 import org.isf.parameters.manager.Param;
 import org.isf.patvac.manager.PatVacManager;
 import org.isf.pregnancy.manager.PregnancyCareManager;
@@ -462,6 +463,15 @@ import org.isf.ward.manager.WardBrowserManager;
 			}
 		}
 		
+		
+		/////////////////////////////Marco
+		public  GenericReportFromDateToDate(String fromDate, String toDate, String jasperFileName, Integer year, String status, String code_title, boolean toCSV, OperationType operationType) {
+			if(toCSV){ //EXCEL
+				GenericReportFromDateToDate_OH004_3_EXCEL(fromDate, toDate, jasperFileName, year, status, code_title, operationType);
+			}else{//CSVstatus
+				GenericReportFromDateToDate_OH004_3_CVS(fromDate, toDate, jasperFileName, year, status, code_title, operationType);
+			}
+		}
 		public void  GenericReportFromDateToDate_OH004_3_CVS(String fromDate, String toDate, String jasperFileName, Integer year, String status, String code_title) {
 			try{
 		        HashMap<String, Object> parameters = new HashMap<String, Object>();
@@ -521,6 +531,72 @@ import org.isf.ward.manager.WardBrowserManager;
 			}
 		}
 		
+		public void  GenericReportFromDateToDate_OH004_3_CVS(
+				String fromDate, 
+				String toDate, 
+				String jasperFileName, 
+				Integer year, 
+				String status, 
+				String code_title, 
+				OperationType operationType) {
+			try{
+		        HashMap<String, Object> parameters = new HashMap<String, Object>();
+				HospitalBrowsingManager hospManager = new HospitalBrowsingManager();
+				BillBrowserManager billManager = new BillBrowserManager();
+				Hospital hosp = hospManager.getHospital();
+				List<BillItemReportBean> collections = new ArrayList<BillItemReportBean>();
+				collections = billManager.getTotalCountAmountByQuery12(year,status, operationType);
+				
+				Collections.sort(collections, new Comparator<BillItemReportBean>() {
+					public int compare(BillItemReportBean o1, BillItemReportBean o2) {
+						return o1.getBLI_ITEM_DESC().compareToIgnoreCase(o2.getBLI_ITEM_DESC());
+					}					
+				});
+				
+				Collections.sort(collections, new Comparator<BillItemReportBean>() {
+					public int compare(BillItemReportBean o1, BillItemReportBean o2) {
+						return o1.getBLI_ITEM_GROUP().compareToIgnoreCase(o2.getBLI_ITEM_GROUP());
+					}					
+				});
+				
+				JRBeanCollectionDataSource beanColDataSource = new JRBeanCollectionDataSource(collections);
+				parameters.put("Hospital", hosp.getDescription());
+				parameters.put("Address", hosp.getAddress());
+				parameters.put("City", hosp.getCity());
+				parameters.put("Email", hosp.getEmail());
+				parameters.put("Telephone", hosp.getTelephone());
+				parameters.put("fromdate", fromDate + ""); 
+				parameters.put("todate", toDate + ""); 
+				parameters.put("operationType", operationType.getDescription() + ""); 
+				parameters.put("code_title", code_title);
+				parameters.put("REPORT_RESOURCE_BUNDLE", MessageBundle.getBundle());
+				StringBuilder sbFilename = new StringBuilder();
+				sbFilename.append("rpt");
+				sbFilename.append(File.separator);
+				sbFilename.append(jasperFileName);
+				sbFilename.append(".jasper");
+
+				File jasperFile = new File(sbFilename.toString());
+		
+				JasperReport jasperReport = (JasperReport)JRLoader.loadObject(jasperFile);
+				JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, beanColDataSource);
+				String PDFfile = "rpt/PDF/"+jasperFileName+".pdf";
+				JasperExportManager.exportReportToPdfFile(jasperPrint, PDFfile);
+				if (Param.bool("INTERNALVIEWER"))
+					JasperViewer.viewReport(jasperPrint,false);
+				else { 
+					try{
+						Runtime rt = Runtime.getRuntime();
+						rt.exec(Param.string("VIEWER") +" "+ PDFfile);
+					} catch(Exception e){
+						e.printStackTrace();
+					}
+				}						
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		public void GenericReportFromDateToDate_OH004_3_EXCEL(String fromDate, String toDate, String jasperFileName, Integer year, String status, String code_title) {
 			try{
 				JFileChooser fcExcel = new JFileChooser();
@@ -536,6 +612,28 @@ import org.isf.ward.manager.WardBrowserManager;
 						exportFile = new File(exportFile.getAbsoluteFile() + ".xls");
 					ExcelExporter xlsExport = new ExcelExporter();
 					xlsExport.GenericReportFromDateToDate_OH004_3_EXCEL(fromDate, toDate, jasperFileName, year, status, code_title, exportFile);
+					Desktop.getDesktop().open(new File(exportFile.getAbsolutePath()));
+				}
+								
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		public void GenericReportFromDateToDate_OH004_3_EXCEL(String fromDate, String toDate, String jasperFileName, Integer year, String status, String code_title, OperationType operationType) {
+			try{
+				JFileChooser fcExcel = new JFileChooser();
+				FileNameExtensionFilter excelFilter = new FileNameExtensionFilter("XLSX (*.xlsx)","xlsx");
+				fcExcel.setFileFilter(excelFilter);
+				fcExcel.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				
+				int iRetVal = fcExcel.showSaveDialog(null);
+				if(iRetVal == JFileChooser.APPROVE_OPTION)
+				{
+					File exportFile = fcExcel.getSelectedFile();
+					if (!exportFile.getName().endsWith("xls")) 
+						exportFile = new File(exportFile.getAbsoluteFile() + ".xls");
+					ExcelExporter xlsExport = new ExcelExporter();
+					xlsExport.GenericReportFromDateToDate_OH004_3_EXCEL(fromDate, toDate, jasperFileName, year, status, code_title, exportFile, operationType);
 					Desktop.getDesktop().open(new File(exportFile.getAbsolutePath()));
 				}
 								

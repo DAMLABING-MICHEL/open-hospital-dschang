@@ -27,6 +27,10 @@ import org.isf.accounting.model.Bill;
 import org.isf.generaldata.MessageBundle;
 import org.isf.hospital.manager.HospitalBrowsingManager;
 import org.isf.hospital.model.Hospital;
+import org.isf.medicals.model.Medical;
+import org.isf.medicals.model.MedicalLot;
+import org.isf.medicalstock.model.Lot;
+import org.isf.opetype.model.OperationType;
 import org.isf.utils.exception.OHException;
 import org.isf.utils.jobjects.BillItemReportBean;
 
@@ -182,7 +186,7 @@ public class ExcelExporter {
 		outFile.write("Total");
 		
 		outFile.write("\n");
-
+		
 		for (int i = 0; i < model.getRowCount(); i++) {
 			for (int j = 0; j <= model.getColumnCount(); j++) {
 				String strVal;
@@ -192,18 +196,24 @@ public class ExcelExporter {
 					if (objVal != null) {
 						if (objVal instanceof Double) {							
 							Double val = (Double) objVal;
-							//strVal = format.format(val);
-							formated = format.format(val);							
-							strVal = trimCustom(formated);	
-							
+							try {
+								formated = format.format(val);							
+								strVal = trimCustom(formated);		
+							} catch (NumberFormatException e) {
+								strVal = "";
+							}
 						} else if (objVal instanceof Timestamp) {						
 							Timestamp val = (Timestamp) objVal;
 							strVal = sdf.format(val);
 						} else {
 							if(j==4){
-								Double val = Double.parseDouble(objVal.toString());					
-								formated = format.format(val);							
-								strVal = trimCustom(formated);
+								try {
+									Double val = Double.parseDouble(objVal.toString());
+									formated = format.format(val);							
+									strVal = trimCustom(formated);
+								} catch (NumberFormatException e) {
+									strVal = "";
+								}
 							}else{
 								strVal = objVal.toString().replace('"', ' ');
 							}
@@ -221,9 +231,13 @@ public class ExcelExporter {
 						qtyV = qtyV*priceV;	
 					}catch (Exception e) {
 						qtyV = 0.0;
-					}													
-					formated = format.format(qtyV);							
-					strVal = trimCustom(formated);	
+					}	
+					try {
+						formated = format.format(qtyV);							
+						strVal = trimCustom(formated);	
+					} catch (NumberFormatException e) {
+						strVal = "";
+					}
 					outFile.write(strVal + separator);
 				}
 			}
@@ -671,6 +685,63 @@ public class ExcelExporter {
 		outFile.close();
 	}
 	
+	public void GenericReportFromDateToDate_OH004_3_EXCEL(String fromDate, String toDate, String jasperFileName, Integer year, String status, String code_title, File exportFile, OperationType operationType) throws IOException {
+		String separator = "\t";
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		FileWriter outFile = new FileWriter(exportFile);
+		try{
+			BillBrowserManager billManager = new BillBrowserManager();
+			List<BillItemReportBean> collections = new ArrayList<BillItemReportBean>();
+			collections = billManager.getTotalCountAmountByQuery12(year,status, operationType);
+			Collections.sort(collections, new Comparator<BillItemReportBean>() {
+				public int compare(BillItemReportBean o1, BillItemReportBean o2) {
+					return o1.getBLI_ITEM_DESC().compareToIgnoreCase(o2.getBLI_ITEM_DESC());
+				}					
+			});
+			Collections.sort(collections, new Comparator<BillItemReportBean>() {
+				public int compare(BillItemReportBean o1, BillItemReportBean o2) {
+					return o1.getBLI_ITEM_GROUP().compareToIgnoreCase(o2.getBLI_ITEM_GROUP());
+				}					
+			});
+			
+			outFile.write(MessageBundle.getMessage("angal.medicalstock.multiplecharging.description") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stat.january") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.february") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.march") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.april") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.may") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.june") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.july") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.august") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.september") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.october") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.november") + separator);
+			outFile.write(MessageBundle.getMessage("angal.stocksheet.december") + separator);
+			outFile.write("\n");
+		
+			for (BillItemReportBean billItemReportBean : collections) {
+				outFile.write(billItemReportBean.getBLI_ITEM_DESC() + separator);
+				outFile.write(billItemReportBean.getCOUNT_JANUARY().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_FEBRUARY().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_MARCH().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_APRIL().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_MAY().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_JUNE().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_JULY().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_AUGUST().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_SEPTEMBER().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_OCTOBER().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_NOVEMBER().intValue() + separator);
+				outFile.write(billItemReportBean.getCOUNT_DECEMBER().intValue() + separator);
+				outFile.write("\n");					
+			}
+			Desktop.getDesktop().open(new File(exportFile.getAbsolutePath()));
+				
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		outFile.close();
+	}
 	public void exportResultsetToEXCEL_OH001(ResultSet resultSet, File exportFile) throws IOException, OHException {
 		String separator = "\t";
 		FileWriter outFile = new FileWriter(exportFile);
@@ -853,6 +924,74 @@ public class ExcelExporter {
 			}
 		} catch (SQLException e) {
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		}
+		outFile.close();
+	}
+	
+	public void exportMedicalLotsToExcel(List<MedicalLot> medicals, File file) throws IOException {
+		String separator = "\t";
+		FileWriter outFile = new FileWriter(file);
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		
+		outFile.write(MessageBundle.getMessage("angal.medicals.code") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.descriptionm") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.lotid") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.lotexpiring") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.stockm"));
+		outFile.write("\n");
+
+		String medCode, desc, lotCode, expDate, qty;
+		for(MedicalLot medLot: medicals) {
+			double actualQty = medLot.getMedical().getInitialqty() + medLot.getMedical().getInqty() - medLot.getMedical().getOutqty();
+			medCode = medLot.isParent()? medLot.getMedical().getProd_code() : "";
+			desc = medLot.isParent()? medLot.getMedical().getDescription() : "";
+			Lot lot = medLot.getLot();
+			if(lot==null && !(medLot.isParent() && medLot.getChildren().size()==1)){
+				if(medLot.hasChildren()){
+					lotCode = "Multiple";
+					expDate = "Multiple";
+				}
+				else{
+					lotCode = "";
+					expDate = "";
+				}
+			}
+			else if(lot==null) {
+				lotCode = medLot.getChildren().get(0).getLot().getCode();
+				expDate = sdf.format(medLot.getChildren().get(0).getLot().getDueDate().getTime());
+			} else {
+				lotCode = medLot.getLot().getCode();
+				expDate = sdf.format(medLot.getLot().getDueDate().getTime());
+			}
+			qty = lot==null? String.valueOf(actualQty) : String.valueOf(medLot.getLot().getQuantity());
+			
+			outFile.write(medCode + separator);
+			outFile.write('"' + desc + '"' + separator);
+			outFile.write(lotCode + separator);
+			outFile.write(expDate + separator);
+			outFile.write(qty);
+			outFile.write("\n");
+		}
+		outFile.close();
+	}
+	
+	public void exportMedicalsToExcel(List<Medical> medicals, File file) throws IOException {
+		String separator = "\t";
+		FileWriter outFile = new FileWriter(file);
+		
+		outFile.write(MessageBundle.getMessage("angal.medicals.code") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.descriptionm") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.stockm") + separator);
+		outFile.write(MessageBundle.getMessage("angal.medicals.lastprice"));
+		outFile.write("\n");
+
+		for(Medical med: medicals) {
+			double actualQty = med.getInitialqty() + med.getInqty() - med.getOutqty();
+			outFile.write(med.getProd_code() + separator);
+			outFile.write('"' +med.getDescription()+ '"' + separator);
+			outFile.write(String.valueOf(actualQty) + separator);
+			outFile.write(String.valueOf(med.getLastprice()));
+			outFile.write("\n");
 		}
 		outFile.close();
 	}

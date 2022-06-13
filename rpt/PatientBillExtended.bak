@@ -35,13 +35,13 @@
 	</parameter>
 	<queryString><![CDATA[SELECT P.PAT_FNAME, P.PAT_SNAME, P.PAT_NAME, BLL_ID, BLL_ID_PAT, BLL_PAT_NAME, BLL_UPDATE, BLL_USR_ID_A, BLI_ID_PRICE, BLI_ITEM_DESC, 
  BLI_ITEM_AMOUNT, IF(IFNULL(BLI_ITEM_AMOUNT,0) > IFNULL(BLI_ITEM_AMOUNT_BRUT,0), IFNULL(BLI_ITEM_AMOUNT,0), IFNULL(BLI_ITEM_AMOUNT_BRUT,0)) as AMOUNT_REAL, BLI_ITEM_AMOUNT_BRUT,
- BLI_QTY, BLP_USR_ID_A, BLL_STATUS, BLL_DATE
+  SUM(BLI_QTY) as BLI_QTY, BLP_USR_ID_A, BLL_STATUS, BLL_DATE
 FROM BILLS B
 JOIN PATIENT P ON B.BLL_ID_PAT=P.PAT_ID 
 JOIN BILLITEMS I ON B.BLL_ID = I.BLI_ID_BILL
 LEFT JOIN (SELECT BLP_ID_BILL, BLP_USR_ID_A FROM BILLPAYMENTS WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE DESC LIMIT 1) 
 AS P ON B.BLL_ID = P.BLP_ID_BILL
-WHERE BLL_ID = $P{billID}]]></queryString>
+WHERE BLL_ID = $P{billID} Group by BLI_ITEM_DESC having BLI_QTY > 0]]></queryString>
 
 	<field name="PAT_FNAME" class="java.lang.String"/>
 	<field name="PAT_SNAME" class="java.lang.String"/>
@@ -289,7 +289,7 @@ WHERE BLL_ID = $P{billID}]]></queryString>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="18"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbill.simulate.details")]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbill.detailsinvoice")]]></textFieldExpression>
 				</textField>
 			</band>
 		</pageHeader>

@@ -1157,22 +1157,18 @@ public class MovStockMultipleCharging extends ModalJFrame implements SupplierLis
 							/*if (lot == null) {
 								lot = new Lot(lotId, new GregorianCalendar(), new GregorianCalendar());
 							}*/
-							////////////////////////
-							GregorianCalendar thisDate = TimeTools.getServerDateTime();
-							thisDate.setTime(jDateChooser.getDate());
-							String generatedId = lotId + " " + formatDateTime(thisDate);
-							
-							jTextFieldLotId.setText(generatedId);
+							////////////////////////			
+							jTextFieldLotId.setText(lotId);
 							if (lot == null) {
-								lot = new Lot(generatedId, new GregorianCalendar(), new GregorianCalendar());
+								lot = new Lot(lotId, new GregorianCalendar(), new GregorianCalendar());
 							} else {
-								lot.setCode(generatedId);
+								lot.setCode(lotId);
 							}
 							//////////////////////
 							if (Param.bool("LOTWITHCOST")) {
 								double cost = getPrice(true);
 								lot.setCost(cost);
-								
+							
 								if(Param.bool("COST_WITH_REDUCTION")){
 									Double redrate = getReductionRate(false);
 									lot.setReduction_rate(redrate<0 ? 0.: redrate);
@@ -1180,7 +1176,6 @@ public class MovStockMultipleCharging extends ModalJFrame implements SupplierLis
 							}
 
 							jTextFieldExpiringDate.setText(format(lot.getDueDate(), DATE_FORMAT_DDMMYYYY));
-
 							if (movement != null) {
 								med = movement.getMedical();
 							}
@@ -1858,7 +1853,7 @@ public class MovStockMultipleCharging extends ModalJFrame implements SupplierLis
 						JOptionPane.ERROR_MESSAGE);
 			return -1;
 		}
-		if (qty <= 0) {
+		if (qty <= 0 ) {
 			if (showMessage)
 				JOptionPane.showMessageDialog(MovStockMultipleCharging.this,
 						MessageBundle.getMessage("angal.medicalstockwardedit.invalidquantitypleasetryagain"), //$NON-NLS-1$
@@ -2268,17 +2263,17 @@ public class MovStockMultipleCharging extends ModalJFrame implements SupplierLis
 		}
 
 		// Check the RefNo
-		String refNo = jTextFieldReference.getText();
+		String refNo = jTextFieldReference.getText().trim();
 		if (refNo.equals("")) { //$NON-NLS-1$
 			JOptionPane.showMessageDialog(MovStockMultipleCharging.this,
 					MessageBundle.getMessage("angal.medicalstock.multiplecharging.pleaseinsertareferencenumber")); //$NON-NLS-1$
 			return false;
 		} 
-		/*else if (manager.refNoExists(refNo)) {
+		else if (manager.refNoExists(refNo)) {
 			JOptionPane.showMessageDialog(MovStockMultipleCharging.this, MessageBundle
 					.getMessage("angal.medicalstock.multiplecharging.theinsertedreferencenumberalreadyexists")); //$NON-NLS-1$
 			return false;
-		}*/
+		}
 
 		// Check supplier
 		Object supplier = jComboBoxSupplier.getSelectedItem();

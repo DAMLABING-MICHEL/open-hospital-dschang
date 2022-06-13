@@ -77,7 +77,7 @@ public class GenericReportBill {
 
 			JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperFile);
 			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
-			
+			System.out.println("name "+jasperFileName+ "  billid "+String.valueOf(billID));
 			String PDFfile = "rpt/PDF/" + jasperFileName + "_" + String.valueOf(billID) + ".pdf";
 			JasperExportManager.exportReportToPdfFile(jasperPrint, PDFfile);
 

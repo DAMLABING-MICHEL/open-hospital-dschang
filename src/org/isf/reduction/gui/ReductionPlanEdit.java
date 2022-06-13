@@ -40,6 +40,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EventListener;
 
@@ -72,6 +73,7 @@ public class ReductionPlanEdit extends ModalJFrame {
 	private JPanel buttonPanel;
 	private JLabel lblDescription;
 	private JTextField txtDescription;
+	private String descriptionBackup;
 	private JLabel lblMedicalrate;
 	private JTextField txtMedicalRate;
 	private JLabel lblOperationRate;
@@ -545,6 +547,12 @@ public class ReductionPlanEdit extends ModalJFrame {
 				public void actionPerformed(ActionEvent event) {
 					try {
 						if(loadDataInObject()){
+							if(reductionPlan.getDescription().trim().length() == 0) {
+								throw new OHException(
+										MessageBundle
+										.getMessage("angal.reduction.descriptionnotvalid"),
+								new SQLException("Cannot save invalid description"));
+							}
 							if(isInsert){
 								manager.newReductionPlan(reductionPlan);
 							}
@@ -723,9 +731,19 @@ public class ReductionPlanEdit extends ModalJFrame {
 	}
 	private boolean loadDataInObject() throws OHException{
 		try {
-			if(manager.getReductionPlan(txtDescription.getText())!= null){
-				JOptionPane.showMessageDialog(ReductionPlanEdit.this, MessageBundle.getMessage("angal.reduction.descriptionused"));
-				return false;
+			if(isInsert) {
+				if(manager.getReductionPlan(txtDescription.getText())!= null){
+					JOptionPane.showMessageDialog(ReductionPlanEdit.this, MessageBundle.getMessage("angal.reduction.descriptionused"));
+					return false;
+				}
+			}
+			else {
+				if(!descriptionBackup.equals(txtDescription.getText())) {
+					if(manager.getReductionPlan(txtDescription.getText())!= null){
+						JOptionPane.showMessageDialog(ReductionPlanEdit.this, MessageBundle.getMessage("angal.reduction.descriptionused"));
+						return false;
+					}
+				}
 			}
 			reductionPlan.setDescription(txtDescription.getText());
 			reductionPlan.setExamReductions(examReductionList);
@@ -743,6 +761,7 @@ public class ReductionPlanEdit extends ModalJFrame {
 	}
 	private void loadDataFromObject(){
 		txtDescription.setText(this.reductionPlan.getDescription());
+		descriptionBackup = txtDescription.getText();
 		txtMedicalRate.setText(String.valueOf(this.reductionPlan.getMedicalRate()));
 		txtExamRate.setText(String.valueOf(this.reductionPlan.getExamRate()));
 		txtOperationRate.setText(String.valueOf(this.reductionPlan.getOperationRate()));

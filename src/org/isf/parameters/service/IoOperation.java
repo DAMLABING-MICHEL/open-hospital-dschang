@@ -33,9 +33,11 @@ public class IoOperation {
 		//String string = "SELECT * FROM parameters WHERE PRMS_DELETED is null or PRMS_DELETED <> ?  ORDER BY PRMS_CODE ASC";
 		String string = "SELECT * FROM parameters WHERE PRMS_DELETED is null or PRMS_DELETED <> ?  ";
 		DbQueryLogger dbQuery = new DbQueryLogger();
+		
 		try {
 			ArrayList<Object> params = new ArrayList<Object>();
 			params.add("D");
+			
 			ResultSet resultSet = dbQuery.getDataWithParams(string,params, true);
 			parameters = new ArrayList<Parameter>(resultSet.getFetchSize());
 			while (resultSet.next()) {
@@ -50,6 +52,7 @@ public class IoOperation {
 			}
 			
 		} catch (SQLException e) {
+			
 			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
 		} 
 		finally{

@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import org.isf.generaldata.MessageBundle;
 import org.slf4j.Logger;
@@ -41,12 +42,14 @@ public class DbSingleConn {
 			try {
 				pConn = createConnection();
 			} catch (CommunicationsException ce){
-				String message = MessageBundle.getMessage("angal.utils.dbserverconnectionfailure");
-				logger.error(">> " + message);
-				JOptionPane.showMessageDialog(null, message);
-				System.exit(1);
-			}
+				String message = "Serveur de donnees arrete ou probleme de reseau"; //MessageBundle.getMessage("angal.utils.dbserverconnectionfailure");
 				
+				//JOptionPane.showMessageDialog(null, message);
+				final JPanel pane = new JPanel();
+			    JOptionPane.showMessageDialog(pane, "Serveur de donnees arrete ou probleme de reseau", "Error", JOptionPane.ERROR_MESSAGE);
+			    logger.error(">> " + message);
+			    System.exit(1);
+			}
 		}
 		return pConn;
 	}
@@ -106,8 +109,15 @@ public class DbSingleConn {
 		sbURL.append(username);
 		sbURL.append("&password=");
 		sbURL.append(password);
-
-		return DriverManager.getConnection(sbURL.toString());
+		
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection(sbURL.toString());
+		} catch (Exception e) {		
+			final JPanel panel = new JPanel();
+		    JOptionPane.showMessageDialog(panel, "Serveur de donnees arrete ou probleme de reseau", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		return conn;
 	}
 
 }

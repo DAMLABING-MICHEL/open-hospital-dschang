@@ -72,6 +72,22 @@ public class MedicalBrowsingManager {
 	}
 	
 	/**
+	 * Returns a <code>limit<code> size of medocs stating from <code>start<code>.
+	 * In case of error a message error is shown and a <code>null</code> value is returned.
+	 * @param start
+	 * @param limit
+	 * @return all the medicals.
+	 */
+	public ArrayList<Medical> getMedicals(int start, int limit) {
+		try {
+			return ioOperations.getMedicals(start, limit);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+	
+	/**
 	 * Returns all the medicals.
 	 * In case of error a message error is shown and a <code>null</code> value is returned.
 	 * @return all the medicals.

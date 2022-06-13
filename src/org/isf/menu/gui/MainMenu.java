@@ -41,6 +41,7 @@ public class MainMenu extends JFrame implements ActionListener, Login.LoginListe
 	private final Logger logger = LoggerFactory.getLogger(MainMenu.class);
 
 	public void loginInserted(AWTEvent e) {
+		
 		if (e.getSource() instanceof User) {
 			myUser = (User) e.getSource();
 			MDC.put("OHUser", myUser.getUserName());
@@ -109,7 +110,7 @@ public class MainMenu extends JFrame implements ActionListener, Login.LoginListe
 
 	public MainMenu() {
 		myFrame = this;
-
+		
 		GeneralData.getGeneralData();
 		try {
 			singleUser = Param.bool("SINGLEUSER") ;   
@@ -156,24 +157,7 @@ public class MainMenu extends JFrame implements ActionListener, Login.LoginListe
 
 		// start connection with xmpp server if is enabled
 		if (flag_Xmpp) {
-//			try {
-//				Server.getInstance().login(myUser.getUserName(), myUser.getPasswd());
-//				try {
-//					Thread.sleep(100);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//				System.out.println("ici la communication");
-//				//new CommunicationFrame();
-//				/*
-//				 * Interaction communication= new Interaction();
-//				 * communication.incomingChat(); communication.receiveFile();
-//				 */
-//			} catch (XMPPException e) {
-//				logger.info("No XMPP Server seems to be running: set XMPPMODULEENABLED = false");
-//				//flag_Xmpp = GeneralData.XMPPMODULEENABLED = false;
-//				flag_Xmpp = false;
-//			}
+
 
 		}
 

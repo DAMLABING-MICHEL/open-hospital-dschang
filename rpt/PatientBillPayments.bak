@@ -24,11 +24,12 @@
 	<import value="net.sf.jasperreports.engine.data.*" />
 
 	<parameter name="billID" isForPrompting="true" class="java.lang.String"/>
-	<queryString><![CDATA[SELECT BLP_DATE, BLP_AMOUNT FROM BILLPAYMENTS
+	<queryString><![CDATA[SELECT BLP_DATE, BLP_AMOUNT, BLP_USR_ID_A FROM BILLPAYMENTS
 WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 
 	<field name="BLP_DATE" class="java.sql.Timestamp"/>
 	<field name="BLP_AMOUNT" class="java.lang.Double"/>
+	<field name="BLP_USR_ID_A" class="java.lang.String"/>
 
 	<variable name="PAID" class="java.lang.Double" resetType="Report" calculation="Sum">
 		<variableExpression><![CDATA[$F{BLP_AMOUNT}]]></variableExpression>
@@ -92,7 +93,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 		</columnHeader>
 		<detail>
 			<band height="17"  isSplitAllowed="true" >
-				<textField isStretchWithOverflow="false" pattern="dd/MM/yyyy" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+				<textField isStretchWithOverflow="false" pattern="dd/MM/yyyy HH.mm.ss" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="289"
 						y="0"
@@ -129,6 +130,19 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 						<font size="10"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BLP_AMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="169"
+						y="2"
+						width="98"
+						height="14"
+						key="textField-7"/>
+					<box></box>
+					<textElement>
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{BLP_USR_ID_A}]]></textFieldExpression>
 				</textField>
 			</band>
 		</detail>
