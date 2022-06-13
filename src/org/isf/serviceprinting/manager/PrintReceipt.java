@@ -76,6 +76,7 @@ public class PrintReceipt {
 					getPrinter(printService);
 					if (!TxtPrinter.ZPL) {
 						printFileTxt(TXTfile, printService);
+						printerCutOff(printService);
 					} else {
 						printFileZPL(TXTfile, printService);
 					}
@@ -105,7 +106,11 @@ public class PrintReceipt {
 				}
 			}
 			
-//			output.append(""+"\r\n");
+			output.append("\n");
+			output.append("\n");
+			output.append("\n");
+			output.append("\n");
+			output.append("\n");
 			
 			sc.close();
 			reader.close();
@@ -115,9 +120,6 @@ public class PrintReceipt {
 			FileWriter fw = null;
 
 			try {
-
-				
-
 				fw = new FileWriter(TXTfile);
 				bw = new BufferedWriter(fw);
 				bw.write(output.toString());
@@ -171,6 +173,18 @@ public class PrintReceipt {
 			} catch (PrintException e) {
 				e.printStackTrace();
 			}
+	}
+	
+	private void printerCutOff(PrintService printService) {
+		DocPrintJob job = printService.createPrintJob();  
+		byte[] bytes = {0x1d,0x56,0x00};
+		DocFlavor flavor = DocFlavor.BYTE_ARRAY.AUTOSENSE;
+		Doc doc = new SimpleDoc(bytes, flavor, null);
+		try {
+			job.print(doc, null);
+		} catch (PrintException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
