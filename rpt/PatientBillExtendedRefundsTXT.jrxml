@@ -2,7 +2,7 @@
 <!-- Created with iReport - A designer for JasperReports -->
 <!DOCTYPE jasperReport PUBLIC "//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
 <jasperReport
-		 name="PatientBillPaymentsSubTXT"
+		 name="PatientBillExtendedRefundsTXT"
 		 columnCount="1"
 		 printOrder="Vertical"
 		 orientation="Landscape"
@@ -25,22 +25,20 @@
 	<import value="net.sf.jasperreports.engine.data.*" />
 
 	<parameter name="billID" isForPrompting="true" class="java.lang.String"/>
-	<queryString><![CDATA[SELECT BLL_ID, BLL_ID_PAT, BLL_PAT_NAME, BLL_USR_ID_A, BLL_UPDATE, BLP_DATE, BLP_AMOUNT, BLL_BALANCE 
-FROM BILLPAYMENTS JOIN BILLS ON BLP_ID_BILL = BLL_ID 
-WHERE BLP_ID_BILL = $P{billID} 
-ORDER BY BLP_DATE ASC]]></queryString>
+	<queryString><![CDATA[SELECT BLL_ID, BLL_ID_PAT, BLL_PAT_NAME, BLL_USR_ID_A, BLL_DATE, BLL_AMOUNT
+FROM BILLS
+WHERE BLL_PARENT_ID = $P{billID} 
+ORDER BY BLL_DATE ASC]]></queryString>
 
 	<field name="BLL_ID" class="java.lang.Integer"/>
 	<field name="BLL_ID_PAT" class="java.lang.Integer"/>
 	<field name="BLL_PAT_NAME" class="java.lang.String"/>
 	<field name="BLL_USR_ID_A" class="java.lang.String"/>
-	<field name="BLL_UPDATE" class="java.sql.Timestamp"/>
-	<field name="BLP_DATE" class="java.sql.Timestamp"/>
-	<field name="BLP_AMOUNT" class="java.lang.Double"/>
-	<field name="BLL_BALANCE" class="java.lang.Double"/>
+	<field name="BLL_DATE" class="java.sql.Timestamp"/>
+	<field name="BLL_AMOUNT" class="java.lang.Double"/>
 
-	<variable name="PAID" class="java.lang.Double" resetType="Report" calculation="Sum">
-		<variableExpression><![CDATA[$F{BLP_AMOUNT}]]></variableExpression>
+	<variable name="TOTALREFUNDS" class="java.lang.Double" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{BLL_AMOUNT}]]></variableExpression>
 	</variable>
 		<background>
 			<band height="0"  isSplitAllowed="true" >
@@ -60,20 +58,20 @@ ORDER BY BLP_DATE ASC]]></queryString>
 					<reportElement
 						x="1"
 						y="0"
-						width="341"
+						width="339"
 						height="18"
 						key="textField-25"/>
 					<box></box>
 					<textElement textAlignment="Left" verticalAlignment="Bottom">
 						<font fontName="Courier New" pdfFontName="Helvetica" size="12" isBold="false" isItalic="false"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbillpaymentssubtxt.payments" )]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbillextended.refunds" )]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="342"
+						x="340"
 						y="0"
-						width="267"
+						width="269"
 						height="18"
 						key="textField-27"/>
 					<box></box>
@@ -90,7 +88,7 @@ ORDER BY BLP_DATE ASC]]></queryString>
 					<reportElement
 						x="1"
 						y="0"
-						width="341"
+						width="339"
 						height="18"
 						key="textField-9"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -101,13 +99,13 @@ ORDER BY BLP_DATE ASC]]></queryString>
 					<textElement textAlignment="Left" verticalAlignment="Bottom">
 						<font fontName="Courier New" size="12" isBold="false"/>
 					</textElement>
-				<textFieldExpression   class="java.sql.Timestamp"><![CDATA[$F{BLP_DATE}]]></textFieldExpression>
+				<textFieldExpression   class="java.sql.Timestamp"><![CDATA[$F{BLL_DATE}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.0" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="342"
+						x="340"
 						y="0"
-						width="267"
+						width="269"
 						height="18"
 						key="textField-13"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -118,7 +116,7 @@ ORDER BY BLP_DATE ASC]]></queryString>
 					<textElement textAlignment="Right" verticalAlignment="Bottom">
 						<font fontName="Courier New" size="12" isBold="false"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BLP_AMOUNT}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BLL_AMOUNT}]]></textFieldExpression>
 				</textField>
 			</band>
 		</detail>
@@ -131,12 +129,12 @@ ORDER BY BLP_DATE ASC]]></queryString>
 			</band>
 		</pageFooter>
 		<summary>
-			<band height="25"  isSplitAllowed="true" >
+			<band height="26"  isSplitAllowed="true" >
 				<textField isStretchWithOverflow="false" pattern="#,##0.0" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="342"
+						x="340"
 						y="0"
-						width="267"
+						width="269"
 						height="18"
 						key="textField-11"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -147,13 +145,13 @@ ORDER BY BLP_DATE ASC]]></queryString>
 					<textElement textAlignment="Right" verticalAlignment="Bottom">
 						<font fontName="Courier New" size="12" isBold="false"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{PAID}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALREFUNDS}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="1"
 						y="0"
-						width="341"
+						width="339"
 						height="18"
 						key="textField-24"/>
 					<box></box>

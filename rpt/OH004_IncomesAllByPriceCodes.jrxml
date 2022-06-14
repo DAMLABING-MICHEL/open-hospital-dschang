@@ -35,19 +35,23 @@
 	<parameter name="state2" isForPrompting="false" class="java.lang.String"/>
 	<queryString><![CDATA[SELECT	BLI_ITEM_GROUP, 
 	BLI_ITEM_DESC, 
-	SUM(BLI_QTY) AS QTY, 
-	SUM(BLI_QTY * BLI_ITEM_AMOUNT) AS AMOUNT
+	SUM(IF(b.BLL_PARENT_ID IS NULL, BLI_QTY, 0)) AS QTY,
+	SUM(IF(b.BLL_PARENT_ID IS NOT NULL, BLI_QTY, 0)) AS REFUNDED_QTY,
+	SUM(IF(b.BLL_PARENT_ID IS NULL, (BLI_QTY * BLI_ITEM_AMOUNT), 0)) AS AMOUNT,
+	SUM(IF(b.BLL_PARENT_ID IS NOT NULL, (BLI_QTY * BLI_ITEM_AMOUNT), 0)) AS REFUNDED_AMOUNT
 FROM BILLITEMS
-JOIN BILLS ON BLI_ID_BILL = BLL_ID
-WHERE (BLL_STATUS = $P{state} or BLL_STATUS = $P{state2}) 
-AND DATE(BLL_DATE) BETWEEN STR_TO_DATE($P{fromdate},'%d/%m/%Y') AND STR_TO_DATE($P{todate},'%d/%m/%Y')
+JOIN BILLS b ON BLI_ID_BILL = b.BLL_ID
+WHERE (b.BLL_STATUS = $P{state} OR b.BLL_STATUS = $P{state2}) 
+AND DATE(b.BLL_DATE) BETWEEN STR_TO_DATE($P{fromdate},'%d/%m/%Y') AND STR_TO_DATE($P{todate},'%d/%m/%Y')
 GROUP BY BLI_ITEM_DESC
 ORDER BY BLI_ITEM_GROUP, BLI_ITEM_DESC ASC]]></queryString>
 
 	<field name="BLI_ITEM_GROUP" class="java.lang.String"/>
 	<field name="BLI_ITEM_DESC" class="java.lang.String"/>
 	<field name="QTY" class="java.lang.Double"/>
+	<field name="REFUNDED_QTY" class="java.lang.Double"/>
 	<field name="AMOUNT" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT" class="java.lang.Double"/>
 
 	<variable name="GRP_SUBTOTAL_NB" class="java.lang.Double" resetType="Group" resetGroup="ITEM_GROUP" calculation="Sum">
 		<variableExpression><![CDATA[$F{QTY}]]></variableExpression>
@@ -59,6 +63,22 @@ ORDER BY BLI_ITEM_GROUP, BLI_ITEM_DESC ASC]]></queryString>
 	</variable>
 	<variable name="GRP_TOTAL_NB" class="java.lang.Double" resetType="Report" calculation="Sum">
 		<variableExpression><![CDATA[$F{QTY}]]></variableExpression>
+		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GRP_TOTAL_REFUNDED_AMOUNT" class="java.lang.Double" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{REFUNDED_AMOUNT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GRP_SUBTOTAL_REFUNDED_NB" class="java.lang.Double" resetType="Group" resetGroup="ITEM_GROUP" calculation="Sum">
+		<variableExpression><![CDATA[$F{REFUNDED_QTY}]]></variableExpression>
+		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GRP_SUBTOTAL_REFUNDED_AMOUNT" class="java.lang.Double" resetType="Group" resetGroup="ITEM_GROUP" calculation="Sum">
+		<variableExpression><![CDATA[$F{REFUNDED_AMOUNT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GRP_TOTAL_REFUNDED_NB" class="java.lang.Double" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{REFUNDED_QTY}]]></variableExpression>
 		<initialValueExpression><![CDATA[new Double(0)]]></initialValueExpression>
 	</variable>
 	<variable name="GRP_TOTAL_AMOUNT" class="java.lang.Double" resetType="Report" calculation="Sum">
@@ -93,9 +113,9 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="3"
-						y="21"
-						width="297"
-						height="20"
+						y="25"
+						width="205"
+						height="17"
 						key="textField-11"/>
 					<box></box>
 					<textElement verticalAlignment="Middle">
@@ -105,29 +125,55 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="299"
-						y="21"
-						width="100"
-						height="20"
+						x="208"
+						y="26"
+						width="59"
+						height="16"
 						key="textField-12"/>
 					<box></box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font pdfFontName="Helvetica-Bold" size="11" isBold="true" isUnderline="false"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.medicalstock.multiplecharging.quantity")]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.billsreport.soldquantity")]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="398"
-						y="21"
-						width="135"
-						height="20"
+						x="267"
+						y="26"
+						width="98"
+						height="16"
 						key="textField-13"/>
 					<box></box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font pdfFontName="Helvetica-Bold" size="11" isBold="true" isUnderline="false"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.medicalstock.multiplecharging.totalcost")]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.billsreport.refundedquantity")]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="365"
+						y="25"
+						width="84"
+						height="16"
+						key="textField-16"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="11" isBold="true" isUnderline="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.billsreport.refundedamount")]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="449"
+						y="25"
+						width="84"
+						height="16"
+						key="textField-17"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="11" isBold="true" isUnderline="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.report.billsreport.soldamount")]]></textFieldExpression>
 				</textField>
 			</band>
 			</groupHeader>
@@ -137,7 +183,7 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 					<reportElement
 						x="3"
 						y="2"
-						width="297"
+						width="205"
 						height="20"
 						key="textField-1"/>
 					<box></box>
@@ -153,9 +199,9 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="300"
+						x="208"
 						y="2"
-						width="100"
+						width="59"
 						height="20"
 						key="textField"/>
 					<box></box>
@@ -166,9 +212,9 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="400"
+						x="448"
 						y="2"
-						width="133"
+						width="87"
 						height="20"
 						key="textField"/>
 					<box></box>
@@ -176,6 +222,32 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 						<font pdfFontName="Helvetica-Bold" isBold="true"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_SUBTOTAL_AMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="267"
+						y="2"
+						width="98"
+						height="20"
+						key="textField-20"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_SUBTOTAL_REFUNDED_NB}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="365"
+						y="2"
+						width="82"
+						height="20"
+						key="textField-21"/>
+					<box></box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_SUBTOTAL_REFUNDED_AMOUNT}]]></textFieldExpression>
 				</textField>
 			</band>
 			</groupFooter>
@@ -199,8 +271,8 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				</rectangle>
 				<image  evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="463"
-						y="4"
+						x="458"
+						y="-1"
 						width="70"
 						height="50"
 						key="image-1"/>
@@ -321,7 +393,7 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 					<reportElement
 						x="3"
 						y="2"
-						width="297"
+						width="205"
 						height="20"
 						key="textField"/>
 					<box></box>
@@ -332,9 +404,9 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="300"
-						y="2"
-						width="100"
+						x="209"
+						y="1"
+						width="58"
 						height="20"
 						key="textField"/>
 					<box></box>
@@ -345,9 +417,9 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="400"
-						y="2"
-						width="133"
+						x="448"
+						y="1"
+						width="85"
 						height="20"
 						key="textField"/>
 					<box></box>
@@ -355,6 +427,32 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 						<font/>
 					</textElement>
 				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{AMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="267"
+						y="1"
+						width="98"
+						height="20"
+						key="textField-18"/>
+					<box></box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{REFUNDED_QTY}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="365"
+						y="1"
+						width="83"
+						height="20"
+						key="textField-19"/>
+					<box></box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{REFUNDED_AMOUNT}]]></textFieldExpression>
 				</textField>
 			</band>
 		</detail>
@@ -410,9 +508,9 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Opaque"
-						x="300"
+						x="208"
 						y="3"
-						width="100"
+						width="59"
 						height="23"
 						forecolor="#FFFFFF"
 						backcolor="#0000FF"
@@ -426,9 +524,9 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Opaque"
-						x="400"
+						x="267"
 						y="3"
-						width="135"
+						width="100"
 						height="23"
 						forecolor="#FFFFFF"
 						backcolor="#0000FF"
@@ -437,14 +535,14 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font pdfFontName="Helvetica-Bold" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_TOTAL_AMOUNT}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_TOTAL_REFUNDED_NB}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						mode="Opaque"
 						x="0"
 						y="3"
-						width="300"
+						width="208"
 						height="23"
 						forecolor="#FFFFFF"
 						backcolor="#0000FF"
@@ -454,6 +552,38 @@ $F{BLI_ITEM_GROUP}.equals("OTH")?$P{REPORT_RESOURCE_BUNDLE}.getString("angal.rep
 						<font size="12"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString("angal.stat.total")]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Opaque"
+						x="368"
+						y="3"
+						width="79"
+						height="23"
+						forecolor="#FFFFFF"
+						backcolor="#0000FF"
+						key="textField-22"/>
+					<box></box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="10" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_TOTAL_REFUNDED_AMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						mode="Opaque"
+						x="448"
+						y="3"
+						width="87"
+						height="23"
+						forecolor="#FFFFFF"
+						backcolor="#0000FF"
+						key="textField-23"/>
+					<box></box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" size="10" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{GRP_TOTAL_AMOUNT}]]></textFieldExpression>
 				</textField>
 			</band>
 		</summary>

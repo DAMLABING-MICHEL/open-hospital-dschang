@@ -49,6 +49,14 @@ public class BillItems {
 	 */
 	private String itemDisplayCode;
 	
+	/**
+	 * Refunded quantity is the quantity of the item that has already been reimbursed.
+	 * This props is never persisted.
+	 * 
+	 * Added on 18/05/2022 by Silevester D.
+	 */
+	private int refundedQty;
+	
 	public BillItems() {
 		super();
 	}
@@ -224,6 +232,14 @@ public class BillItems {
 		this.export_status = export_status;
 	}
 
+	public int getRefundedQty() {
+		return refundedQty;
+	}
+
+	public void setRefundedQty(int refundedQty) {
+		this.refundedQty = refundedQty;
+	}
+	
 //	public int getItemRealId() {
 //		return itemRealId;
 //	}

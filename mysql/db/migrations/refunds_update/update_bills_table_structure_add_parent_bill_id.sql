@@ -1,0 +1,2 @@
+ALTER TABLE `bills` ADD `BLL_PARENT_ID` INT NULL DEFAULT NULL COMMENT "main bill's id in refunds bills" AFTER `BLL_ID`;
+ALTER TABLE `bills` ADD CONSTRAINT `fk_bill_id_bll_parent_id` FOREIGN KEY(`BLL_PARENT_ID`) REFERENCES `bills`(`BLL_ID`);

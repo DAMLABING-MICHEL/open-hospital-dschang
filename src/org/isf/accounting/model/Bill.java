@@ -13,6 +13,7 @@ import org.isf.utils.time.TimeTools;
  * Pure Model Bill : represents a Bill
  * @author Mwithi
  *
+ *14/06/2022 - Silevester D. - Add props parentId and new constructor with parentId param
  */
 @XmlRootElement
 public class Bill implements Comparable<Bill> {
@@ -34,11 +35,21 @@ public class Bill implements Comparable<Bill> {
 	private int affiliatedParent;
 	private boolean closedManually;
 	
+	/**
+	 * ParentId is the main bill id in refunds bills
+	 */
+	private int parentId;
+	
+	/**
+	 * Refund amount is the amount of bill that has been refunded
+	 */
+	private double refundAmount;
+	
 	//fields for history	
-		private String create_by ; 
-		private String modify_by ; 
-		private GregorianCalendar create_date;
-		private GregorianCalendar modify_date;
+	private String create_by ; 
+	private String modify_by ; 
+	private GregorianCalendar create_date;
+	private GregorianCalendar modify_date;
 	//
 		
 	private String garante;
@@ -122,6 +133,50 @@ public class Bill implements Comparable<Bill> {
 		this.user = user;
 		
 	}
+	
+	/** Constructor with bill parent's id
+	 * 
+	 * @param id
+	 * @param parentId
+	 * @param date
+	 * @param update
+	 * @param isList
+	 * @param listID
+	 * @param listName
+	 * @param isPatient
+	 * @param patID
+	 * @param patName
+	 * @param status
+	 * @param amount
+	 * @param balance
+	 * @param user
+	 * @param wardcode
+	 * @param reductPlan
+	 * @param parent
+	 */
+	public Bill(int id, int parentId, GregorianCalendar date, GregorianCalendar update, boolean isList, int listID, String listName,
+			boolean isPatient, int patID, String patName, String status, Double amount, Double balance, String user,
+			String wardcode, int reductPlan, int parent) {
+		super();
+		this.id = id;
+		this.parentId = parentId;
+		this.date = date;
+		this.update = update;
+		this.isList = isList;
+		this.listID = listID;
+		this.listName = listName;
+		this.isPatient = isPatient;
+		this.patID = patID;
+		this.patName = patName;
+		this.status = status;
+		this.amount = amount;
+		this.balance = balance;
+		this.user = user;
+		this.wardCode = wardcode;
+		this.reductionPlan = reductPlan;
+		this.affiliatedParent = parent;
+	}
+
 
 	public int getId() {
 		return id;
@@ -285,5 +340,21 @@ public class Bill implements Comparable<Bill> {
 
 	public void setGarante(String garante) {
 		this.garante = garante;
+	}
+	
+	public int getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
+	
+	public double getRefundAmount() {
+		return refundAmount;
+	}
+
+	public void setRefundAmount(double refundAmount) {
+		this.refundAmount = refundAmount;
 	}
 }

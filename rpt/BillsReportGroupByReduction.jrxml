@@ -5,10 +5,10 @@
 		 name="BillsReportGroupByReduction"
 		 columnCount="1"
 		 printOrder="Vertical"
-		 orientation="Portrait"
-		 pageWidth="595"
-		 pageHeight="842"
-		 columnWidth="535"
+		 orientation="Landscape"
+		 pageWidth="842"
+		 pageHeight="595"
+		 columnWidth="782"
 		 columnSpacing="0"
 		 leftMargin="30"
 		 rightMargin="30"
@@ -34,13 +34,15 @@
 	<parameter name="todate_timestamp" isForPrompting="false" class="java.sql.Timestamp"/>
 	<parameter name="fromdate_timestamp" isForPrompting="false" class="java.sql.Timestamp"/>
 	<parameter name="reduction_plan" isForPrompting="false" class="java.lang.String"/>
-	<queryString><![CDATA[SELECT BLL_ID, BLL_DATE, BLL_UPDATE, BLL_PAT_NAME, BLL_AMOUNT, PAID, IF(DATE(BLL_DATE) BETWEEN $P{fromdate} AND $P{todate}, BLL_AMOUNT - IF(PAID is null,0,PAID), null) BALANCE, BLL_STATUS, RP_DESCRIPTION
+	<queryString><![CDATA[SELECT BLL_ID, BLL_DATE, BLL_UPDATE, BLL_PAT_NAME, BLL_AMOUNT, PAID, IF(DATE(BLL_DATE) BETWEEN $P{fromdate} AND $P{todate}, BLL_AMOUNT - IF(PAID is null,0,PAID), null) BALANCE, BLL_STATUS, RP_DESCRIPTION,
+(SELECT SUM(b1.BLL_AMOUNT) FROM BILLS b1 WHERE b1.BLL_PARENT_ID = BILLS1.BLL_ID) AS REFUNDED_AMOUNT
 FROM (
 	SELECT BLL_ID, BLL_DATE, BLL_UPDATE, BLL_PAT_NAME, BLL_AMOUNT, IF(DATE(BLP_DATE) BETWEEN $P{fromdate} AND $P{todate}, SUM(BLP_AMOUNT), 0) PAID, BLL_STATUS, IFNULL(RP_DESCRIPTION, 'AUCUNE REDUCTION') RP_DESCRIPTION
 	FROM (
 		SELECT * FROM BILLS LEFT JOIN BILLPAYMENTS ON BLL_ID = BLP_ID_BILL  
 		LEFT JOIN REDUCTIONPLAN ON BLL_RP_ID=RP_ID 
 		WHERE BLL_STATUS <> 'D' 
+		AND BLL_PARENT_ID IS NULL
 		AND (DATE(BLL_DATE) BETWEEN $P{fromdate} AND $P{todate}
 		OR DATE(BLP_DATE) BETWEEN $P{fromdate} AND $P{todate})		
 		And (
@@ -52,7 +54,7 @@ FROM (
                     )
 	) PAYMENTS
 GROUP BY BLL_ID
-) BILLS 
+) BILLS1 
 ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 
 	<field name="BLL_ID" class="java.lang.Integer"/>
@@ -64,11 +66,12 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 	<field name="BALANCE" class="java.lang.Double"/>
 	<field name="BLL_STATUS" class="java.lang.String"/>
 	<field name="RP_DESCRIPTION" class="java.lang.String"/>
+	<field name="REFUNDED_AMOUNT" class="java.lang.Double"/>
 
 	<variable name="PAID" class="java.lang.Double" resetType="Report" calculation="Sum">
-		<variableExpression><![CDATA[$F{PAID}]]></variableExpression>
+		<variableExpression><![CDATA[$F{REFUNDED_AMOUNT} == null ? $F{PAID} : new java.lang.Double(  ($F{PAID}.doubleValue()) -($F{REFUNDED_AMOUNT}.doubleValue()) )]]></variableExpression>
 	</variable>
-	<variable name="TOTAL" class="java.lang.Double" resetType="Report" calculation="Sum">
+	<variable name="TOTALAMOUNT" class="java.lang.Double" resetType="Report" calculation="Sum">
 		<variableExpression><![CDATA[($F{BLL_DATE}.after(  $P{fromdate_timestamp} ) &&
  $F{BLL_DATE}.before(  $P{todate_timestamp} ) ? $F{BLL_AMOUNT} : $F{PAID})]]></variableExpression>
 	</variable>
@@ -76,14 +79,26 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 		<variableExpression><![CDATA[$F{BALANCE}]]></variableExpression>
 	</variable>
 	<variable name="PAIDGROUP" class="java.lang.Double" resetType="Group" resetGroup="Plan de réduction" calculation="Sum">
-		<variableExpression><![CDATA[$F{PAID}]]></variableExpression>
+		<variableExpression><![CDATA[$F{REFUNDED_AMOUNT} == null ? $F{PAID} : new java.lang.Double(  ($F{PAID}.doubleValue()) -($F{REFUNDED_AMOUNT}.doubleValue()) )]]></variableExpression>
 	</variable>
-	<variable name="TOTALGROUP" class="java.lang.Double" resetType="Group" resetGroup="Plan de réduction" calculation="Sum">
+	<variable name="TOTALAMOUNTGROUP" class="java.lang.Double" resetType="Group" resetGroup="Plan de réduction" calculation="Sum">
 		<variableExpression><![CDATA[($F{BLL_DATE}.after(  $P{fromdate_timestamp} ) &&
  $F{BLL_DATE}.before(  $P{todate_timestamp} ) ? $F{BLL_AMOUNT} : $F{PAID})]]></variableExpression>
 	</variable>
 	<variable name="BALANCEGROUP" class="java.lang.Double" resetType="Group" resetGroup="Plan de réduction" calculation="Sum">
 		<variableExpression><![CDATA[$F{BALANCE}]]></variableExpression>
+	</variable>
+	<variable name="TOTALREFUNDEDGROUP" class="java.lang.Double" resetType="Group" resetGroup="Plan de réduction" calculation="Sum">
+		<variableExpression><![CDATA[$F{REFUNDED_AMOUNT} == null ? new Double(0) : $F{REFUNDED_AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="TOTALREALGROUP" class="java.lang.Double" resetType="Group" resetGroup="Plan de réduction" calculation="Sum">
+		<variableExpression><![CDATA[$F{REFUNDED_AMOUNT} == null ? $F{BLL_AMOUNT} : new java.lang.Double(  ($F{BLL_AMOUNT}.doubleValue()) -($F{REFUNDED_AMOUNT}.doubleValue()) )]]></variableExpression>
+	</variable>
+	<variable name="TOTALREFUNDED" class="java.lang.Double" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{REFUNDED_AMOUNT} == null ? new Double(0) : $F{REFUNDED_AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="TOTALREAL" class="java.lang.Double" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{REFUNDED_AMOUNT} == null ? $F{BLL_AMOUNT} : new java.lang.Double(  ($F{BLL_AMOUNT}.doubleValue()) -($F{REFUNDED_AMOUNT}.doubleValue()) )]]></variableExpression>
 	</variable>
 
 		<group  name="Plan de réduction" >
@@ -95,13 +110,13 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 						mode="Transparent"
 						x="0"
 						y="7"
-						width="535"
+						width="782"
 						height="18"
 						backcolor="#FFFFFF"
 						key="textField"/>
 					<box></box>
 					<textElement verticalAlignment="Middle">
-						<font isBold="true"/>
+						<font pdfFontName="Helvetica-Bold" size="11" isBold="true" isUnderline="true"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.String"><![CDATA[$F{RP_DESCRIPTION}]]></textFieldExpression>
 				</textField>
@@ -109,11 +124,11 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 			</groupHeader>
 			<groupFooter>
 			<band height="31"  isSplitAllowed="true" >
-				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="451"
+						x="604"
 						y="0"
-						width="65"
+						width="89"
 						height="25"
 						key="textField-32"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -128,9 +143,9 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="230"
+						x="273"
 						y="0"
-						width="64"
+						width="83"
 						height="25"
 						key="textField-33"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -141,13 +156,13 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font pdfFontName="Helvetica-Bold" size="8" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALGROUP}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALAMOUNTGROUP}]]></textFieldExpression>
 				</textField>
-				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="382"
+						x="356"
 						y="0"
-						width="70"
+						width="80"
 						height="25"
 						key="textField-34"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -158,13 +173,13 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{PAIDGROUP}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALREFUNDEDGROUP}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="0"
 						y="0"
-						width="72"
+						width="273"
 						height="25"
 						key="textField-45"/>
 					<box></box>
@@ -172,6 +187,40 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 						<font pdfFontName="Helvetica-Bold" size="10" isBold="true"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.totals" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="436"
+						y="0"
+						width="74"
+						height="25"
+						key="textField-55"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALREALGROUP}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="510"
+						y="0"
+						width="94"
+						height="25"
+						key="textField-56"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{PAIDGROUP}]]></textFieldExpression>
 				</textField>
 			</band>
 			</groupFooter>
@@ -186,7 +235,7 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<reportElement
 						x="0"
 						y="0"
-						width="535"
+						width="782"
 						height="22"
 						key="textField-18"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -203,7 +252,7 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<reportElement
 						x="0"
 						y="22"
-						width="535"
+						width="782"
 						height="17"
 						key="textField-19"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -220,7 +269,7 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<reportElement
 						x="0"
 						y="39"
-						width="535"
+						width="782"
 						height="17"
 						key="textField-20"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -237,7 +286,7 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<reportElement
 						x="0"
 						y="56"
-						width="535"
+						width="782"
 						height="17"
 						key="textField-21"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -258,53 +307,14 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<reportElement
 						x="0"
 						y="0"
-						width="354"
+						width="782"
 						height="22"
 						key="textField-35"/>
 					<box></box>
-					<textElement verticalAlignment="Middle">
+					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font fontName="Arial" pdfFontName="Helvetica-Bold" size="14" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.byreduction.title" )]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
-					<reportElement
-						x="360"
-						y="2"
-						width="65"
-						height="20"
-						key="textField-46"/>
-					<box></box>
-					<textElement verticalAlignment="Middle">
-						<font size="12"/>
-					</textElement>
-				<textFieldExpression   class="java.sql.Timestamp"><![CDATA[$P{fromdate_timestamp}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
-					<reportElement
-						x="450"
-						y="1"
-						width="65"
-						height="21"
-						key="textField-47"/>
-					<box></box>
-					<textElement verticalAlignment="Middle">
-						<font size="12"/>
-					</textElement>
-				<textFieldExpression   class="java.sql.Timestamp"><![CDATA[$P{todate_timestamp}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
-					<reportElement
-						x="426"
-						y="0"
-						width="24"
-						height="22"
-						key="textField-48"/>
-					<box></box>
-					<textElement verticalAlignment="Middle">
-						<font size="12"/>
-					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.to2" )]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.byreduction.title" ) + " " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{fromdate_timestamp}) + " " + $P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.to2" ) + " " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{todate_timestamp})]]></textFieldExpression>
 				</textField>
 			</band>
 		</pageHeader>
@@ -340,7 +350,7 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<reportElement
 						x="114"
 						y="11"
-						width="116"
+						width="159"
 						height="19"
 						key="textField-40"/>
 					<box></box>
@@ -351,20 +361,20 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="230"
+						x="273"
 						y="11"
-						width="64"
+						width="83"
 						height="19"
 						key="textField-41"/>
 					<box></box>
 					<textElement textAlignment="Right">
 						<font pdfFontName="Helvetica-Bold" size="12" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.amount" )]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.intialamount" )]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="293"
+						x="693"
 						y="11"
 						width="89"
 						height="19"
@@ -377,9 +387,9 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="380"
+						x="510"
 						y="11"
-						width="71"
+						width="94"
 						height="19"
 						key="textField-43"/>
 					<box></box>
@@ -390,16 +400,42 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="451"
+						x="604"
 						y="11"
-						width="65"
+						width="89"
 						height="19"
 						key="textField-44"/>
 					<box></box>
 					<textElement textAlignment="Right">
 						<font pdfFontName="Helvetica-Bold" size="12" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.notpaid" )]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.rest" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="433"
+						y="11"
+						width="77"
+						height="19"
+						key="textField-51"/>
+					<box></box>
+					<textElement textAlignment="Right">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.realamount" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="356"
+						y="11"
+						width="77"
+						height="19"
+						key="textField-52"/>
+					<box></box>
+					<textElement textAlignment="Right">
+						<font pdfFontName="Helvetica-Bold" size="12" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.refunded" )]]></textFieldExpression>
 				</textField>
 			</band>
 		</columnHeader>
@@ -426,7 +462,7 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 					<reportElement
 						x="113"
 						y="0"
-						width="117"
+						width="160"
 						height="18"
 						key="textField-8"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -458,9 +494,9 @@ ORDER BY RP_DESCRIPTION, BLL_DATE]]></queryString>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="230"
+						x="273"
 						y="0"
-						width="63"
+						width="83"
 						height="18"
 						key="textField-25"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -483,7 +519,7 @@ $F{BLL_AMOUNT}.toString() :
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="dd/MM/yy" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="294"
+						x="693"
 						y="0"
 						width="88"
 						height="18"
@@ -498,15 +534,13 @@ $F{BLL_AMOUNT}.toString() :
 					</textElement>
 				<textFieldExpression   class="java.util.Date"><![CDATA[$F{BLL_UPDATE}]]></textFieldExpression>
 				</textField>
-				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="451"
+						x="604"
 						y="0"
-						width="65"
+						width="89"
 						height="18"
-						key="textField-27">
-							<printWhenExpression><![CDATA[new Boolean ($F{BALANCE}.compareTo( new Double(0) ) > 0)]]></printWhenExpression>
-						</reportElement>
+						key="textField-27"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="0.0" lineColor="#000000"/>
@@ -515,17 +549,15 @@ $F{BLL_AMOUNT}.toString() :
 					<textElement textAlignment="Right">
 						<font/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BALANCE}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BALANCE} == null ? new Double(0) : $F{BALANCE}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="382"
+						x="356"
 						y="0"
-						width="69"
+						width="80"
 						height="18"
-						key="textField-29">
-							<printWhenExpression><![CDATA[new Boolean ($F{PAID}.compareTo( new Double(0) ) > 0)]]></printWhenExpression>
-						</reportElement>
+						key="textField-29"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="0.0" lineColor="#000000"/>
@@ -534,7 +566,41 @@ $F{BLL_AMOUNT}.toString() :
 					<textElement textAlignment="Right">
 						<font/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{PAID}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{REFUNDED_AMOUNT} == null ? new Double(0) : $F{REFUNDED_AMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="436"
+						y="0"
+						width="74"
+						height="18"
+						key="textField-53"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{REFUNDED_AMOUNT} == null ? $F{BLL_AMOUNT} : new java.lang.Double(  ($F{BLL_AMOUNT}.doubleValue()) -($F{REFUNDED_AMOUNT}.doubleValue()) )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="510"
+						y="0"
+						width="94"
+						height="18"
+						key="textField-54"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right">
+						<font/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{REFUNDED_AMOUNT} == null ? $F{PAID} : new java.lang.Double(  ($F{PAID}.doubleValue()) -($F{REFUNDED_AMOUNT}.doubleValue()) )]]></textFieldExpression>
 				</textField>
 			</band>
 		</detail>
@@ -546,7 +612,7 @@ $F{BLL_AMOUNT}.toString() :
 			<band height="22"  isSplitAllowed="true" >
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="436"
+						x="680"
 						y="3"
 						width="53"
 						height="19"
@@ -559,7 +625,7 @@ $F{BLL_AMOUNT}.toString() :
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Report" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="489"
+						x="733"
 						y="3"
 						width="46"
 						height="19"
@@ -574,11 +640,11 @@ $F{BLL_AMOUNT}.toString() :
 		</pageFooter>
 		<summary>
 			<band height="25"  isSplitAllowed="true" >
-				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="451"
+						x="604"
 						y="0"
-						width="65"
+						width="89"
 						height="25"
 						key="textField-11"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -593,9 +659,9 @@ $F{BLL_AMOUNT}.toString() :
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="230"
+						x="273"
 						y="0"
-						width="64"
+						width="83"
 						height="25"
 						key="textField-28"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -606,13 +672,13 @@ $F{BLL_AMOUNT}.toString() :
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font pdfFontName="Helvetica-Bold" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTAL}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALAMOUNT}]]></textFieldExpression>
 				</textField>
-				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
-						x="382"
+						x="356"
 						y="0"
-						width="70"
+						width="80"
 						height="25"
 						key="textField-30"/>
 					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -621,15 +687,15 @@ $F{BLL_AMOUNT}.toString() :
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 </box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font/>
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{PAID}]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALREFUNDED}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="0"
 						y="0"
-						width="72"
+						width="273"
 						height="25"
 						key="textField-37"/>
 					<box></box>
@@ -637,6 +703,40 @@ $F{BLL_AMOUNT}.toString() :
 						<font pdfFontName="Helvetica-Bold" size="12" isBold="true"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.totals" )]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="436"
+						y="0"
+						width="74"
+						height="25"
+						key="textField-57"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{TOTALREAL}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						x="510"
+						y="0"
+						width="94"
+						height="25"
+						key="textField-58"/>
+					<box>					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font pdfFontName="Helvetica-Bold" isBold="true"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.Double"><![CDATA[$V{PAID}]]></textFieldExpression>
 				</textField>
 			</band>
 		</summary>

@@ -15,6 +15,7 @@ import org.isf.accounting.gui.PatientBillEdit;
 import org.isf.accounting.model.Bill;
 import org.isf.accounting.model.BillItems;
 import org.isf.accounting.model.BillPayments;
+import org.isf.accounting.model.RefundBillItem;
 import org.isf.accounting.service.IoOperations;
 import org.isf.admission.manager.AdmissionBrowserManager;
 import org.isf.admission.model.Admission;
@@ -104,6 +105,101 @@ public class BillBrowserManager {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			return null;
 		}
+	}
+	
+	/**
+	 * Retrieves all the {@link BillItems} grouped to avoid duplicates, 
+	 * associated to the passed {@link Bill} id.
+	 * 
+	 * @author Silevester D.
+	 * @since 18/05/2022
+	 * 
+	 * @param billID the bill id.
+	 * @return a list of {@link BillItems} or <code>null</code> if an error occurred.
+	 */
+	public ArrayList<BillItems> getGroupItems(int billID) {
+		if (billID == 0)
+			return new ArrayList<BillItems>();
+		try {
+			return ioOperations.getGroupItems(billID, true);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+	
+	/**
+	 * Returns only the reimbursed {@link BillItems} of a passed {@link Bill}'s id.
+	 * 
+	 * @author Silevester D.
+	 * @since 18/05/2022
+	 * 
+	 * @param billId the bill id.
+	 * @return a list of {@link BillItems} or null if an error occurs.
+	 */
+	public ArrayList<BillItems> getOnlyRefundItems(int billId) {
+		try {
+			return ioOperations.getOnlyRefundItems(billId, true);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+	
+	/**
+	 * Retrieves all the refund {@link Bill}s associated to the passed {@link Bill}'s id.
+	 * 
+	 * @author Silevester D.
+	 * @since 18/05/2022
+	 * 
+	 * @param billId the bill id.
+	 * @return a list of {@link Bill} or <code>null</code> if an error occurred.
+	 */
+	public ArrayList<Bill> getRefundBills(int billId) {
+		if (billId == 0)
+			return new ArrayList<Bill>();
+		try {
+			return ioOperations.getRefundBills(billId);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Retrieves all the {@link BillItems} with reimbursed quantities associated 
+	 * to the passed {@link Bill}'s id and initialize {@link RefundBillItem} based on them
+	 * 
+	 * @author Silevester D.
+	 * @since 18/05/2022
+	 * 
+	 * @param billId the bill id.
+	 * @return a list of {@link RefundBillItem} or <code>null</code> if an error occurred.
+	 */
+	public ArrayList<RefundBillItem> getRefundItems(int billId) {
+		if (billId == 0)
+			return new ArrayList<RefundBillItem>();
+
+		ArrayList<BillItems> items = this.getGroupItems(billId);
+		ArrayList<BillItems> refundItems = this.getOnlyRefundItems(billId);
+		
+		ArrayList<RefundBillItem> refundBillItems = new ArrayList<RefundBillItem>();
+		
+		for (BillItems billItem : items) {
+			billItem.setRefundedQty(0);
+			
+			for(BillItems refundItem: refundItems) {
+				
+				if(refundItem.getPriceID().equals(billItem.getPriceID())) {
+					billItem.setRefundedQty(refundItem.getRefundedQty());
+				}
+			}
+			
+			RefundBillItem refundBillItem = new RefundBillItem(billItem, 0);
+			refundBillItems.add(refundBillItem);
+		}
+
+		return refundBillItems;
 	}
 	
 	public ArrayList<BillItems> getItems(int billID, GregorianCalendar dateFrom, GregorianCalendar dateTo) {

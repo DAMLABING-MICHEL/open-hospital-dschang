@@ -63,9 +63,35 @@
 	<field name="TOTAL_YEAR_COUNT" class="java.lang.Double"/>
 	<field name="TOTAL_YEAR_AMOUNT" class="java.lang.Double"/>
 	<field name="BLI_ITEM_GROUP" class="java.lang.String"/>
+	<field name="REFUNDED_COUNT_JANUARY" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_JANUARY" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_FEBRUARY" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_MARCH" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_APRIL" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_MAY" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_JUNE" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_JULY" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_AUGUST" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_SEPTEMBER" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_OCTOBER" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_NOVEMBER" class="java.lang.Double"/>
+	<field name="REFUNDED_COUNT_DECEMBER" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_FEBRUARY" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_MARCH" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_APRIL" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_MAY" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_JUNE" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_JULY" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_SEPTEMBER" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_OCTOBER" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_NOVEMBER" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_DECEMBER" class="java.lang.Double"/>
+	<field name="REFUNDED_AMOUNT_AUGUST" class="java.lang.Double"/>
+	<field name="REFUNDED_TOTAL_YEAR_COUNT" class="java.lang.Double"/>
+	<field name="REFUNDED_TOTAL_YEAR_AMOUNT" class="java.lang.Double"/>
 
 	<variable name="TOTAL" class="java.lang.Double" resetType="Report" calculation="Sum">
-		<variableExpression><![CDATA[$F{TOTAL_YEAR_AMOUNT}]]></variableExpression>
+		<variableExpression><![CDATA[new java.lang.Double(  ($F{TOTAL_YEAR_AMOUNT}.doubleValue()) -($F{REFUNDED_TOTAL_YEAR_AMOUNT}.doubleValue()) )]]></variableExpression>
 	</variable>
 
 		<group  name="type" >
@@ -223,11 +249,11 @@
 			</band>
 		</pageHeader>
 		<columnHeader>
-			<band height="14"  isSplitAllowed="true" >
+			<band height="17"  isSplitAllowed="true" >
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="0"
-						y="0"
+						y="2"
 						width="110"
 						height="14"
 						key="textField-22"/>
@@ -243,7 +269,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="112"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-23"/>
@@ -261,7 +287,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="164"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-24"/>
@@ -278,7 +304,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="216"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-25"/>
@@ -295,7 +321,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="320"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-26"/>
@@ -312,7 +338,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="372"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-27"/>
@@ -329,7 +355,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="424"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-28"/>
@@ -346,7 +372,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="476"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-29"/>
@@ -363,7 +389,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="528"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-30"/>
@@ -380,7 +406,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="580"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-31"/>
@@ -397,7 +423,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="632"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-32"/>
@@ -414,7 +440,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="684"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-33"/>
@@ -431,7 +457,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="268"
-						y="0"
+						y="2"
 						width="52"
 						height="14"
 						key="textField-34"/>
@@ -448,7 +474,7 @@
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="736"
-						y="0"
+						y="2"
 						width="45"
 						height="14"
 						key="textField-35"/>
@@ -465,13 +491,13 @@
 			</band>
 		</columnHeader>
 		<detail>
-			<band height="21"  isSplitAllowed="true" >
+			<band height="32"  isSplitAllowed="true" >
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="0"
 						y="0"
 						width="110"
-						height="21"
+						height="32"
 						key="textField-37"/>
 					<box>					<leftPen lineWidth="0.25"/>
 					<bottomPen lineWidth="0.25"/>
@@ -486,7 +512,7 @@
 						x="632"
 						y="0"
 						width="52"
-						height="21"
+						height="31"
 						key="textField-38"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -496,14 +522,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_NOVEMBER}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_NOVEMBER})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_NOVEMBER}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_NOVEMBER}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_NOVEMBER})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_NOVEMBER})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="580"
 						y="0"
 						width="52"
-						height="21"
+						height="31"
 						key="textField-39"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -513,14 +542,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_OCTOBER}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_OCTOBER})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_OCTOBER}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_OCTOBER}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_OCTOBER})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_OCTOBER})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="684"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-40"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -530,14 +562,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_DECEMBER}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_DECEMBER})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_DECEMBER}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_DECEMBER}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_DECEMBER})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_DECEMBER})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="736"
 						y="0"
 						width="46"
-						height="21"
+						height="32"
 						key="textField-41"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -547,14 +582,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{TOTAL_YEAR_COUNT}) +" \n"+ new DecimalFormat("0").format($F{TOTAL_YEAR_AMOUNT})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{TOTAL_YEAR_COUNT}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_TOTAL_YEAR_COUNT}) +" \n" +
+new DecimalFormat("0").format($F{TOTAL_YEAR_AMOUNT})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_TOTAL_YEAR_AMOUNT})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="528"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-43"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -564,14 +602,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_SEPTEMBER}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_SEPTEMBER})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_SEPTEMBER}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_SEPTEMBER}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_SEPTEMBER})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_SEPTEMBER})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="476"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-44"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -581,14 +622,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_AUGUST}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_AUGUST})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_AUGUST}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_AUGUST}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_AUGUST})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_AUGUST})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="424"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-45"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -598,14 +642,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_JULY}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_JULY})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_JULY}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_JULY}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_JULY})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_JULY})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="372"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-46"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -615,14 +662,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_JUNE}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_JUNE})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_JUNE}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_JUNE}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_JUNE})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_JUNE})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="320"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-47"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -632,14 +682,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_MAY}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_MAY})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_MAY}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_MAY}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_MAY})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_MAY})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="268"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-48"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -649,14 +702,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_APRIL}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_APRIL})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_APRIL}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_APRIL}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_APRIL})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_APRIL})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="216"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-49"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -666,14 +722,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_MARCH}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_MARCH})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_MARCH}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_MARCH}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_MARCH})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_MARCH})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="164"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-50"/>
 					<box>					<topPen lineWidth="0.25"/>
 					<leftPen lineWidth="0.0"/>
@@ -683,14 +742,17 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_FEBRUARY}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_FEBRUARY})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_FEBRUARY}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_FEBRUARY}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_FEBRUARY})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_FEBRUARY})+" \n" ]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="false" pattern="" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="112"
 						y="0"
 						width="52"
-						height="21"
+						height="32"
 						key="textField-51"/>
 					<box>					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.25" lineStyle="Solid"/>
@@ -701,7 +763,10 @@
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font size="8"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_JANUARY}) +" \n"+ new DecimalFormat("0").format($F{AMOUNT_JANUARY})+" "]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[new DecimalFormat("0").format($F{COUNT_JANUARY}) + " | " +
+new DecimalFormat("0").format($F{REFUNDED_COUNT_JANUARY}) +" \n" +
+new DecimalFormat("0").format($F{AMOUNT_JANUARY})+" \n" +
+new DecimalFormat("0").format($F{REFUNDED_AMOUNT_JANUARY})+" \n" ]]></textFieldExpression>
 				</textField>
 			</band>
 		</detail>
