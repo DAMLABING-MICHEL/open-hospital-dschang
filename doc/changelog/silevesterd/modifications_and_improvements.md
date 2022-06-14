@@ -36,3 +36,5 @@
     - Create new parameter for Bills Refund Report [mysql/db/migrations/refunds_update/create_bills_refund_report_parameter.sql ];
     - Add database migrations scripts [mysql/db/create_all.sql ].
 
+3. Update BillBrowser to show refunds summary only if the bill's items refund is allowed.
+    - Update BillBrowser UI [src/org/isf/accounting/gui/BillBrowser.java ].

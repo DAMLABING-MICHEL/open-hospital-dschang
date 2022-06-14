@@ -333,10 +333,13 @@ public class BillBrowser extends ModalJFrame
 			jPanelTotals.add(getJTablePeriod());
 			if (!Param.bool("SINGLEUSER")) {
 				jPanelTotals.add(getJTableUser());
-				jPanelTotals.add(getJTableUserRefund());
+				if (Param.bool("ENABLEMEDICALREFUND"))
+					jPanelTotals.add(getJTableUserRefund());
 			}
 
-			jPanelTotals.add(getJTableRefund());
+			if (Param.bool("ENABLEMEDICALREFUND"))
+				jPanelTotals.add(getJTableRefund());
+			
 			updateTotals();
 		}
 		if (MainMenu.getCurrentUser().getUserGroupName().equals("admin")) {
@@ -1932,12 +1935,14 @@ public class BillBrowser extends ModalJFrame
 			jTableUser.setValueAt(userPeriod, 0, 3);
 		}
 
-		jTableRefund.setValueAt(refundToday.multiply(new BigDecimal(-1)), 0, 1);
-		jTableRefund.setValueAt(refundPeriod.multiply(new BigDecimal(-1)), 0, 3);
-
-		if (jTableUserRefund != null) {
-			jTableUserRefund.setValueAt(userRefundToday.multiply(new BigDecimal(-1)), 0, 1);
-			jTableUserRefund.setValueAt(userRefundPeriod.multiply(new BigDecimal(-1)), 0, 3);
+		if (Param.bool("ENABLEMEDICALREFUND")) {
+			jTableRefund.setValueAt(refundToday.multiply(new BigDecimal(-1)), 0, 1);
+			jTableRefund.setValueAt(refundPeriod.multiply(new BigDecimal(-1)), 0, 3);
+	
+			if (jTableUserRefund != null) {
+				jTableUserRefund.setValueAt(userRefundToday.multiply(new BigDecimal(-1)), 0, 1);
+				jTableUserRefund.setValueAt(userRefundPeriod.multiply(new BigDecimal(-1)), 0, 3);
+			}
 		}
 	}
 

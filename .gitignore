@@ -10,4 +10,7 @@ result.txt
 logs/
 
 bin/
+build/rpt/
 rpt/PDF/*
+result.txt
+resulmt.txt
