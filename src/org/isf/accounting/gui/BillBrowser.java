@@ -1560,7 +1560,7 @@ public class BillBrowser extends ModalJFrame
 		if (jTableToday == null) {
 			jTableToday = new JTable();
 			jTableToday.setModel(new DefaultTableModel(new Object[][] {
-					{ "<html><b>" + MessageBundle.getMessage("angal.billbrowser.todaym") + "</b></html>", totalToday, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					{ "<html><b>" + MessageBundle.getMessage("angal.billbrowser.todaypayments") + "</b></html>", totalToday, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							"<html><b>" + MessageBundle.getMessage("angal.billbrowser.notpaid") + "</b></html>",
 							balanceToday } },
 					new String[] { "", "", "", "" }) {
@@ -1586,7 +1586,7 @@ public class BillBrowser extends ModalJFrame
 		if (jTablePeriod == null) {
 			jTablePeriod = new JTable();
 			jTablePeriod.setModel(new DefaultTableModel(new Object[][] {
-					{ "<html><b>" + MessageBundle.getMessage("angal.billbrowser.periodm") + "</b></html>", totalPeriod, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					{ "<html><b>" + MessageBundle.getMessage("angal.billbrowser.periodpayments") + "</b></html>", totalPeriod, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							"<html><b>" + MessageBundle.getMessage("angal.billbrowser.notpaid") + "</b></html>",
 							balancePeriod } },
 					new String[] { "", "", "", "" }) {
@@ -1615,7 +1615,7 @@ public class BillBrowser extends ModalJFrame
 					.setModel(
 							new DefaultTableModel(
 									new Object[][] {
-											{ "<html><b>" + user + "</b></html>", userToday, //$NON-NLS-1$ //$NON-NLS-2$
+											{ "<html><b>" + MessageBundle.getMessage("angal.billbrowser.userpayments") + " : " + user + "</b></html>", userToday, //$NON-NLS-1$ //$NON-NLS-2$
 													"<html><b>" + MessageBundle.getMessage("angal.billbrowser.period") //$NON-NLS-1$
 															+ "</b></html>",
 													userPeriod } },

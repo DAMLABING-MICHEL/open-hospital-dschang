@@ -2,7 +2,7 @@
 <!-- Created with iReport - A designer for JasperReports -->
 <!DOCTYPE jasperReport PUBLIC "//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
 <jasperReport
-		 name="PatientBillPayments"
+		 name="PatientBillRefunds"
 		 columnCount="1"
 		 printOrder="Vertical"
 		 orientation="Portrait"
@@ -24,8 +24,9 @@
 	<import value="net.sf.jasperreports.engine.data.*" />
 
 	<parameter name="billID" isForPrompting="true" class="java.lang.String"/>
-	<queryString><![CDATA[SELECT BLP_DATE, BLP_AMOUNT FROM BILLPAYMENTS
-WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
+	<queryString><![CDATA[SELECT BLP_DATE, ABS(BLP_AMOUNT) AS BLP_AMOUNT FROM BILLPAYMENTS BLP
+JOIN BILLS B ON B.BLL_ID = BLP.BLP_ID_BILL
+WHERE B.BLL_PARENT_ID = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 
 	<field name="BLP_DATE" class="java.sql.Timestamp"/>
 	<field name="BLP_AMOUNT" class="java.lang.Double"/>
@@ -42,7 +43,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 			</band>
 		</title>
 		<pageHeader>
-			<band height="30"  isSplitAllowed="true" >
+			<band height="27"  isSplitAllowed="true" >
 				<textField isStretchWithOverflow="false" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="2"
@@ -56,7 +57,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font fontName="Arial" size="18"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbillpayments.title" )]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbillrefunds.title" )]]></textFieldExpression>
 				</textField>
 			</band>
 		</pageHeader>
@@ -70,7 +71,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 						height="16"
 						key="textField-4"/>
 					<box></box>
-					<textElement textAlignment="Left" verticalAlignment="Top">
+					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.date" )]]></textFieldExpression>
@@ -83,7 +84,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 						height="16"
 						key="textField-5"/>
 					<box></box>
-					<textElement textAlignment="Left" verticalAlignment="Top">
+					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.billsreport.amount" )]]></textFieldExpression>
@@ -106,7 +107,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 					<bottomPen lineWidth="0.0" lineColor="#000000"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 </box>
-					<textElement textAlignment="Left">
+					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
 				<textFieldExpression   class="java.sql.Timestamp"><![CDATA[$F{BLP_DATE}]]></textFieldExpression>
@@ -125,7 +126,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 					<bottomPen lineWidth="0.0" lineColor="#000000"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 </box>
-					<textElement textAlignment="Left">
+					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="10"/>
 					</textElement>
 				<textFieldExpression   class="java.lang.Double"><![CDATA[$F{BLP_AMOUNT}]]></textFieldExpression>
@@ -133,7 +134,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 			</band>
 		</detail>
 		<columnFooter>
-			<band height="35"  isSplitAllowed="true" >
+			<band height="26"  isSplitAllowed="true" >
 				<textField isStretchWithOverflow="false" pattern="#,##0.00" isBlankWhenNull="false" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
 					<reportElement
 						x="282"
@@ -162,7 +163,7 @@ WHERE BLP_ID_BILL = $P{billID} ORDER BY BLP_DATE ASC]]></queryString>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font pdfFontName="Helvetica-Bold" size="12" isBold="true" isItalic="false"/>
 					</textElement>
-				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbillpayments.paid" )]]></textFieldExpression>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$P{REPORT_RESOURCE_BUNDLE}.getString( "angal.report.patientbillrefunds.totalrefunds" )]]></textFieldExpression>
 				</textField>
 			</band>
 		</columnFooter>

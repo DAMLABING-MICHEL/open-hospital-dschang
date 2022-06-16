@@ -38,3 +38,11 @@
 
 3. Update BillBrowser to show refunds summary only if the bill's items refund is allowed.
     - Update BillBrowser UI [src/org/isf/accounting/gui/BillBrowser.java ].
+
+## 16/06/2022
+
+4. Update Patient Bill report (PatientBillExtended) to add refunds infos
+    - Add subreport [rpt/PatientBillRefunds.jrxml ];
+    - Update fr and en translation bundles [angal.report.patientbillextended.refunds, angal.report.patientbillpayments.paid, angal.report.patientbillrefunds.title, angal.report.patientbillrefunds.totalrefunds];
+    - Redesign PatientBillExtended report [rpt/PatientBillExtended.jrxml ];
+    - Redesign subreport [rpt/PatientBillPayments.jrxml ].
