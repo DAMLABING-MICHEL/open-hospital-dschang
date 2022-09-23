@@ -19,6 +19,7 @@ import org.isf.generaldata.MessageBundle;
 import org.isf.menu.gui.MainMenu;
 import org.isf.menu.model.User;
 import org.isf.opetype.model.OperationType;
+import org.isf.parameters.manager.Param;
 import org.isf.patient.model.Patient;
 import org.isf.utils.db.DbQueryLogger;
 import org.isf.utils.exception.OHException;
@@ -1157,6 +1158,287 @@ public class IoOperations {
 			dbQuery.releaseConnection();
 		}
 		return bills;
+	}
+	
+	/**
+	 * Get bills filtered by date, guaranteer user, status, patient, bill item
+	 * 
+	 * @param dateFrom the min date
+	 * @param dateTo the max date
+	 * @param userGarant The guaranteer user to be considered
+	 * @param billItem The {@link BillItems} to be considered
+	 * @param patient The {@link Patient} to be considered
+	 * @param limit The pagination limit
+	 * @param offset The pagination offset
+	 * 
+	 * @return {@link ArrayList} of filtered {@link Bill}
+	 * @throws OHException
+	 * 
+	 * @since 20/09/2022
+	 * @author Silevester D.
+	 */
+	public ArrayList<Bill> getBills(
+			String status, 
+			GregorianCalendar dateFrom, 
+			GregorianCalendar dateTo, 
+			User userGarant,
+			BillItems billItem, 
+			Patient patient,
+			int limit,
+			int offset
+	) throws OHException 
+	{
+		ArrayList<Bill> bills = null;
+		List<Object> parameters = new ArrayList<Object>(2);
+		StringBuilder queryBuilder = new StringBuilder();
+		
+		queryBuilder.append("SELECT b.*, ");
+		
+		String refundBillQuery = " (SELECT SUM(BLL_AMOUNT) FROM BILLS WHERE BLL_PARENT_ID = b.BLL_ID) AS REFUNDED_AMOUNT ";
+		queryBuilder.append(refundBillQuery);			
+		
+		queryBuilder.append(" FROM BILLS b WHERE b.BLL_PARENT_ID IS NULL ");
+		
+		if (status != null) {
+			queryBuilder.append(" AND b.BLL_STATUS = ? ");
+			parameters.add(status);
+		}
+		
+		if (dateFrom != null) {
+			queryBuilder.append(" AND (DATE(b.BLL_DATE) >= ? OR DATE(b.BLL_UPDATE) >= ?) ");
+			parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+			parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		}
+		
+		if (dateTo != null) {
+			queryBuilder.append(" AND (DATE(b.BLL_DATE) <= ? OR DATE(b.BLL_UPDATE) >= ?) ");
+			parameters.add(new Timestamp(dateTo.getTime().getTime()));
+			parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		}
+		
+		if (userGarant != null) {
+			queryBuilder.append(" AND ( BLL_GARANTE = ? ) ");
+			parameters.add(userGarant.getUserName());
+		}
+		
+		if (billItem != null) {
+			queryBuilder.append(" AND b.BLL_ID IN (SELECT BLI_ID_BILL FROM BILLITEMS WHERE BLI_ITEM_ID = ? AND BLI_ITEM_GROUP = ? ) ");
+			parameters.add(billItem.getItemId());
+			parameters.add(billItem.getItemGroup());
+		}
+		
+		if (patient != null) {
+			queryBuilder.append(" AND ( b.BLL_ID_PAT = ? OR b.BLL_PAT_AFFILIATED_PERSON = ? ) ");
+			parameters.add(patient.getCode());
+			parameters.add(patient.getCode());
+		}
+		
+		queryBuilder.append(" ORDER BY b.BLL_ID DESC");
+		
+		if (limit > 0) {
+			queryBuilder.append(" LIMIT ? OFFSET ?");
+			parameters.add(limit);
+			parameters.add(offset);
+		}
+		
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		
+		try {
+			ResultSet resultSet = dbQuery.getDataWithParams(queryBuilder.toString(), parameters, true);
+
+			bills = new ArrayList<Bill>(resultSet.getFetchSize());
+
+			while (resultSet.next()) {
+				Bill bill = toBill(resultSet);
+				bill.setRefundAmount(resultSet.getDouble("REFUNDED_AMOUNT"));
+				bills.add(bill);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			dbQuery.releaseConnection();
+		}
+		
+		return bills;
+	}
+	
+	/**
+	 * Get bills filtered by date, guaranteer user, status, patient, bill item
+	 * 
+	 * @param dateFrom the start date
+	 * @param dateTo the end date
+	 * @param userGarant The guaranteer user to be considered
+	 * @param billItem The {@link BillItems} to be considered
+	 * @param patient The {@link Patient} to be considered
+	 * 
+	 * @return The number of matched {@link Bill}
+	 * @throws OHException
+	 * 
+	 * @since 20/09/2022
+	 * @author Silevester D.
+	 */
+	public int countBills(
+			String status, 
+			GregorianCalendar dateFrom, 
+			GregorianCalendar dateTo, 
+			User userGarant,
+			BillItems billItem, 
+			Patient patient
+	) throws OHException 
+	{
+		int totalRecord = 0;
+		List<Object> parameters = new ArrayList<Object>();
+		StringBuilder queryBuilder = new StringBuilder();
+		
+		queryBuilder.append("SELECT COUNT(*) as count ");
+		
+		queryBuilder.append(" FROM BILLS b USE INDEX(PRIMARY) WHERE b.BLL_PARENT_ID IS NULL ");
+		
+		if (status != null) {
+			queryBuilder.append(" AND b.BLL_STATUS = ? ");
+			parameters.add(status);
+		}
+		
+		if (dateFrom != null) {
+			queryBuilder.append(" AND (DATE(b.BLL_DATE) >= ? OR DATE(b.BLL_UPDATE) >= ?) ");
+			parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+			parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		}
+		
+		if (dateTo != null) {
+			queryBuilder.append(" AND (DATE(b.BLL_DATE) <= ? OR DATE(b.BLL_UPDATE) >= ?) ");
+			parameters.add(new Timestamp(dateTo.getTime().getTime()));
+			parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		}
+		
+		if (userGarant != null) {
+			queryBuilder.append(" AND ( BLL_GARANTE = ? ) ");
+			parameters.add(userGarant.getUserName());
+		}
+		
+		if (billItem != null) {
+			queryBuilder.append(" AND b.BLL_ID IN (SELECT BLI_ID_BILL FROM BILLITEMS WHERE BLI_ITEM_ID = ? AND BLI_ITEM_GROUP = ? ) ");
+			parameters.add(billItem.getItemId());
+			parameters.add(billItem.getItemGroup());
+		}
+		
+		if (patient != null) {
+			queryBuilder.append(" AND ( b.BLL_ID_PAT = ? OR b.BLL_PAT_AFFILIATED_PERSON = ? ) ");
+			parameters.add(patient.getCode());
+			parameters.add(patient.getCode());
+		}
+		
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		
+		try {
+			ResultSet resultSet = dbQuery.getDataWithParams(queryBuilder.toString(), parameters, true);
+
+			while (resultSet.next()) {
+				totalRecord = resultSet.getInt("count");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			dbQuery.releaseConnection();
+		}
+		
+		return totalRecord;
+	}
+	
+	/**
+	 * Get Bills Statistics for a period
+	 * @param dateFrom Start date
+	 * @param dateTo End date
+	 * @param user User to be considered
+	 * @return {@link HashMap} containing possible keys :
+	 * - BALANCE : The total balance for the period
+	 * - TOTAL_PAYMENTS : The total payments amount for the period
+	 * - USER_PAYMENTS : User payment amount for the period
+	 * - TOTAL_REFUNDS : The total amount refunded for the period
+	 * - USER_REFUNDS : The total amount refunded by the user for the period
+	 * @throws OHException
+	 * 
+	 * @since 20/09/2022
+	 * @author Silevester D.
+	 */
+	public HashMap<String, Double> getStatsByPeriod(
+			GregorianCalendar dateFrom, 
+			GregorianCalendar dateTo, 
+			String user
+	)throws OHException 
+	{
+		HashMap<String, Double> periodStats = new HashMap<String, Double>();
+		List<Object> parameters = new ArrayList<Object>();
+		StringBuilder queryBuilder = new StringBuilder();
+		
+		queryBuilder.append("SELECT SUM(b.BLL_BALANCE) as BALANCE, TOTAL_PAYMENTS ");
+		
+		if (user != null) {
+			queryBuilder.append(", USER_PAYMENTS ");
+		}
+		
+		if (Param.bool("ENABLEMEDICALREFUND")) {
+			queryBuilder.append(", TOTAL_REFUNDS ");
+			if (user != null) {
+				queryBuilder.append(", USER_REFUNDS ");
+			}
+		}
+
+		queryBuilder.append(" FROM BILLS b, ");
+		queryBuilder.append(" ( SELECT SUM(IF(bp.BLP_AMOUNT > 0, bp.BLP_AMOUNT, 0)) AS TOTAL_PAYMENTS ");
+		if (user != null) {
+			queryBuilder.append(", SUM(IF(bp.BLP_AMOUNT > 0 AND bp.BLP_USR_ID_A = ?, bp.BLP_AMOUNT, 0)) AS USER_PAYMENTS  ");
+			parameters.add(user);
+		}
+		
+		if (Param.bool("ENABLEMEDICALREFUND")) {
+			queryBuilder.append(", SUM(IF(bp.BLP_AMOUNT < 0, ABS(bp.BLP_AMOUNT), 0)) AS TOTAL_REFUNDS ");
+			if (user != null) {
+				queryBuilder.append(", SUM(IF(bp.BLP_AMOUNT < 0 AND bp.BLP_USR_ID_A = ?, ABS(bp.BLP_AMOUNT), 0)) AS USER_REFUNDS ");
+				parameters.add(user);
+			}
+		}
+		
+		queryBuilder.append(" FROM BILLPAYMENTS bp WHERE DATE(bp.BLP_DATE) BETWEEN ? AND ?");
+		parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		parameters.add(new Timestamp(dateTo.getTime().getTime()));
+		queryBuilder.append(" ) PAYMENTS ");
+		
+		queryBuilder.append(" WHERE b.BLL_PARENT_ID IS NULL AND DATE(b.BLL_DATE) BETWEEN ? AND ? ");
+		parameters.add(new Timestamp(dateFrom.getTime().getTime()));
+		parameters.add(new Timestamp(dateTo.getTime().getTime()));
+		
+		DbQueryLogger dbQuery = new DbQueryLogger();
+		
+		try {
+			ResultSet resultSet = dbQuery.getDataWithParams(queryBuilder.toString(), parameters, true);
+
+			while (resultSet.next()) {
+				periodStats.put("BALANCE", resultSet.getDouble("BALANCE"));
+				periodStats.put("TOTAL_PAYMENTS", resultSet.getDouble("TOTAL_PAYMENTS"));
+				
+				if (user != null) {
+					periodStats.put("USER_PAYMENTS", resultSet.getDouble("USER_PAYMENTS"));					
+				}
+				
+				if (Param.bool("ENABLEMEDICALREFUND")) {
+					periodStats.put("TOTAL_REFUNDS", resultSet.getDouble("TOTAL_REFUNDS"));
+					if (user != null) {
+						periodStats.put("USER_REFUNDS", resultSet.getDouble("USER_REFUNDS"));						
+					}
+				}
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new OHException(MessageBundle.getMessage("angal.sql.problemsoccurredwiththesqlistruction"), e);
+		} finally {
+			dbQuery.releaseConnection();
+		}
+		
+		return periodStats;
 	}
 
 	/**

@@ -958,6 +958,57 @@ public class BillBrowserManager {
 			return null;
 		}
 	}
+	
+	public ArrayList<Bill> getBills(
+			String status, 
+			GregorianCalendar dateFrom, 
+			GregorianCalendar dateTo, 
+			User userGarant,
+			BillItems billItem, 
+			Patient patient,
+			int limit,
+			int offset
+	) {
+		try {
+			return ioOperations.getBills(
+					status, dateFrom, dateTo, userGarant, billItem, patient, limit, offset);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
+	
+	public int countBills(
+			String status, 
+			GregorianCalendar dateFrom, 
+			GregorianCalendar dateTo, 
+			User userGarant,
+			BillItems billItem, 
+			Patient patient
+	)
+	{
+		try {
+			return ioOperations.countBills(
+					status, dateFrom, dateTo, userGarant, billItem, patient);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return 0;
+		}
+	}
+	
+	public HashMap<String, Double> getStatsByPeriod(
+			GregorianCalendar dateFrom, 
+			GregorianCalendar dateTo, 
+			String user
+	)
+	{
+		try {
+			return ioOperations.getStatsByPeriod(dateFrom, dateTo, user);
+		} catch (OHException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return null;
+		}
+	}
 
 	/**
 	 * Gets all the {@link Bill}s associated to the passed {@link BillPayments}.

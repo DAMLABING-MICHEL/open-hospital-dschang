@@ -46,3 +46,17 @@
     - Update fr and en translation bundles [angal.report.patientbillextended.refunds, angal.report.patientbillpayments.paid, angal.report.patientbillrefunds.title, angal.report.patientbillrefunds.totalrefunds];
     - Redesign PatientBillExtended report [rpt/PatientBillExtended.jrxml ];
     - Redesign subreport [rpt/PatientBillPayments.jrxml ].
+
+## 19/09/2022 - 22/09/2022
+
+5. Add pagination in bills browser
+
+- Add lot of methods in BillBrowser UI [];
+- Update BillBrowser Manager and Service, add methods countBills(String status, GregorianCalendar dateFrom, GregorianCalendar dateTo, User userGarant, BillItems billItem, Patient patient), getBills(String status, GregorianCalendar dateFrom, GregorianCalendar dateTo, User userGarant, BillItems billItem, Patient patient, int limit, int offset),  getStatsByPeriod(GregorianCalendar dateFrom, GregorianCalendar dateTo, String user).
+
+
+
+
+
+
+    

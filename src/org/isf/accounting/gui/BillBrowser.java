@@ -31,7 +31,6 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -127,9 +126,13 @@ public class BillBrowser extends ModalJFrame
 				updateDataSet(dateFrom, dateTo);
 			}
 		}
+		
 		/*******/
+		pendingBillsUpdated = false;
 		updateTables();
 		updateTotals();
+		resetPaginationCombos();
+		
 		if (event != null) {
 			Bill billInserted = (Bill) event.getSource();
 			if (billInserted != null) {
@@ -167,6 +170,7 @@ public class BillBrowser extends ModalJFrame
 		/*******/
 		updateTables();
 		updateTotals();
+		resetPaginationCombos();
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -176,9 +180,7 @@ public class BillBrowser extends ModalJFrame
 	private JTable jTablePending;
 	private JScrollPane jScrollPanePending;
 	private JTable jTableClosed;
-	private JTable jTableDeleted;
 	private JScrollPane jScrollPaneClosed;
-	private JScrollPane jScrollPaneDeleted;
 	private JTable jTableToday;
 	private JTable jTablePeriod;
 	private JTable jTableUser;
@@ -243,10 +245,11 @@ public class BillBrowser extends ModalJFrame
 
 	// Bills & Payments
 	private BillBrowserManager billManager = new BillBrowserManager();
-	private ArrayList<Bill> billPeriod;
-	private HashMap<Integer, Bill> mapBill = new HashMap<Integer, Bill>();
-	private ArrayList<BillPayments> paymentsPeriod;
-	private ArrayList<Bill> billFromPayments;
+	private ArrayList<Bill> allBills = new ArrayList<Bill>();
+	private ArrayList<Bill> closedBills = new ArrayList<Bill>();
+	private ArrayList<Bill> pendingBills = new ArrayList<Bill>();
+	private HashMap<String, Double> todayStats = new HashMap<String, Double>();
+	private HashMap<String, Double> periodStats = new HashMap<String, Double>();
 
 	// Users
 	private String user = MainMenu.getUser();
@@ -283,9 +286,66 @@ public class BillBrowser extends ModalJFrame
 	 * action on the bill, only use it without having to check all tables
 	 */
 	private Bill selectedBill = null;
-
+	private int selectedTab = 0;
+	
+	/**=======================================================
+	 * PAGINATION
+	 * 
+	 * @since 19/09/2022
+	 * @author Silevester D.
+	 *=======================================================*/
+	
+	private int dataset = 1;
+	
+	// All bills tab
+	private int all_start_index = 0;
+	private int all_items_per_page = 100;
+	private JButton allPaginationFirstBtn;
+	private JButton allPaginationLastBtn;
+	private JButton allPaginationPrevBtn;
+	private JButton allPaginationNextBtn;
+	private JComboBox<Integer> allPaginationCombo;
+	private JLabel allPaginationLabel = new JLabel();
+	private JPanel allPaginationPanel;
+	private JPanel allBillsCountPanel;
+	private JLabel allBillsCountLabel = new JLabel();
+	private int allBillsCount;
+	private boolean allBillsUpdated = false;
+	
+	// Closed bills tab
+	private int closed_start_index = 0;
+	private int closed_items_per_page = 100;
+	private JButton closedPaginationFirstBtn;
+	private JButton closedPaginationLastBtn;
+	private JButton closedPaginationPrevBtn;
+	private JButton closedPaginationNextBtn;
+	private JComboBox<Integer> closedPaginationCombo;
+	private JLabel closedPaginationLabel = new JLabel();
+	private JPanel closedPaginationPanel;
+	private JPanel closedBillsCountPanel;
+	private JLabel closedBillsCountLabel = new JLabel();
+	private int closedBillsCount;
+	private boolean closedBillsUpdated = false;
+	
+	// Pending bills tab
+	private int pending_start_index = 0;
+	private int pending_items_per_page = 100;
+	private JButton pendingPaginationFirstBtn;
+	private JButton pendingPaginationLastBtn;
+	private JButton pendingPaginationPrevBtn;
+	private JButton pendingPaginationNextBtn;
+	private JComboBox<Integer> pendingPaginationCombo;
+	private JLabel pendingPaginationLabel = new JLabel();
+	private JPanel pendingPaginationPanel;
+	private JPanel pendingBillsCountPanel;
+	private JLabel pendingBillsCountLabel = new JLabel();
+	private int pendingBillsCount;
+	private boolean pendingBillsUpdated = false;
+	
 	public BillBrowser() {
+		// Load data
 		updateDataSet();
+		
 		initComponents();
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		// setResizable(false);
@@ -303,8 +363,9 @@ public class BillBrowser extends ModalJFrame
 
 			public void windowClosing(WindowEvent e) {
 				// to free memory
-				billPeriod.clear();
-				mapBill.clear();
+				allBills.clear();
+				closedBills.clear();
+				pendingBills.clear();
 				users.clear();
 				dispose();
 			}
@@ -597,8 +658,9 @@ public class BillBrowser extends ModalJFrame
 
 				public void actionPerformed(ActionEvent e) {
 					// to free memory
-					billPeriod.clear();
-					mapBill.clear();
+					allBills.clear();
+					closedBills.clear();
+					pendingBills.clear();
 					users.clear();
 					dispose();
 				}
@@ -652,11 +714,6 @@ public class BillBrowser extends ModalJFrame
 						if (jScrollPaneClosed.isShowing()) {
 							int rowSelected = jTableClosed.getSelectedRow();
 							Bill editBill = (Bill) jTableClosed.getValueAt(rowSelected, -1);
-							new GenericReportBill(editBill.getId(), Param.string("PATIENTBILL"));
-						}
-						if (jScrollPaneDeleted.isShowing()) {
-							int rowSelected = jTableDeleted.getSelectedRow();
-							Bill editBill = (Bill) jTableDeleted.getValueAt(rowSelected, -1);
 							new GenericReportBill(editBill.getId(), Param.string("PATIENTBILL"));
 						}
 					} catch (Exception ex) {
@@ -787,11 +844,6 @@ public class BillBrowser extends ModalJFrame
 							Bill editBill = (Bill) jTableClosed.getValueAt(rowSelected, -1);
 							new GenericReportBill(editBill.getId(), Param.string("PATIENTBILL"));
 						}
-						if (jScrollPaneDeleted.isShowing()) {
-							int rowSelected = jTableDeleted.getSelectedRow();
-							Bill editBill = (Bill) jTableDeleted.getValueAt(rowSelected, -1);
-							new GenericReportBill(editBill.getId(), Param.string("PATIENTBILL"));
-						}
 					} catch (Exception ex) {
 						JOptionPane.showMessageDialog(null,
 								MessageBundle.getMessage("angal.billbrowser.pleaseselectabillfirst"), //$NON-NLS-1$
@@ -879,26 +931,6 @@ public class BillBrowser extends ModalJFrame
 						if (jScrollPaneClosed != null && jScrollPaneClosed.isShowing()) {
 							int rowSelected = jTableClosed.getSelectedRow();
 							deleteBill = (Bill) jTableClosed.getValueAt(rowSelected, -1);
-
-							// Check if the bill is already deleted. Show an alert and return if so
-							if (deleteBill.getStatus().equalsIgnoreCase("D")) {
-								JOptionPane.showMessageDialog(null,
-										MessageBundle.getMessage("angal.billbrowser.cannotdeleteadeletedbill"), //$NON-NLS-1$
-										MessageBundle.getMessage("angal.hospital"), //$NON-NLS-1$
-										JOptionPane.PLAIN_MESSAGE);
-
-								return;
-							}
-
-							ok = JOptionPane.showConfirmDialog(null,
-									MessageBundle
-											.getMessage("angal.billbrowser.doyoureallywanttodeletetheselectedbill"), //$NON-NLS-1$
-									MessageBundle.getMessage("angal.common.delete"), //$NON-NLS-1$
-									JOptionPane.YES_NO_OPTION);
-						}
-						if (jScrollPaneDeleted != null && jScrollPaneDeleted.isShowing()) {
-							int rowSelected = jTableDeleted.getSelectedRow();
-							deleteBill = (Bill) jTableDeleted.getValueAt(rowSelected, -1);
 
 							// Check if the bill is already deleted. Show an alert and return if so
 							if (deleteBill.getStatus().equalsIgnoreCase("D")) {
@@ -1073,12 +1105,6 @@ public class BillBrowser extends ModalJFrame
 									MessageBundle.getMessage("angal.billbrowser.title"), //$NON-NLS-1$
 									JOptionPane.PLAIN_MESSAGE);
 						}
-						if (jScrollPaneDeleted.isShowing()) {
-							JOptionPane.showMessageDialog(null,
-									MessageBundle.getMessage("angal.billbrowser.cancloseonlyopenbills"), //$NON-NLS-1$
-									MessageBundle.getMessage("angal.billbrowser.title"), //$NON-NLS-1$
-									JOptionPane.PLAIN_MESSAGE);
-						}
 					} catch (OHException ex) {
 						JOptionPane.showMessageDialog(null, ex.getMessage(), // $NON-NLS-1$
 								MessageBundle.getMessage("angal.billbrowser.title"), //$NON-NLS-1$
@@ -1214,7 +1240,31 @@ public class BillBrowser extends ModalJFrame
 						exportFile = new File(exportFile.getAbsoluteFile() + ".xls");
 					ExcelExporter xlsExport = new ExcelExporter();
 					try {
-						xlsExport.exportBillsTableToExcel(billPeriod, exportFile);
+						ArrayList<Bill> bills = new ArrayList<Bill>();
+						
+						switch (dataset) {
+							case 1:
+								bills = billManager.getBills(null, dateFrom, dateTo, null, null, null, 0, 0);
+								break;
+								
+							case 2:
+								bills = billManager.getBills(null, dateFrom, dateTo, null, null, patientParent, 0, 0);
+								break;
+								
+							case 3:
+								bills = billManager.getBills(null, dateFrom, dateTo, null, chooseItem, null, 0, 0);
+								break;
+								
+							case 4:
+								bills = billManager.getBills(null, dateFrom, dateTo, null, chooseItem, null, 0, 0);
+								break;
+					
+							default:
+								bills = billManager.getBills(null, dateFrom, dateTo, garantUserChoose, null, null, 0, 0);
+								break;
+						}
+						
+						xlsExport.exportBillsTableToExcel(bills, exportFile);
 						Desktop.getDesktop().open(new File(exportFile.getAbsolutePath()));
 					} catch (IOException exc) {
 						logger.info("Export to excel error : " + exc.getMessage());
@@ -1232,13 +1282,14 @@ public class BillBrowser extends ModalJFrame
 		}
 		return jScrollPaneClosed;
 	}
-
-	private JScrollPane getJScrollPaneDeleted() {
-		if (jScrollPaneDeleted == null) {
-			jScrollPaneDeleted = new JScrollPane();
-			jScrollPaneDeleted.setViewportView(getJTableDeleted());
-		}
-		return jScrollPaneDeleted;
+	
+	private JPanel getPanelClosed() {
+		JPanel closedPanel = new JPanel();
+		closedPanel.setLayout(new BorderLayout());
+		closedPanel.add(getJScrollPaneClosed(), BorderLayout.NORTH);
+		closedPanel.add(getClosedPaginationPanel(), BorderLayout.SOUTH);
+		
+		return closedPanel;
 	}
 
 	private JTable getJTableClosed() {
@@ -1271,7 +1322,7 @@ public class BillBrowser extends ModalJFrame
 				}
 			});
 
-			jTableClosed.setModel(new BillTableModel("C")); //$NON-NLS-1$
+			jTableClosed.setModel(new BillTableModel(closedBills)); //$NON-NLS-1$
 			for (int i = 0; i < columsWidth.length; i++) {
 				jTableClosed.getColumnModel().getColumn(i).setMinWidth(columsWidth[i]);
 				if (!columsResizable[i])
@@ -1315,77 +1366,6 @@ public class BillBrowser extends ModalJFrame
 		return jTableClosed;
 	}
 
-	private JTable getJTableDeleted() {
-		if (jTableDeleted == null) {
-			jTableDeleted = new JTable();
-
-			// apply cell rendered behaviour
-			jTableDeleted.addMouseMotionListener(new MouseMotionListener() {
-				@Override
-				public void mouseMoved(MouseEvent e) {
-					JTable aTable = (JTable) e.getSource();
-					int itsRow = aTable.rowAtPoint(e.getPoint());
-					if (itsRow >= 0) {
-						cellRenderer.setHoveredRow(itsRow);
-					} else {
-						cellRenderer.setHoveredRow(-1);
-					}
-					aTable.repaint();
-				}
-
-				@Override
-				public void mouseDragged(MouseEvent e) {
-
-				}
-			});
-			jTableDeleted.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseExited(MouseEvent e) {
-					cellRenderer.setHoveredRow(-1);
-				}
-			});
-
-			jTableDeleted.setModel(new BillTableModel("D")); //$NON-NLS-1$
-			for (int i = 0; i < columsWidth.length; i++) {
-				jTableDeleted.getColumnModel().getColumn(i).setMinWidth(columsWidth[i]);
-				if (!columsResizable[i])
-					jTableDeleted.getColumnModel().getColumn(i).setMaxWidth(maxWidth[i]);
-				if (alignCenter[i]) {
-					jTableDeleted.getColumnModel().getColumn(i).setCellRenderer(new StringCenterTableCellRenderer());
-					if (boldCenter[i]) {
-						jTableDeleted.getColumnModel().getColumn(i).setCellRenderer(new CenterBoldTableCellRenderer());
-					}
-				}
-			}
-			jTableDeleted.setAutoCreateColumnsFromModel(false);
-			jTableDeleted.setDefaultRenderer(String.class, new StringTableCellRenderer());
-			jTableDeleted.setDefaultRenderer(Integer.class, new IntegerTableCellRenderer());
-			jTableDeleted.setDefaultRenderer(Double.class, new DoubleTableCellRenderer());
-
-			// Enable Refund button if selected bill is closed
-			if(Param.bool("ENABLEMEDICALREFUND")) {
-				jTableDeleted.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-					public void valueChanged(ListSelectionEvent event) {
-						if (!jTableDeleted.getSelectionModel().isSelectionEmpty()) {
-	
-							selectedBill = (Bill) jTableDeleted.getValueAt(jTableDeleted.getSelectedRow(), -1);
-	
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									jButtonBack.setEnabled(false);
-								}
-							});
-						} else {
-							selectedBill = null;
-							jButtonBack.setEnabled(false);
-						}
-					}
-				});
-			}
-		}
-		return jTableDeleted;
-	}
-
 	private JScrollPane getJScrollPanePending() {
 		if (jScrollPanePending == null) {
 			jScrollPanePending = new JScrollPane();
@@ -1394,6 +1374,15 @@ public class BillBrowser extends ModalJFrame
 		return jScrollPanePending;
 	}
 
+	private JPanel getPanelPending() {
+		JPanel pendingPanel = new JPanel();
+		pendingPanel.setLayout(new BorderLayout());
+		pendingPanel.add(getJScrollPanePending(), BorderLayout.NORTH);
+		pendingPanel.add(getPendingPaginationPanel(), BorderLayout.SOUTH);
+		
+		return pendingPanel;
+	}
+	
 	private JTable getJTablePending() {
 		if (jTablePending == null) {
 			jTablePending = new JTable();
@@ -1424,7 +1413,7 @@ public class BillBrowser extends ModalJFrame
 				}
 			});
 
-			jTablePending.setModel(new BillTableModel("O")); //$NON-NLS-1$
+			jTablePending.setModel(new BillTableModel(pendingBills)); //$NON-NLS-1$
 			for (int i = 0; i < columsWidth.length; i++) {
 				jTablePending.getColumnModel().getColumn(i).setMinWidth(columsWidth[i]);
 				if (!columsResizable[i])
@@ -1472,6 +1461,15 @@ public class BillBrowser extends ModalJFrame
 		return jScrollPaneBills;
 	}
 
+	private JPanel getPanelBills() {
+		JPanel allPanel = new JPanel();
+		allPanel.setLayout(new BorderLayout());
+		allPanel.add(getJScrollPaneBills(), BorderLayout.NORTH);
+		allPanel.add(getAllPaginationPanel(), BorderLayout.SOUTH);
+		
+		return allPanel;
+	}
+	
 	private JTable getJTableBills() {
 		if (jTableBills == null) {
 			jTableBills = new JTable();
@@ -1501,7 +1499,7 @@ public class BillBrowser extends ModalJFrame
 					cellRenderer.setHoveredRow(-1);
 				}
 			});
-			jTableBills.setModel(new BillTableModel("ALL"));
+			jTableBills.setModel(new BillTableModel(allBills));
 			for (int i = 0; i < columsWidth.length; i++) {
 				jTableBills.getColumnModel().getColumn(i).setMinWidth(columsWidth[i]);
 				if (!columsResizable[i])
@@ -1548,10 +1546,33 @@ public class BillBrowser extends ModalJFrame
 	private JTabbedPane getJTabbedPaneBills() {
 		if (jTabbedPaneBills == null) {
 			jTabbedPaneBills = new JTabbedPane();
-			jTabbedPaneBills.addTab(MessageBundle.getMessage("angal.billbrowser.bills"), getJScrollPaneBills());
-			jTabbedPaneBills.addTab(MessageBundle.getMessage("angal.billbrowser.pending"), getJScrollPanePending());
-			jTabbedPaneBills.addTab(MessageBundle.getMessage("angal.billbrowser.closed"), getJScrollPaneClosed());
-			jTabbedPaneBills.addTab(MessageBundle.getMessage("angal.billbrowser.deleted"), getJScrollPaneDeleted());
+			jTabbedPaneBills.addTab(MessageBundle.getMessage("angal.billbrowser.bills"), getPanelBills());
+			jTabbedPaneBills.addTab(MessageBundle.getMessage("angal.billbrowser.closed"), getPanelClosed());
+			jTabbedPaneBills.addTab(MessageBundle.getMessage("angal.billbrowser.pending"), getPanelPending());
+		
+			jTabbedPaneBills.addChangeListener(e -> {
+				selectedTab = jTabbedPaneBills.getSelectedIndex();
+				
+				System.out.println("Tab changed : " + selectedTab);
+
+				if (selectedTab == 0 && !allBillsUpdated) {
+					updateAllBills();
+					jTableBills.setModel(new BillTableModel(allBills));
+					initializeAllPaginationCombo();
+				}
+				
+				if (selectedTab == 1 && !closedBillsUpdated) {
+					updateClosedBills();
+					jTableClosed.setModel(new BillTableModel(closedBills));
+					initializeClosedPaginationCombo();
+				}
+				
+				if (selectedTab == 2 && !pendingBillsUpdated) {
+					updatePendingBills();
+					jTablePending.setModel(new BillTableModel(pendingBills));
+					initializePendingPaginationCombo();
+				}
+			});
 		}
 		return jTabbedPaneBills;
 	}
@@ -1753,313 +1774,290 @@ public class BillBrowser extends ModalJFrame
 		return priceListLabelPanel;
 	}
 
+	/**
+	 * Update pending bills stats
+	 */
+	private void updatePendingBills() {
+		pendingBillsUpdated = true;
+		
+		if (dataset == 2) {
+			pendingBillsCount = billManager.countBills("O", null, null, null, null, patientParent);
+			if (pendingBillsCount > 0) {
+				pendingBills = billManager.getBills("O", null, null, null, null, patientParent, pending_items_per_page, 0);			
+			} else {
+				pendingBills = new ArrayList<Bill>();
+			}
+		} else {
+			pendingBillsCount = billManager.countBills("O", null, null, null, null, null);
+			if (pendingBillsCount > 0) {
+				pendingBills = billManager.getBills("O", null, null, null, null, null, pending_items_per_page, 0);			
+			} else {
+				pendingBills = new ArrayList<Bill>();
+			}
+		}
+	}
+	
+	/**
+	 * Update All bills data set
+	 */
+	private void updateAllBills() {
+		System.out.println("Start date : " + dateFrom.getTime());
+		System.out.println("End date : " + dateTo.getTime());
+		
+		allBillsUpdated = true;
+		
+		if (dataset == 1) {
+			allBillsCount = billManager.countBills(null, dateFrom, dateTo, null, null, null);
+			if (allBillsCount > 0) {
+				allBills = billManager.getBills(null, dateFrom, dateTo, null, null, null, all_items_per_page, 0);			
+			} else {
+				allBills = new ArrayList<Bill>();
+			}
+		}
+
+		if (dataset == 2) {
+			allBillsCount = billManager.countBills(null, dateFrom, dateTo, null, null, patientParent);
+			if (allBillsCount > 0) {
+				allBills = billManager.getBills(null, dateFrom, dateTo, null, null, patientParent, all_items_per_page, 0);			
+			} else {
+				allBills = new ArrayList<Bill>();
+			}
+		}
+		
+		if (dataset == 3) {
+			allBillsCount = billManager.countBills(null, dateFrom, dateTo, null, chooseItem, null);
+			if (allBillsCount > 0) {
+				allBills = billManager.getBills(null, dateFrom, dateTo, null, chooseItem, null, all_items_per_page, 0);			
+			} else {
+				allBills = new ArrayList<Bill>();
+			}
+		}
+		
+		if (dataset == 4) {
+			allBillsCount = billManager.countBills(null, dateFrom, dateTo, garantUserChoose, null, null);
+			if (allBillsCount > 0) {
+				allBills = billManager.getBills(null, dateFrom, dateTo, garantUserChoose, null, null, all_items_per_page, 0);			
+			} else {
+				allBills = new ArrayList<Bill>();
+			}
+		}
+	}
+	
+	/**
+	 * Update closed bills data set
+	 */
+	private void updateClosedBills() {
+		System.out.println("Start date : " + dateFrom.getTime());
+		System.out.println("End date : " + dateTo.getTime());
+		
+		closedBillsUpdated = true;
+		if (dataset == 1) {
+			closedBillsCount = billManager.countBills("C", dateFrom, dateTo, null, null, null);
+			if (closedBillsCount > 0) {
+				closedBills = billManager.getBills("C", dateFrom, dateTo, null, null, null, closed_items_per_page, 0);			
+			} else {
+				closedBills = new ArrayList<Bill>();
+			}
+		}
+
+		if (dataset == 2) {
+			closedBillsCount = billManager.countBills("C", dateFrom, dateTo, null, null, patientParent);
+			if (closedBillsCount > 0) {
+				closedBills = billManager.getBills("C", dateFrom, dateTo, null, null, patientParent, closed_items_per_page, 0);			
+			} else {
+				closedBills = new ArrayList<Bill>();
+			}
+		}
+		
+		if (dataset == 3) {
+			closedBillsCount = billManager.countBills("C", dateFrom, dateTo, null, chooseItem, null);
+			if (closedBillsCount > 0) {
+				closedBills = billManager.getBills("C", dateFrom, dateTo, null, chooseItem, null, closed_items_per_page, 0);			
+			} else {
+				closedBills = new ArrayList<Bill>();
+			}
+		}
+		
+		if (dataset == 4) {
+			closedBillsCount = billManager.countBills("C", dateFrom, dateTo, garantUserChoose, null, null);
+			if (closedBillsCount > 0) {
+				closedBills = billManager.getBills("C", dateFrom, dateTo, garantUserChoose, null, null, closed_items_per_page, 0);			
+			} else {
+				closedBills = new ArrayList<Bill>();
+			}
+		}
+	}
+	
+	/**
+	 * Update today stats
+	 */
+	private void updateTodayStats() {
+		todayStats = billManager.getStatsByPeriod(dateToday0, dateToday24, user);
+	}
+	
+	/**
+	 * Update period stats
+	 */
+	private void updatePeriodStats() {
+		periodStats = billManager.getStatsByPeriod(dateFrom, dateTo, user);
+	}
+	
 	private void updateTables() {
-		jTableBills.setModel(new BillTableModel("ALL")); //$NON-NLS-1$
-		jTablePending.setModel(new BillTableModel("O")); //$NON-NLS-1$
-		jTableClosed.setModel(new BillTableModel("C")); //$NON-NLS-1$
-		jTableDeleted.setModel(new BillTableModel("D")); //$NON-NLS-1$
+		if (selectedTab == 0) {
+			jTableBills.setModel(new BillTableModel(allBills)); //$NON-NLS-1$			
+		}
+		
+		if (selectedTab == 1) {
+			jTableClosed.setModel(new BillTableModel(closedBills)); //$NON-NLS-1$			
+		}
+		
+		if (selectedTab == 2) {
+			jTablePending.setModel(new BillTableModel(pendingBills)); //$NON-NLS-1$			
+		}
+		
+		//jTableDeleted.setModel(new BillTableModel("D")); //$NON-NLS-1$
 	}
 
 	private void updateDataSet() {
-		updateDataSet(new DateTime().toDateMidnight().toGregorianCalendar(),
-				new DateTime().toDateMidnight().plusDays(1).toGregorianCalendar());
+		dateFrom = new DateTime().toDateMidnight().toGregorianCalendar();
+		dateTo = new DateTime().toDateMidnight().plusDays(1).toGregorianCalendar();
+		updateDataSet(dateFrom, dateTo);
 	}
 
 	private void updateDataSet(GregorianCalendar dateFrom, GregorianCalendar dateTo) {
-		/*
-		 * Bills in the period
-		 */
-		billPeriod = billManager.getBills(dateFrom, dateTo);
-
-		/*
-		 * Payments in the period
-		 */
-		paymentsPeriod = billManager.getPayments(dateFrom, dateTo);
-
-		/*
-		 * Bills not in the period but with payments in the period
-		 */
-		billFromPayments = billManager.getBills(paymentsPeriod);
+		dataset = 1;
+		
+		this.dateFrom = dateFrom;
+		this.dateTo = dateTo;
+		allBillsUpdated = false;
+		closedBillsUpdated = false;
+		
+		if (jTabbedPaneBills == null) {
+			updateAllBills();
+		} else {
+			int selectedIndex = jTabbedPaneBills.getSelectedIndex();
+			
+			if (selectedIndex == 0) {
+				updateAllBills();
+			} else if(selectedIndex == 1) {
+				updateClosedBills();
+			}
+		}
+		
+		System.out.println("Data loaded 1");
 	}
 
 	private void updateDataSet(GregorianCalendar dateFrom, GregorianCalendar dateTo, Patient patient) {
-		/*
-		 * Bills in the period
-		 */
-		billPeriod = billManager.getBills(dateFrom, dateTo, patient);
-
-		/*
-		 * Payments in the period
-		 */
-		paymentsPeriod = billManager.getPayments(dateFrom, dateTo, patient);
-
-		/*
-		 * Bills not in the period but with payments in the period
-		 */
-		billFromPayments = billManager.getBills(paymentsPeriod);
+		dataset = 2;
+		
+		this.dateFrom = dateFrom;
+		this.dateTo = dateTo;
+		patientParent = patient;
+		allBillsUpdated = false;
+		closedBillsUpdated = false;
+		
+		if (jTabbedPaneBills == null) {
+			updateAllBills();
+		} else {
+			int selectedIndex = jTabbedPaneBills.getSelectedIndex();
+			
+			if (selectedIndex == 0) {
+				updateAllBills();
+			} else if(selectedIndex == 1) {
+				updateClosedBills();
+			} else if(selectedIndex == 2) {
+				updatePendingBills();
+			}
+		}
+		
+		System.out.println("Data loaded 2");
 	}
 
 	private void updateDataSet(GregorianCalendar dateFrom, GregorianCalendar dateTo, BillItems billItem) {
-		/*
-		 * Bills in the period contending selected item
-		 */
-		billPeriod = billManager.getBills(dateFrom, dateTo, billItem);
-
-		/*
-		 * Payments in the period
-		 */
-		// paymentsPeriod = billManager.getPayments(dateFrom, dateTo, patient);
-		paymentsPeriod = billManager.getPayments(billPeriod);
-
-		/*
-		 * Bills not in the period but with payments in the period
-		 */
-		billFromPayments = billManager.getBills(paymentsPeriod);
+		dataset = 3;
+		
+		this.dateFrom = dateFrom;
+		this.dateTo = dateTo;
+		chooseItem = billItem;
+		allBillsUpdated = false;
+		closedBillsUpdated = false;
+		
+		if (jTabbedPaneBills == null) {
+			updateAllBills();
+		} else {
+			int selectedIndex = jTabbedPaneBills.getSelectedIndex();
+			
+			if (selectedIndex == 0) {
+				updateAllBills();
+			} else if(selectedIndex == 1) {
+				updateClosedBills();
+			}
+		}
+		
+		System.out.println("Data loaded 3");
 	}
 
 	private void updateDataSet(GregorianCalendar dateFrom, GregorianCalendar dateTo, User userGarant) {
-		/*
-		 * Bills in the period contending selected item
-		 */
-		billPeriod = billManager.getBills(dateFrom, dateTo, userGarant);
-
-		/*
-		 * Payments in the period
-		 */
-		// paymentsPeriod = billManager.getPayments(dateFrom, dateTo, patient);
-		paymentsPeriod = billManager.getPayments(billPeriod);
-
-		/*
-		 * Bills not in the period but with payments in the period
-		 */
-		billFromPayments = billManager.getBills(paymentsPeriod);
+		
+		dataset = 4;
+		
+		this.dateFrom = dateFrom;
+		this.dateTo = dateTo;
+		garantUserChoose = userGarant;
+		allBillsUpdated = false;
+		closedBillsUpdated = false;
+		
+		if (jTabbedPaneBills == null) {
+			updateAllBills();
+		} else {
+			int selectedIndex = jTabbedPaneBills.getSelectedIndex();
+			
+			if (selectedIndex == 0) {
+				updateAllBills();
+			} else if(selectedIndex == 1) {
+				updateClosedBills();
+			}
+		}
+		
+		System.out.println("Data loaded 4");
 	}
 
 	private void updateTotals() {
-		ArrayList<Bill> billToday;
-		ArrayList<BillPayments> paymentsToday;
-
-		billToday = billManager.getBills(dateToday0, dateToday24, patientParent); // adding patient parameter
-		paymentsToday = billManager.getPayments(dateToday0, dateToday24, patientParent); // adding patient parameter
-
-		// if (MainMenu.getUser().equals("admin")) {
-		// billToday = billManager.getBills(dateToday0, dateToday24, patientParent);
-		// //adding patient parameter
-		// paymentsToday = billManager.getPayments(dateToday0, dateToday24,
-		// patientParent); //adding patient parameter
-		// } else {
-		// billToday = billPeriod;
-		// paymentsToday = paymentsPeriod;
-		// }
-
-		totalPeriod = new BigDecimal(0);
-		balancePeriod = new BigDecimal(0);
-		totalToday = new BigDecimal(0);
-		balanceToday = new BigDecimal(0);
-		userToday = new BigDecimal(0);
-		userPeriod = new BigDecimal(0);
-		userRefundToday = new BigDecimal(0);
-		userRefundPeriod = new BigDecimal(0);
-		refundToday = new BigDecimal(0);
-		refundPeriod = new BigDecimal(0);
-
-		ArrayList<Integer> deletedBill = new ArrayList<Integer>();
-
-		// Bills in range contribute for Not Paid (balance)
-		for (Bill bill : billPeriod) {
-			if (bill.getStatus().equals("D")) {
-				deletedBill.add(bill.getId());
-			} else {
-				BigDecimal balance = new BigDecimal(Double.toString(bill.getBalance()));
-				balancePeriod = balancePeriod.add(balance);
-			}
-		}
-
-		// Payments in range contribute for Paid Period (total)
-		for (BillPayments payment : paymentsPeriod) {
-			if (!deletedBill.contains(payment.getBillID())) {
-				BigDecimal payAmount = new BigDecimal(Double.toString(payment.getAmount()));
-				String payUser = payment.getUser();
-				if (payAmount.doubleValue() > 0) {
-					totalPeriod = totalPeriod.add(payAmount);
-				} else {
-					refundPeriod = refundPeriod.add(payAmount);
-				}
-
-				if (payUser.equals(user)) {
-					if (payAmount.doubleValue() > 0) {
-						userPeriod = userPeriod.add(payAmount);
-					} else {
-						userRefundPeriod = userRefundPeriod.add(payAmount);
-					}
-				}
-			}
-		}
-
-		// Bills in today contribute for Not Paid Today (balance)
-		for (Bill bill : billToday) {
-			if (!bill.getStatus().equals("D")) {
-				BigDecimal balance = new BigDecimal(Double.toString(bill.getBalance()));
-				balanceToday = balanceToday.add(balance);
-			}
-		}
-
-		// Payments in today contribute for Paid Today (total)
-		for (BillPayments payment : paymentsToday) {
-			if (!deletedBill.contains(payment.getBillID())) {
-				BigDecimal payAmount = new BigDecimal(Double.toString(payment.getAmount()));
-				String payUser = payment.getUser();
-				
-				if (payAmount.doubleValue() > 0) {
-					totalToday = totalToday.add(payAmount);					
-				} else {
-					refundToday = refundToday.add(payAmount);
-				}
-				
-				if (!Param.bool("SINGLEUSER") && payUser.equals(user)) {
-					if (payAmount.doubleValue() > 0) {
-						userToday = userToday.add(payAmount);
-					} else {
-						userRefundToday = userRefundToday.add(payAmount);
-					}
-				}
-			}
-		}
-
-		jTableToday.setValueAt(totalToday, 0, 1);
-		jTableToday.setValueAt(balanceToday, 0, 3);
-		jTablePeriod.setValueAt(totalPeriod, 0, 1);
-		jTablePeriod.setValueAt(balancePeriod, 0, 3);
+		updateTodayStats();
+		updatePeriodStats();
+		
+		jTableToday.setValueAt(todayStats.get("TOTAL_PAYMENTS"), 0, 1);
+		jTableToday.setValueAt(todayStats.get("BALANCE"), 0, 3);
+		jTablePeriod.setValueAt(periodStats.get("TOTAL_PAYMENTS"), 0, 1);
+		jTablePeriod.setValueAt(periodStats.get("BALANCE"), 0, 3);
 		if (jTableUser != null) {
-			jTableUser.setValueAt(userToday, 0, 1);
-			jTableUser.setValueAt(userPeriod, 0, 3);
+			jTableUser.setValueAt(todayStats.get("USER_PAYMENTS"), 0, 1);
+			jTableUser.setValueAt(periodStats.get("USER_PAYMENTS"), 0, 3);
 		}
 
 		if (Param.bool("ENABLEMEDICALREFUND")) {
-			jTableRefund.setValueAt(refundToday.multiply(new BigDecimal(-1)), 0, 1);
-			jTableRefund.setValueAt(refundPeriod.multiply(new BigDecimal(-1)), 0, 3);
+			jTableRefund.setValueAt(todayStats.get("TOTAL_REFUNDS"), 0, 1);
+			jTableRefund.setValueAt(periodStats.get("TOTAL_REFUNDS"), 0, 3);
 	
 			if (jTableUserRefund != null) {
-				jTableUserRefund.setValueAt(userRefundToday.multiply(new BigDecimal(-1)), 0, 1);
-				jTableUserRefund.setValueAt(userRefundPeriod.multiply(new BigDecimal(-1)), 0, 3);
+				jTableUserRefund.setValueAt(todayStats.get("USER_REFUNDS"), 0, 1);
+				jTableUserRefund.setValueAt(periodStats.get("USER_REFUNDS"), 0, 3);
 			}
 		}
+		
+		System.out.println("Totals updated");
 	}
-
+	
 	public class BillTableModel extends DefaultTableModel {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private ArrayList<Bill> tableArray = new ArrayList<Bill>();
+		private ArrayList<Bill> bills = new ArrayList<Bill>();
 
-		/*
-		 * All Bills
-		 */
-		private ArrayList<Bill> billAll = new ArrayList<Bill>();
-
-		public BillTableModel(String status) {
-			loadData(status);
-		}
-
-		private void loadData(String status) {
-
-			tableArray.clear();
-			mapBill.clear();
-
-			mapping(status);
-		}
-
-		private void mapping(String status) {
-			int limit = -1;
-			if (Param.bool("ALLOWLIMITRECORDDISPLAY")) {
-				try {
-					String limitS = Param.string("LIMITRECORDDISPLAY");
-
-					limit = Integer.parseInt(limitS);
-				} catch (Exception e) {
-					System.out.println("Errors occurs with retreiving LIMIT PARAMETER in bill browser");
-				}
-			}
-			/*
-			 * Mappings Bills in the period
-			 */
-			for (Bill bill : billPeriod) {
-				// mapBill.clear();
-				mapBill.put(bill.getId(), bill);
-			}
-			/*
-			 * Merging the two bills lists
-			 */
-			billAll.addAll(billPeriod);
-			for (Bill bill : billFromPayments) {
-				if (mapBill.get(bill.getId()) == null)
-					billAll.add(bill);
-			}
-
-			if (status.equals("O")) {
-				if (patientParent != null) {
-					tableArray = billManager.getPendingBillsAffiliate(patientParent.getCode());
-				} else {
-					if (chooseItem != null) {
-						tableArray = billManager.getPendingBillsSpecificItem(chooseItem.getItemId());
-					} else if (garantUserChoose != null) {
-						tableArray = billManager.getPendingBillsSpecificGarante(garantUserChoose);
-					} else {
-						tableArray = billManager.getPendingBills2(0);
-					}
-				}
-
-				/*** filter by specific items ***/
-
-			} else if (status.equals("ALL")) {
-
-				Collections.sort(billAll);
-				tableArray = billAll;
-			} else if (status.equals("C")) {
-				for (Bill bill : billPeriod) {
-					if (bill.getStatus().equals(status)) {
-						tableArray.add(bill);
-					}
-				}
-			} else if (status.equals("D")) {
-				for (Bill bill : billPeriod) {
-					if (bill.getStatus().equals(status)) {
-						tableArray.add(bill);
-					}
-				}
-			}
-
-			// minimiser la taille ici
-			ArrayList<Bill> temp = new ArrayList<Bill>();
-			// inverser quand c'est le premier tableau
-			int id_last = 0;
-			int id_first = 0;
-			try {
-				id_last = tableArray.get(tableArray.size() - 1).getId();
-			} catch (Exception e) {
-			}
-			try {
-				id_first = tableArray.get(0).getId();
-			} catch (Exception e) {
-			}
-			if (id_last > id_first) {
-				Collections.sort(tableArray, Collections.reverseOrder());
-			}
-
-			//
-			for (Bill bill : tableArray) {
-				if (temp.size() >= limit && limit != -1) {
-
-					break;
-				}
-				temp.add(bill);
-			}
-			tableArray = temp;
-			//
-			Collections.sort(tableArray, Collections.reverseOrder());
-
+		public BillTableModel(ArrayList<Bill> bills) {
+			this.bills = bills;
 		}
 
 		public Class<?> getColumnClass(int columnIndex) {
@@ -2075,9 +2073,9 @@ public class BillBrowser extends ModalJFrame
 		}
 
 		public int getRowCount() {
-			if (tableArray == null)
+			if (bills == null)
 				return 0;
-			return tableArray.size();
+			return bills.size();
 		}
 
 		// ["Date", "Patient", "Balance", "Update", "Status", "Amount"};
@@ -2085,7 +2083,7 @@ public class BillBrowser extends ModalJFrame
 		public Object getValueAt(int r, int c) {
 			// String name = "";
 			int index = -1;
-			Bill thisBill = tableArray.get(r);
+			Bill thisBill = bills.get(r);
 			if (c == index) {
 				return thisBill;
 			}
@@ -2317,6 +2315,29 @@ public class BillBrowser extends ModalJFrame
 						File cashFile = new File(txtSageDirectory.getAbsoluteFile() + File.separator
 								+ Sage.getSage().FILE_CASHDESK_NAME + strDate + "_from_" + from + "_to_" + to + ".txt");
 						try {
+							
+							ArrayList<BillPayments> paymentsPeriod = new ArrayList<BillPayments>();
+							
+							switch (dataset) {
+								case 1:
+									paymentsPeriod = billManager.getPayments(dateFrom, dateTo);
+									break;
+								case 2:
+									paymentsPeriod = billManager.getPayments(dateFrom, dateTo, patientParent);
+									break;
+								case 3:
+									ArrayList<Bill> bills = billManager.getBills(null, dateFrom, dateTo, null, chooseItem, null, 0, 0);
+									paymentsPeriod = billManager.getPayments(bills);
+									break;
+								case 4:
+									ArrayList<Bill> bills2 = billManager.getBills(null, dateFrom, dateTo, garantUserChoose, null, null, 0, 0);
+									paymentsPeriod = billManager.getPayments(bills2);
+									break;
+								default:
+									paymentsPeriod = billManager.getPayments(dateFrom, dateTo);
+									break;
+							}
+							
 							boolean resultExportCashTable = SageExporter.exportCashTable(paymentsPeriod, cashFile);
 							boolean resultExportSales = SageExporter.exportSales(salesFile, dateFrom, dateTo);
 							if (resultExportCashTable && resultExportSales) {
@@ -2376,6 +2397,7 @@ public class BillBrowser extends ModalJFrame
 			updateDataSet(dateFrom, dateTo, patientParent);
 			updateTables();
 			updateTotals();
+			resetPaginationCombos();
 		}
 	}
 
@@ -2455,6 +2477,7 @@ public class BillBrowser extends ModalJFrame
 							updateDataSet(dateFrom, dateTo, chooseItem);
 							updateTables();
 							updateTotals();
+							resetPaginationCombos();
 						}
 					}
 				}
@@ -2473,6 +2496,7 @@ public class BillBrowser extends ModalJFrame
 					updateDataSet(dateFrom, dateTo);
 					updateTables();
 					updateTotals();
+					resetPaginationCombos();
 				}
 			});
 			chooseMedicalJButtonSupp.setIcon(new ImageIcon("rsc/icons/delete_button.png"));
@@ -2553,12 +2577,14 @@ public class BillBrowser extends ModalJFrame
 							updateDataSet(dateFrom, dateTo, userr);
 							updateTables();
 							updateTotals();
+							resetPaginationCombos();
 						}
 					} else {
 						garantUserChoose = null;
 						updateDataSet(dateFrom, dateTo);
 						updateTables();
 						updateTotals();
+						resetPaginationCombos();
 					}
 				}
 			});
@@ -2607,5 +2633,853 @@ public class BillBrowser extends ModalJFrame
 			});
 		}
 		return printGaranteButton;
+	}
+
+	/**
+	 * Get All Bills' Pagination Panel
+	 * 
+	 * @return JPanel
+	 */
+	private JPanel getAllPaginationPanel() {
+		if (allPaginationPanel != null)
+			return allPaginationPanel;
+
+		allPaginationPanel = new JPanel(new FlowLayout());
+
+		allPaginationPanel.add(getAllBillsCountPanel());
+		allPaginationPanel.add(getAllPaginationFirstButton());
+		allPaginationPanel.add(getAllPaginationPrevButton());
+		allPaginationPanel.add(getAllPaginationCombo());
+		allPaginationPanel.add(allPaginationLabel);
+		allPaginationPanel.add(getAllPaginationNextButton());
+		allPaginationPanel.add(getAllPaginationLastButton());
+
+		initializeAllPaginationCombo();
+
+		return allPaginationPanel;
+	}
+	
+	/**
+	 * Get Result count Panel
+	 * 
+	 * @return JPanel
+	 */
+	private JPanel getAllBillsCountPanel() {
+		if (allBillsCountPanel == null) {
+			allBillsCountPanel = new JPanel(new FlowLayout());
+			
+			allBillsCountLabel = new JLabel(MessageBundle.getMessage("angal.stat.total") + " : " + allBillsCount);
+			allBillsCountPanel.add(allBillsCountLabel);			
+		}
+
+		return allBillsCountPanel;
+	}
+	
+	/**
+	 * Get All Bills' Pagination First Button. 
+	 * The button that reset the pagination start index to 0
+	 * 
+	 * @return JButton
+	 */
+	private JButton getAllPaginationFirstButton() {
+		if (allPaginationFirstBtn != null)
+			return allPaginationFirstBtn;
+
+		allPaginationFirstBtn = new JButton("<<");
+		allPaginationFirstBtn.setEnabled(false);
+		allPaginationFirstBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removeAllPaginationComboListener();
+				all_start_index = 0;
+				applyAllBillsFilters(all_start_index);
+				setAllPaginationButtons();
+				allPaginationCombo.setSelectedItem(all_start_index / all_items_per_page + 1);
+				addAllPaginationComboListener();
+			}
+		});
+
+		return allPaginationFirstBtn;
+	}
+	
+	/**
+	 * Get All Bills' Pagination Previous Button
+	 * 
+	 * @return JButton
+	 */
+	private JButton getAllPaginationPrevButton() {
+		if (allPaginationPrevBtn != null)
+			return allPaginationPrevBtn;
+
+		allPaginationPrevBtn = new JButton("<");
+		allPaginationPrevBtn.setEnabled(false);
+		allPaginationPrevBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removeAllPaginationComboListener();
+				all_start_index -= all_items_per_page;
+				applyAllBillsFilters(all_start_index);
+				setAllPaginationButtons();
+				allPaginationCombo.setSelectedItem(all_start_index / all_items_per_page + 1);
+				addAllPaginationComboListener();
+			}
+		});
+		return allPaginationPrevBtn;
+	}
+
+	/**
+	 * Get All Bills' Pagination Pages combo
+	 * 
+	 * @return JComboBox
+	 */
+	private JComboBox<Integer> getAllPaginationCombo() {
+		if (allPaginationCombo != null)
+			return allPaginationCombo;
+
+		allPaginationCombo = new JComboBox<Integer>();
+		addAllPaginationComboListener();
+
+		return allPaginationCombo;
+	}
+	
+	/**
+	 * Remove or add ActionListener to All bills pagination combobox
+	 */
+	private void addAllPaginationComboListener() {
+		if(allPaginationCombo.getActionListeners().length == 0) {
+			allPaginationCombo.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("Handle all bill combobox event");
+					
+					if (allPaginationCombo.getItemCount() > 0) {
+						int _page_number = (Integer) allPaginationCombo.getSelectedItem();
+						all_start_index = (_page_number - 1) * all_items_per_page;
+						//allPaginationCombo.setSelectedItem(all_start_index / all_items_per_page + 1);
+						applyAllBillsFilters(all_start_index);
+						setAllPaginationButtons();
+					}
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Remove ActionListener to All bills pagination combobox
+	 */
+	private void removeAllPaginationComboListener() {
+		if(allPaginationCombo.getActionListeners().length > 0) {
+			for(ActionListener al: allPaginationCombo.getActionListeners()) {
+				allPaginationCombo.removeActionListener(al);
+			}
+		}
+	}
+	
+	/**
+	 * Handle pagination for all bills
+	 * 
+	 * @param startIndex 
+	 */
+	private void applyAllBillsFilters(int startIndex) {
+		System.out.println("Applying all bills filter");
+		
+		switch (dataset) {
+			case 1:
+				allBills = billManager.getBills(null, dateFrom, dateTo, null, null, null, all_items_per_page, startIndex);
+				break;
+				
+			case 2:
+				allBills = billManager.getBills(null, dateFrom, dateTo, null, null, patientParent, all_items_per_page, startIndex);
+				break;
+				
+			case 3:
+				allBills = billManager.getBills(null, dateFrom, dateTo, null, chooseItem, null, all_items_per_page, startIndex);
+				break;
+				
+			case 4:
+				allBills = billManager.getBills(null, dateFrom, dateTo, null, chooseItem, null, all_items_per_page, startIndex);
+				break;
+	
+			default:
+				allBills = billManager.getBills(null, dateFrom, dateTo, garantUserChoose, null, null, all_items_per_page, startIndex);
+				break;
+		}
+		
+		jTableBills.setModel(new BillTableModel(allBills));
+		jTableBills.updateUI();
+	}
+
+	/**
+	 * Get All Bills' Pagination Next Button
+	 * 
+	 * @return JButton paginationNextBtn
+	 */
+	private JButton getAllPaginationNextButton() {
+		if (allPaginationNextBtn != null)
+			return allPaginationNextBtn;
+
+		allPaginationNextBtn = new JButton(">");
+		allPaginationNextBtn.setEnabled(false);
+		allPaginationNextBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removeAllPaginationComboListener();
+				all_start_index += all_items_per_page;
+				applyAllBillsFilters(all_start_index);
+				setAllPaginationButtons();
+				allPaginationCombo.setSelectedItem(all_start_index / all_items_per_page + 1);
+				addAllPaginationComboListener();
+			}
+		});
+
+		return allPaginationNextBtn;
+	}
+
+	/**
+	 * Get All Bills' Pagination Last Page button
+	 * 
+	 * @return JButton
+	 */
+	private JButton getAllPaginationLastButton() {
+		if (allPaginationLastBtn != null)
+			return allPaginationLastBtn;
+
+		allPaginationLastBtn = new JButton(">>");
+		allPaginationLastBtn.setEnabled(false);
+		allPaginationLastBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removeAllPaginationComboListener();
+				all_start_index = ((Integer) allPaginationCombo.getItemCount() - 1) * all_items_per_page;
+				applyAllBillsFilters(all_start_index);
+				setAllPaginationButtons();
+				allPaginationCombo.setSelectedItem(all_start_index / all_items_per_page + 1);
+				addAllPaginationComboListener();
+			}
+		});
+
+		return allPaginationLastBtn;
+	}
+
+	/**
+	 * Initialize All Bills' Pagination Pages Combo
+	 */
+	public void initializeAllPaginationCombo() {
+		removeAllPaginationComboListener();
+		
+		int j = 0;
+		allPaginationCombo.removeAllItems();
+
+		for (int i = 0; i < allBillsCount / all_items_per_page; i++) {
+			j = i + 1;
+			allPaginationCombo.addItem(j);
+		}
+
+		System.out.println("All bills count : " + allBillsCount);
+		
+		if (j * all_items_per_page < allBillsCount) {
+			allPaginationCombo.addItem(j + 1);
+			allPaginationLabel.setText("/" + (allBillsCount / all_items_per_page + 1 + " Pages"));
+		} else {
+			allPaginationLabel.setText("/" + allBillsCount / all_items_per_page + " Pages");
+		}
+
+		allBillsCountLabel.setText(MessageBundle.getMessage("angal.stat.total") + " : " + allBillsCount);
+		
+		setAllPaginationButtons();
+		
+		addAllPaginationComboListener();
+	}
+
+	/**
+	 * Enabling / Disabling All Bills' Pagination Buttons
+	 */
+	private void setAllPaginationButtons() {
+		/**
+		 * Enabling / Disabling Pagination's Next page and Last page buttons
+		 */
+		if (all_start_index + all_items_per_page > allBillsCount) {
+			allPaginationNextBtn.setEnabled(false);
+			allPaginationLastBtn.setEnabled(false);
+		} else {
+			allPaginationNextBtn.setEnabled(true);
+			allPaginationLastBtn.setEnabled(true);
+		}
+
+		/**
+		 * Enabling / Disabling Pagination's Previous page and first page buttons
+		 */
+		if (all_start_index < all_items_per_page) {
+			allPaginationPrevBtn.setEnabled(false);
+			allPaginationFirstBtn.setEnabled(false);
+		} else {
+			allPaginationPrevBtn.setEnabled(true);
+			allPaginationFirstBtn.setEnabled(true);
+		}
+	}
+	
+	/**
+	 * Get Closed Bills' Pagination Panel
+	 * 
+	 * @return JPanel
+	 */
+	private JPanel getClosedPaginationPanel() {
+		if (closedPaginationPanel != null)
+			return closedPaginationPanel;
+
+		closedPaginationPanel = new JPanel(new FlowLayout());
+
+		closedPaginationPanel.add(getClosedBillsCountPanel());
+		closedPaginationPanel.add(getClosedPaginationFirstButton());
+		closedPaginationPanel.add(getClosedPaginationPrevButton());
+		closedPaginationPanel.add(getClosedPaginationCombo());
+		closedPaginationPanel.add(closedPaginationLabel);
+		closedPaginationPanel.add(getClosedPaginationNextButton());
+		closedPaginationPanel.add(getClosedPaginationLastButton());
+
+		//initializeClosedPaginationCombo();
+
+		return closedPaginationPanel;
+	}
+	
+	/**
+	 * Get Closed Bills' Result count Panel
+	 * 
+	 * @return JPanel
+	 */
+	private JPanel getClosedBillsCountPanel() {
+		if (closedBillsCountPanel == null) {
+			closedBillsCountPanel = new JPanel(new FlowLayout());
+			
+			closedBillsCountLabel = new JLabel(MessageBundle.getMessage("angal.stat.total") + " : " + closedBillsCount);
+			closedBillsCountPanel.add(closedBillsCountLabel);			
+		}
+
+		return closedBillsCountPanel;
+	}
+	
+	/**
+	 * Get Closed Bills' Pagination First Button. 
+	 * The button that reset the pagination start index to 0
+	 * 
+	 * @return JButton
+	 */
+	private JButton getClosedPaginationFirstButton() {
+		if (closedPaginationFirstBtn != null)
+			return closedPaginationFirstBtn;
+
+		closedPaginationFirstBtn = new JButton("<<");
+		closedPaginationFirstBtn.setEnabled(false);
+		closedPaginationFirstBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removeClosedPaginationComboListener();
+				closed_start_index = 0;
+				applyClosedBillsFilters(all_start_index);
+				setClosedPaginationButtons();
+				closedPaginationCombo.setSelectedItem(closed_start_index / closed_items_per_page + 1);
+				addClosedPaginationComboListener();
+			}
+		});
+
+		return closedPaginationFirstBtn;
+	}
+	
+	/**
+	 * Get closed Bills' Pagination Previous Button
+	 * 
+	 * @return JButton
+	 */
+	private JButton getClosedPaginationPrevButton() {
+		if (closedPaginationPrevBtn != null)
+			return closedPaginationPrevBtn;
+
+		closedPaginationPrevBtn = new JButton("<");
+		closedPaginationPrevBtn.setEnabled(false);
+		closedPaginationPrevBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removeClosedPaginationComboListener();
+				closed_start_index -= closed_items_per_page;
+				applyClosedBillsFilters(all_start_index);
+				setClosedPaginationButtons();
+				closedPaginationCombo.setSelectedItem(closed_start_index / closed_items_per_page + 1);
+				addClosedPaginationComboListener();
+			}
+		});
+		return closedPaginationPrevBtn;
+	}
+
+	/**
+	 * Get Closed Bills' Pagination Pages combo
+	 * 
+	 * @return JComboBox
+	 */
+	private JComboBox<Integer> getClosedPaginationCombo() {
+		if (closedPaginationCombo != null)
+			return closedPaginationCombo;
+
+		closedPaginationCombo = new JComboBox<Integer>();
+		addClosedPaginationComboListener();
+
+		return closedPaginationCombo;
+	}
+	
+	/**
+	 * Add ActionListener to closed bills pagination combobox
+	 */
+	private void addClosedPaginationComboListener() {
+		if(closedPaginationCombo.getActionListeners().length == 0) {
+			closedPaginationCombo.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("Handle closed bills combobox event");
+					if (closedPaginationCombo.getItemCount() > 0) {
+						int _page_number = (Integer) closedPaginationCombo.getSelectedItem();
+						closed_start_index = (_page_number - 1) * closed_items_per_page;
+						//closedPaginationCombo.setSelectedItem(closed_start_index / closed_items_per_page + 1);
+						applyClosedBillsFilters(closed_start_index);
+						setClosedPaginationButtons();
+					}
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Remove ActionListener to closed bills pagination combobox
+	 */
+	private void removeClosedPaginationComboListener() {
+		if(closedPaginationCombo.getActionListeners().length > 0) {
+			System.out.println("Aaction listener found on closed bill page combo");
+			for(ActionListener al: closedPaginationCombo.getActionListeners()) {
+				closedPaginationCombo.removeActionListener(al);
+			}
+		} 
+	}
+	
+	/**
+	 * Handle pagination for all bills
+	 * 
+	 * @param startIndex 
+	 */
+	private void applyClosedBillsFilters(int startIndex) {
+		System.out.println("Applying closed bills filter");
+		
+		switch (dataset) {
+			case 1:
+				closedBills = billManager.getBills("C", dateFrom, dateTo, null, null, null, closed_items_per_page, startIndex);
+				break;
+				
+			case 2:
+				closedBills = billManager.getBills("C", dateFrom, dateTo, null, null, patientParent, closed_items_per_page, startIndex);
+				break;
+				
+			case 3:
+				closedBills = billManager.getBills("C", dateFrom, dateTo, null, chooseItem, null, closed_items_per_page, startIndex);
+				break;
+				
+			case 4:
+				closedBills = billManager.getBills("C", dateFrom, dateTo, null, chooseItem, null, closed_items_per_page, startIndex);
+				break;
+	
+			default:
+				closedBills = billManager.getBills("C", dateFrom, dateTo, garantUserChoose, null, null, closed_items_per_page, startIndex);
+				break;
+		}
+		
+		jTableClosed.setModel(new BillTableModel(closedBills));
+		jTableClosed.updateUI();
+	}
+
+	/**
+	 * Get closed Bills' Pagination Next Button
+	 * 
+	 * @return JButton paginationNextBtn
+	 */
+	private JButton getClosedPaginationNextButton() {
+		if (closedPaginationNextBtn != null)
+			return closedPaginationNextBtn;
+
+		closedPaginationNextBtn = new JButton(">");
+		closedPaginationNextBtn.setEnabled(false);
+		closedPaginationNextBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removeClosedPaginationComboListener();
+				closed_start_index += closed_items_per_page;
+				applyClosedBillsFilters(closed_start_index);
+				setClosedPaginationButtons();
+				closedPaginationCombo.setSelectedItem(closed_start_index / closed_items_per_page + 1);
+				addClosedPaginationComboListener();
+			}
+		});
+
+		return closedPaginationNextBtn;
+	}
+
+	/**
+	 * Get closed Bills' Pagination Last Page button
+	 * 
+	 * @return JButton
+	 */
+	private JButton getClosedPaginationLastButton() {
+		if (closedPaginationLastBtn != null)
+			return closedPaginationLastBtn;
+
+		closedPaginationLastBtn = new JButton(">>");
+		closedPaginationLastBtn.setEnabled(false);
+		closedPaginationLastBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removeClosedPaginationComboListener();
+				closed_start_index = ((Integer) closedPaginationCombo.getItemCount() - 1) * closed_items_per_page;
+				applyClosedBillsFilters(closed_start_index);
+				setClosedPaginationButtons();
+				closedPaginationCombo.setSelectedItem(closed_start_index / closed_items_per_page + 1);
+				addClosedPaginationComboListener();
+			}
+		});
+
+		return closedPaginationLastBtn;
+	}
+
+	/**
+	 * Initialize Closed Bills' Pagination Pages Combo
+	 */
+	public void initializeClosedPaginationCombo() {
+		removeClosedPaginationComboListener();
+		
+		int j = 0;
+		closedPaginationCombo.removeAllItems();
+
+		System.out.println("Closed bills count : " + closedBillsCount);
+		for (int i = 0; i < closedBillsCount / closed_items_per_page; i++) {
+			j = i + 1;
+			closedPaginationCombo.addItem(j);
+		}
+
+		if (j * closed_items_per_page < closedBillsCount) {
+			closedPaginationCombo.addItem(j + 1);
+			closedPaginationLabel.setText("/" + (closedBillsCount / closed_items_per_page + 1 + " Pages"));
+		} else {
+			closedPaginationLabel.setText("/" + closedBillsCount / closed_items_per_page + " Pages");
+		}
+
+		closedBillsCountLabel.setText(MessageBundle.getMessage("angal.stat.total") + " : " + closedBillsCount);
+		
+		setClosedPaginationButtons();
+		
+		addClosedPaginationComboListener();
+	}
+
+	/**
+	 * Enabling / Disabling Closed Bills' Pagination Buttons
+	 */
+	private void setClosedPaginationButtons() {
+		/**
+		 * Enabling / Disabling Pagination's Next page and Last page buttons
+		 */
+		if (closed_start_index + closed_items_per_page > closedBillsCount) {
+			closedPaginationNextBtn.setEnabled(false);
+			closedPaginationLastBtn.setEnabled(false);
+		} else {
+			closedPaginationNextBtn.setEnabled(true);
+			closedPaginationLastBtn.setEnabled(true);
+		}
+
+		/**
+		 * Enabling / Disabling Pagination's Previous page and first page buttons
+		 */
+		if (closed_start_index < closed_items_per_page) {
+			closedPaginationPrevBtn.setEnabled(false);
+			closedPaginationFirstBtn.setEnabled(false);
+		} else {
+			closedPaginationPrevBtn.setEnabled(true);
+			closedPaginationFirstBtn.setEnabled(true);
+		}
+	}
+	
+	
+	/**
+	 * Get Pending Bills' Pagination Panel
+	 * 
+	 * @return JPanel
+	 */
+	private JPanel getPendingPaginationPanel() {
+		if (pendingPaginationPanel != null)
+			return pendingPaginationPanel;
+
+		pendingPaginationPanel = new JPanel(new FlowLayout());
+
+		pendingPaginationPanel.add(getPendingBillsCountPanel());
+		pendingPaginationPanel.add(getPendingPaginationFirstButton());
+		pendingPaginationPanel.add(getPendingPaginationPrevButton());
+		pendingPaginationPanel.add(getPendingPaginationCombo());
+		pendingPaginationPanel.add(pendingPaginationLabel);
+		pendingPaginationPanel.add(getPendingPaginationNextButton());
+		pendingPaginationPanel.add(getPendingPaginationLastButton());
+
+		//initializePendingPaginationCombo();
+
+		return pendingPaginationPanel;
+	}
+	
+	/**
+	 * Get Pending Bills' Result count Panel
+	 * 
+	 * @return JPanel
+	 */
+	private JPanel getPendingBillsCountPanel() {
+		if (pendingBillsCountPanel == null) {
+			pendingBillsCountPanel = new JPanel(new FlowLayout());
+			
+			pendingBillsCountLabel = new JLabel(MessageBundle.getMessage("angal.stat.total") + " : " + pendingBillsCount);
+			pendingBillsCountPanel.add(pendingBillsCountLabel);
+			
+		}
+		return pendingBillsCountPanel;			
+	}
+	
+	/**
+	 * Get Pending Bills' Pagination First Button. 
+	 * The button that reset the pagination start index to 0
+	 * 
+	 * @return JButton
+	 */
+	private JButton getPendingPaginationFirstButton() {
+		if (pendingPaginationFirstBtn != null)
+			return pendingPaginationFirstBtn;
+
+		pendingPaginationFirstBtn = new JButton("<<");
+		pendingPaginationFirstBtn.setEnabled(false);
+		pendingPaginationFirstBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removePendingPaginationComboListener();
+				pending_start_index = 0;
+				applyPendingBillsFilters(pending_start_index);
+				setPendingPaginationButtons();
+				pendingPaginationCombo.setSelectedItem(pending_start_index / pending_items_per_page + 1);
+				addPendingPaginationComboListener();
+			}
+		});
+
+		return pendingPaginationFirstBtn;
+	}
+	
+	/**
+	 * Get pending Bills' Pagination Previous Button
+	 * 
+	 * @return JButton
+	 */
+	private JButton getPendingPaginationPrevButton() {
+		if (pendingPaginationPrevBtn != null)
+			return pendingPaginationPrevBtn;
+
+		pendingPaginationPrevBtn = new JButton("<");
+		pendingPaginationPrevBtn.setEnabled(false);
+		pendingPaginationPrevBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removePendingPaginationComboListener();
+				pending_start_index -= pending_items_per_page;
+				applyPendingBillsFilters(pending_start_index);
+				setPendingPaginationButtons();
+				pendingPaginationCombo.setSelectedItem(pending_start_index / pending_items_per_page + 1);
+				addPendingPaginationComboListener();
+			}
+		});
+		return pendingPaginationPrevBtn;
+	}
+
+	/**
+	 * Get Pending Bills' Pagination Pages combo
+	 * 
+	 * @return JComboBox
+	 */
+	private JComboBox<Integer> getPendingPaginationCombo() {
+		if (pendingPaginationCombo != null)
+			return pendingPaginationCombo;
+
+		pendingPaginationCombo = new JComboBox<Integer>();
+
+		addPendingPaginationComboListener();
+
+		return pendingPaginationCombo;
+	}
+	
+	/**
+	 * Remove or add ActionListener to Pending bills pagination combobox
+	 */
+	private void addPendingPaginationComboListener() {
+		if(pendingPaginationCombo.getActionListeners().length == 0) {
+			System.out.println("Add pending bills page combo");
+			pendingPaginationCombo.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("Handle all bill combobox event");
+					
+					if (pendingPaginationCombo.getItemCount() > 0) {
+						int _page_number = (Integer) pendingPaginationCombo.getSelectedItem();
+						pending_start_index = (_page_number - 1) * pending_items_per_page;
+						//pendingPaginationCombo.setSelectedItem(pending_start_index / pending_items_per_page + 1);
+						applyPendingBillsFilters(pending_start_index);
+						setPendingPaginationButtons();
+					}
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Remove ActionListener to Pending bills pagination combobox
+	 */
+	private void removePendingPaginationComboListener() {
+		if(pendingPaginationCombo.getActionListeners().length > 0) {
+			System.out.println("Remove pending bills page combo");
+			for(ActionListener al: pendingPaginationCombo.getActionListeners()) {
+				pendingPaginationCombo.removeActionListener(al);
+			}
+		}
+	}
+	
+	/**
+	 * Handle pagination for all bills
+	 * 
+	 * @param startIndex 
+	 */
+	private void applyPendingBillsFilters(int startIndex) {
+		System.out.println("Applying pending bills filter");
+		
+		pendingBills = billManager.getBills("O", null, null, null, null, null, pending_items_per_page, startIndex);
+		jTablePending.setModel(new BillTableModel(pendingBills));
+		jTablePending.updateUI();
+	}
+
+	/**
+	 * Get Pending Bills' Pagination Next Button
+	 * 
+	 * @return JButton paginationNextBtn
+	 */
+	private JButton getPendingPaginationNextButton() {
+		if (pendingPaginationNextBtn != null)
+			return pendingPaginationNextBtn;
+
+		pendingPaginationNextBtn = new JButton(">");
+		pendingPaginationNextBtn.setEnabled(false);
+		pendingPaginationNextBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removePendingPaginationComboListener();
+				pending_start_index += pending_items_per_page;
+				applyPendingBillsFilters(pending_start_index);
+				setPendingPaginationButtons();
+				pendingPaginationCombo.setSelectedItem(pending_start_index / pending_items_per_page + 1);
+				addPendingPaginationComboListener();
+			}
+		});
+
+		return pendingPaginationNextBtn;
+	}
+
+	/**
+	 * Get Pending Bills' Pagination Last Page button
+	 * 
+	 * @return JButton
+	 */
+	private JButton getPendingPaginationLastButton() {
+		if (pendingPaginationLastBtn != null)
+			return pendingPaginationLastBtn;
+
+		pendingPaginationLastBtn = new JButton(">>");
+		pendingPaginationLastBtn.setEnabled(false);
+		pendingPaginationLastBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				removePendingPaginationComboListener();
+				pending_start_index = ((Integer) pendingPaginationCombo.getItemCount() - 1) * pending_items_per_page;
+				applyPendingBillsFilters(pending_start_index);
+				setPendingPaginationButtons();
+				pendingPaginationCombo.setSelectedItem(pending_start_index / pending_items_per_page + 1);
+				addPendingPaginationComboListener();
+			}
+		});
+
+		return pendingPaginationLastBtn;
+	}
+	
+	/**
+	 * Initialize Pending Bills' Pagination Pages Combo
+	 */
+	public void initializePendingPaginationCombo() {
+		removePendingPaginationComboListener();
+		
+		int j = 0;
+		pendingPaginationCombo.removeAllItems();
+
+		for (int i = 0; i < pendingBillsCount / pending_items_per_page; i++) {
+			j = i + 1;
+			pendingPaginationCombo.addItem(j);
+		}
+
+		if (j * pending_items_per_page < pendingBillsCount) {
+			pendingPaginationCombo.addItem(j + 1);
+			pendingPaginationLabel.setText("/" + (pendingBillsCount / pending_items_per_page + 1 + " Pages"));
+		} else {
+			pendingPaginationLabel.setText("/" + pendingBillsCount / pending_items_per_page + " Pages");
+		}
+
+		pendingBillsCountLabel.setText(MessageBundle.getMessage("angal.stat.total") + " : " + pendingBillsCount);
+		pendingPaginationCombo.setSelectedItem(pending_start_index / pending_items_per_page + 1);
+		
+		setPendingPaginationButtons();
+		
+		addPendingPaginationComboListener();
+	}
+
+	/**
+	 * Enabling / Disabling Pending Bills' Pagination Buttons
+	 */
+	private void setPendingPaginationButtons() {
+		/**
+		 * Enabling / Disabling Pagination's Next page and Last page buttons
+		 */
+		if (pending_start_index + pending_items_per_page > pendingBillsCount) {
+			pendingPaginationNextBtn.setEnabled(false);
+			pendingPaginationLastBtn.setEnabled(false);
+		} else {
+			pendingPaginationNextBtn.setEnabled(true);
+			pendingPaginationLastBtn.setEnabled(true);
+		}
+
+		/**
+		 * Enabling / Disabling Pagination's Previous page and first page buttons
+		 */
+		if (pending_start_index < pending_items_per_page) {
+			pendingPaginationPrevBtn.setEnabled(false);
+			pendingPaginationFirstBtn.setEnabled(false);
+		} else {
+			pendingPaginationPrevBtn.setEnabled(true);
+			pendingPaginationFirstBtn.setEnabled(true);
+		}
+	}
+	
+	private void resetPaginationCombos() {
+		if (jTabbedPaneBills != null) {
+			int selectedIndex = jTabbedPaneBills.getSelectedIndex();
+			
+			if (selectedIndex == 2) {
+				initializePendingPaginationCombo();				
+			}
+			
+			if (selectedIndex == 1) {
+				initializeClosedPaginationCombo();			
+			}
+			
+			if (selectedIndex == 0) {
+				initializeAllPaginationCombo();		
+			}
+		}
 	}
 }
