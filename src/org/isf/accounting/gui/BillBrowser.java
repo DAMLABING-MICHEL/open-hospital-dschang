@@ -1552,8 +1552,6 @@ public class BillBrowser extends ModalJFrame
 		
 			jTabbedPaneBills.addChangeListener(e -> {
 				selectedTab = jTabbedPaneBills.getSelectedIndex();
-				
-				System.out.println("Tab changed : " + selectedTab);
 
 				if (selectedTab == 0 && !allBillsUpdated) {
 					updateAllBills();
@@ -1801,9 +1799,6 @@ public class BillBrowser extends ModalJFrame
 	 * Update All bills data set
 	 */
 	private void updateAllBills() {
-		System.out.println("Start date : " + dateFrom.getTime());
-		System.out.println("End date : " + dateTo.getTime());
-		
 		allBillsUpdated = true;
 		
 		if (dataset == 1) {
@@ -1847,9 +1842,6 @@ public class BillBrowser extends ModalJFrame
 	 * Update closed bills data set
 	 */
 	private void updateClosedBills() {
-		System.out.println("Start date : " + dateFrom.getTime());
-		System.out.println("End date : " + dateTo.getTime());
-		
 		closedBillsUpdated = true;
 		if (dataset == 1) {
 			closedBillsCount = billManager.countBills("C", dateFrom, dateTo, null, null, null);
@@ -1943,8 +1935,6 @@ public class BillBrowser extends ModalJFrame
 				updateClosedBills();
 			}
 		}
-		
-		System.out.println("Data loaded 1");
 	}
 
 	private void updateDataSet(GregorianCalendar dateFrom, GregorianCalendar dateTo, Patient patient) {
@@ -1969,8 +1959,6 @@ public class BillBrowser extends ModalJFrame
 				updatePendingBills();
 			}
 		}
-		
-		System.out.println("Data loaded 2");
 	}
 
 	private void updateDataSet(GregorianCalendar dateFrom, GregorianCalendar dateTo, BillItems billItem) {
@@ -1993,8 +1981,6 @@ public class BillBrowser extends ModalJFrame
 				updateClosedBills();
 			}
 		}
-		
-		System.out.println("Data loaded 3");
 	}
 
 	private void updateDataSet(GregorianCalendar dateFrom, GregorianCalendar dateTo, User userGarant) {
@@ -2018,8 +2004,6 @@ public class BillBrowser extends ModalJFrame
 				updateClosedBills();
 			}
 		}
-		
-		System.out.println("Data loaded 4");
 	}
 
 	private void updateTotals() {
@@ -2044,8 +2028,6 @@ public class BillBrowser extends ModalJFrame
 				jTableUserRefund.setValueAt(periodStats.get("USER_REFUNDS"), 0, 3);
 			}
 		}
-		
-		System.out.println("Totals updated");
 	}
 	
 	public class BillTableModel extends DefaultTableModel {
@@ -2750,8 +2732,6 @@ public class BillBrowser extends ModalJFrame
 			allPaginationCombo.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Handle all bill combobox event");
-					
 					if (allPaginationCombo.getItemCount() > 0) {
 						int _page_number = (Integer) allPaginationCombo.getSelectedItem();
 						all_start_index = (_page_number - 1) * all_items_per_page;
@@ -2781,7 +2761,6 @@ public class BillBrowser extends ModalJFrame
 	 * @param startIndex 
 	 */
 	private void applyAllBillsFilters(int startIndex) {
-		System.out.println("Applying all bills filter");
 		
 		switch (dataset) {
 			case 1:
@@ -2874,8 +2853,6 @@ public class BillBrowser extends ModalJFrame
 			j = i + 1;
 			allPaginationCombo.addItem(j);
 		}
-
-		System.out.println("All bills count : " + allBillsCount);
 		
 		if (j * all_items_per_page < allBillsCount) {
 			allPaginationCombo.addItem(j + 1);
@@ -3033,7 +3010,6 @@ public class BillBrowser extends ModalJFrame
 			closedPaginationCombo.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Handle closed bills combobox event");
 					if (closedPaginationCombo.getItemCount() > 0) {
 						int _page_number = (Integer) closedPaginationCombo.getSelectedItem();
 						closed_start_index = (_page_number - 1) * closed_items_per_page;
@@ -3051,7 +3027,6 @@ public class BillBrowser extends ModalJFrame
 	 */
 	private void removeClosedPaginationComboListener() {
 		if(closedPaginationCombo.getActionListeners().length > 0) {
-			System.out.println("Aaction listener found on closed bill page combo");
 			for(ActionListener al: closedPaginationCombo.getActionListeners()) {
 				closedPaginationCombo.removeActionListener(al);
 			}
@@ -3064,7 +3039,6 @@ public class BillBrowser extends ModalJFrame
 	 * @param startIndex 
 	 */
 	private void applyClosedBillsFilters(int startIndex) {
-		System.out.println("Applying closed bills filter");
 		
 		switch (dataset) {
 			case 1:
@@ -3153,7 +3127,6 @@ public class BillBrowser extends ModalJFrame
 		int j = 0;
 		closedPaginationCombo.removeAllItems();
 
-		System.out.println("Closed bills count : " + closedBillsCount);
 		for (int i = 0; i < closedBillsCount / closed_items_per_page; i++) {
 			j = i + 1;
 			closedPaginationCombo.addItem(j);
@@ -3314,12 +3287,9 @@ public class BillBrowser extends ModalJFrame
 	 */
 	private void addPendingPaginationComboListener() {
 		if(pendingPaginationCombo.getActionListeners().length == 0) {
-			System.out.println("Add pending bills page combo");
 			pendingPaginationCombo.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Handle all bill combobox event");
-					
 					if (pendingPaginationCombo.getItemCount() > 0) {
 						int _page_number = (Integer) pendingPaginationCombo.getSelectedItem();
 						pending_start_index = (_page_number - 1) * pending_items_per_page;
@@ -3337,7 +3307,6 @@ public class BillBrowser extends ModalJFrame
 	 */
 	private void removePendingPaginationComboListener() {
 		if(pendingPaginationCombo.getActionListeners().length > 0) {
-			System.out.println("Remove pending bills page combo");
 			for(ActionListener al: pendingPaginationCombo.getActionListeners()) {
 				pendingPaginationCombo.removeActionListener(al);
 			}
@@ -3350,8 +3319,6 @@ public class BillBrowser extends ModalJFrame
 	 * @param startIndex 
 	 */
 	private void applyPendingBillsFilters(int startIndex) {
-		System.out.println("Applying pending bills filter");
-		
 		pendingBills = billManager.getBills("O", null, null, null, null, null, pending_items_per_page, startIndex);
 		jTablePending.setModel(new BillTableModel(pendingBills));
 		jTablePending.updateUI();
