@@ -167,6 +167,9 @@ public class MainMenu extends JFrame implements ActionListener, Login.LoginListe
 			Iterator<UserMenuItem> it = myMenu.iterator();
 			while (it.hasNext()) {
 				UserMenuItem umi = it.next();
+				if(umi.getCode().equalsIgnoreCase("profile")) {
+//					junkMenu.add(umi);
+				}
 				if (umi.getCode().equalsIgnoreCase("USERS") || umi.getMySubmenu().equalsIgnoreCase("USERS"))
 					junkMenu.add(umi);
 				if (umi.getCode().equalsIgnoreCase("communication")) {
